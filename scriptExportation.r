@@ -343,7 +343,7 @@ ca.id_carre, year;",sep="")
 makeTablePoint <- function(con=NULL,savePostgres=FALSE,output=FALSE,sp=NULL,champSp = "code_sp",nomChampSp="espece",
                            spExcluPassage1=c("MOTFLA","SAXRUB","ANTPRA","OENOEN","PHYTRO"),# (Prince et al. 2013 Env. Sc. and Pol.) + "OENOEN","PHYTRO" avis d'expert F. Jiguet
                            seuilAbondance=.99,
-                           champsHabitat=TRUE,altitude=NULL,firstYear=NULL,lastYear=NULL,
+                           champsHabitat=TRUE,champsCoordGrid=TRUE,altitude=NULL,firstYear=NULL,lastYear=NULL,
                            departement=NULL,onf=TRUE,
                            selectHabitat = NULL, selectTypeHabitat= NULL,
                            distance_contact=NULL,formatTrend = FALSE,isEnglish=FALSE,addAbscence=FALSE,
@@ -354,7 +354,7 @@ makeTablePoint <- function(con=NULL,savePostgres=FALSE,output=FALSE,sp=NULL,cham
     
  ## con=NULL;savePostgres=FALSE;output=TRUE;sp=NULL;champSp = "code_sp";
  ## spExcluPassage1=c("MOTFLA","SAXRUB","ANTPRA")  ;seuilAbondance=.99;
- ## champsHabitat=TRUE;altitude=NULL;firstYear=NULL;lastYear=NULL;
+ ## champsHabitat=TRUE;champsCoordGrid=TRUE;altitude=NULL;firstYear=NULL;lastYear=NULL;
  ## departement="44";onf=TRUE;distance_contact="100";
  ## selectHabitat = NULL; selectTypeHabitat= NULL#c("urbain_ps","agri_ps");
  ## formatTrend = FALSE;anglais=FALSE;addAbscence=FALSE;
@@ -479,7 +479,7 @@ ifelse(!is.null(selectTypeHabitat),queryTypeHab," ")," ", sep="")
 c.etude as etude, p.commune,p.insee,p.departement as departement, 
 code_sp , e.scientific_name as nom_scientifique, e.french_name as nom_francais, e.english_name as nom_anglais, e.euring as code_espece_euring,e.taxref as code_espece_taxref,
 abond_brut as abondance_brut, abond as abondance, pa.qualite_inventaire_stoc as qualite_inventaire_stoc,
-p.altitude, longitude_wgs84,  latitude_wgs84,  
+p.altitude, longitude_wgs84,  latitude_wgs84, " , ifelse(champsCoordGrid," longitude_grid_wgs84,latitude_grid_wgs84, ","")," 
 " , ifelse(champsHabitat,listChampsHabitat,""),
 " p.db as data_base_name, ",
 "'",dateExport,"'::varchar(10) as date_export,
@@ -550,8 +550,8 @@ om.id_point, annee,code_sp; ",sep="")
         if(!is.null(sp)) {
         queryPointAn <- paste("select pa.id_point as point, pa.id_carre as carre, pa.annee as annee, pk_point_annee as id_point_annee, ''::varchar(25) as etude,
  p.commune,p.insee,p.departement as departement,pa.qualite_inventaire_stoc as qualite_inventaire_stoc,p.altitude, longitude_wgs84,  latitude_wgs84,
- ",
-ifelse(champsHabitat,listChampsHabitat,""),
+ ",ifelse(champsCoordGrid," longitude_grid_wgs84,latitude_grid_wgs84, ","")," 
+ ",ifelse(champsHabitat,listChampsHabitat,""),
 " p.db as data_base_name, ",
 "'",dateExport,"'::varchar(10) as date_export,
 '",operateur[1],"'::varchar(50) as operateur,

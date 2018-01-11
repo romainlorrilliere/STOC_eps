@@ -802,7 +802,7 @@ makeTableBrut <- function(con=NULL,output=TRUE,sp=NULL,champSp = "code_sp",nomCh
                           altitude=NULL,firstYear=NULL,lastYear=NULL,
                            departement=NULL,onf=TRUE,
                            selectHabitat = NULL, selectTypeHabitat= NULL,
-                          formatTrend = FALSE,isEnglish=FALSE,addAbscence=TRUE,
+                          formatTrend = FALSE,isEnglish=FALSE,addAbscence=FALSE,
                            id_output="AlexR_2017-11-23", #"NicolasM",
                            operateur=c("Lorrilliere Romain",
                                        "lorrilliere@mnhn.fr"),

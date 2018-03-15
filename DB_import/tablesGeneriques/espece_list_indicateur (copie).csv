@@ -1,0 +1,615 @@
+"pk_species";"indicator";"habitat_specialisation_f";"habitat_specialisation";"european_fbi";"french_fbi";"montane_lehikoinen"
+"GLANOR";f;"non";"";f;f;f
+"AYTFERNYR";f;"non";"";f;f;f
+"ANTSPISPI";f;"non";"";f;f;f
+"DENVID";f;"non";"";f;f;f
+"DIOMEL";f;"non";"";f;f;f
+"BUTVIR";f;"non";"";f;f;f
+"LARHEU";f;"non";"";f;f;f
+"LYNPAR";f;"non";"";f;f;f
+"PHAFUL";f;"non";"";f;f;f
+"PLUFUL";f;"non";"";f;f;f
+"PUFYEL";f;"non";"";f;f;f
+"ROSBEN";f;"non";"";f;f;f
+"TRICIN";f;"non";"";f;f;f
+"ANSFABJOH";f;"non";"";f;f;f
+"ANTPETLIT";f;"non";"";f;f;f
+"CORCORSAR";f;"non";"";f;f;f
+"LARARGARG";f;"non";"";f;f;f
+"PHYCOLCOL";t;"milieux forestiers";"woodland";f;f;f
+"PYRPYREUR";t;"milieux forestiers";"woodland";f;f;f
+"GAVSTE";f;"non";"";f;f;f
+"GAVARC";f;"non";"";f;f;f
+"GAVIMM";f;"non";"";f;f;f
+"GAVADA";f;"non";"";f;f;f
+"PODPOD";f;"non";"";f;f;f
+"PODAUR";f;"non";"";f;f;f
+"DIOEXU";f;"non";"";f;f;f
+"BULBUL";f;"non";"";f;f;f
+"CALDIO";f;"non";"";f;f;f
+"PUFGRA";f;"non";"";f;f;f
+"PUFGRI";f;"non";"";f;f;f
+"PUFPUF";f;"non";"";f;f;f
+"PUFASS";f;"non";"";f;f;f
+"LARCAC";f;"non";"";f;f;f
+"LARMIC";f;"non";"";f;f;f
+"LIMICO";f;"non";"";f;f;f
+"MERPER";f;"non";"";f;f;f
+"MOTIMA";f;"non";"";f;f;f
+"PASITA";f;"non";"";f;f;f
+"PICTRI";f;"non";"";f;f;f
+"PINSON";f;"non";"";f;f;f
+"PODGRI";f;"non";"";f;f;f
+"PODNIG";f;"non";"";f;f;f
+"RAPACE";f;"non";"";f;f;f
+"SERCOR";f;"non";"";f;f;f
+"TACRUF";f;"non";"";f;f;f
+"TURDUS";f;"non";"";f;f;f
+"AQUADA";f;"non";"";f;f;f
+"CHAMOR";f;"non";"";f;f;f
+"FULGLA";f;"non";"";f;f;f
+"ANTPET";f;"non";"";f;f;f
+"OCEOCE";f;"non";"";f;f;f
+"HYDPEL";f;"non";"";f;f;f
+"OCEMON";f;"non";"";f;f;f
+"OCECAS";f;"non";"";f;f;f
+"PHACARCAR";f;"non";"";f;f;f
+"PHACARSIN";f;"non";"";f;f;f
+"PHAARIARI";f;"non";"";f;f;f
+"PHAARIDES";f;"non";"";f;f;f
+"PHAPYG";f;"non";"";f;f;f
+"PELONO";f;"non";"";f;f;f
+"PELCRI";f;"non";"";f;f;f
+"FREMAG";f;"non";"";f;f;f
+"EGRGUL";f;"non";"";f;f;f
+"CYGCYG";f;"non";"";f;f;f
+"ANSFAB";f;"non";"";f;f;f
+"ANSFABFAB";f;"non";"";f;f;f
+"ANSFABROS";f;"non";"";f;f;f
+"ANSBRA";f;"non";"";f;f;f
+"ANSALB";f;"non";"";f;f;f
+"ANSALBALB";f;"non";"";f;f;f
+"ANSALBFLA";f;"non";"";f;f;f
+"ANSERY";f;"non";"";f;f;f
+"ANSANSANS";f;"non";"";f;f;f
+"ANSANSRUB";f;"non";"";f;f;f
+"ANSCAE";f;"non";"";f;f;f
+"ANSCAECAE";f;"non";"";f;f;f
+"ANSCAEATL";f;"non";"";f;f;f
+"ANSANS";f;"non";"";f;f;f
+"BOTSTE";f;"non";"";f;f;f
+"CICCIC";f;"non";"";t;f;f
+"CICNIG";f;"non";"";f;f;f
+"CYGOLO";f;"non";"";f;f;f
+"EGRGAR";f;"non";"";f;f;f
+"IXOMIN";f;"non";"";f;f;f
+"NYCNYC";f;"non";"";f;f;f
+"OCELEU";f;"non";"";f;f;f
+"PHAARI";f;"non";"";f;f;f
+"PHACAR";f;"non";"";f;f;f
+"PHORUB";f;"non";"";f;f;f
+"PLALEU";f;"non";"";f;f;f
+"PLEFAL";f;"non";"";f;f;f
+"SULBAS";f;"non";"";f;f;f
+"THRAET";f;"non";"";f;f;f
+"EGRALB";f;"non";"";f;f;f
+"ANSIND";f;"non";"";f;f;f
+"ARDCIN";f;"non";"";f;f;f
+"ARDPUR";f;"non";"";f;f;f
+"ARDRAL";f;"non";"";f;f;f
+"BRABERBER";f;"non";"";f;f;f
+"BRABERHRO";f;"non";"";f;f;f
+"BRARUF";f;"non";"";f;f;f
+"ANAAME";f;"non";"";f;f;f
+"ANAFOR";f;"non";"";f;f;f
+"ANARUB";f;"non";"";f;f;f
+"ANADIS";f;"non";"";f;f;f
+"AYTCOL";f;"non";"";f;f;f
+"AYTNYR";f;"non";"";f;f;f
+"SOMMOL";f;"non";"";f;f;f
+"POLSTE";f;"non";"";f;f;f
+"HISHIS";f;"non";"";f;f;f
+"CLAHYE";f;"non";"";f;f;f
+"MELNIG";f;"non";"";f;f;f
+"MELPER";f;"non";"";f;f;f
+"MELFUS";f;"non";"";f;f;f
+"BUCISL";f;"non";"";f;f;f
+"BUCCLA";f;"non";"";f;f;f
+"MERSER";f;"non";"";f;f;f
+"OXYJAM";f;"non";"";f;f;f
+"OXYLEU";f;"non";"";f;f;f
+"TORTRA";f;"non";"";f;f;f
+"ANACRE";f;"non";"";f;f;f
+"ANAPEN";f;"non";"";f;f;f
+"ANAPLA";f;"non";"";f;f;f
+"ANAQUE";f;"non";"";f;f;f
+"ANASTR";f;"non";"";f;f;f
+"AYTAFF";f;"non";"";f;f;f
+"AYTFER";f;"non";"";f;f;f
+"AYTFUL";f;"non";"";f;f;f
+"AYTMAR";f;"non";"";f;f;f
+"BRABER";f;"non";"";f;f;f
+"BRACAN";f;"non";"";f;f;f
+"BRALEU";f;"non";"";f;f;f
+"ELACAE";f;"non";"";f;f;f
+"GYPBAR";f;"non";"";f;f;f
+"AIXGAL";f;"non";"";f;f;f
+"GYPFUL";f;"non";"";f;f;f
+"MARANG";f;"non";"";f;f;f
+"MERALB";f;"non";"";f;f;f
+"MERMER";f;"non";"";f;f;f
+"MILMIG";f;"non";"";f;f;f
+"MILMIL";f;"non";"";f;f;f
+"NEOPER";f;"non";"";f;f;f
+"NETRUF";f;"non";"";f;f;f
+"PERAPI";f;"non";"";f;f;f
+"TADFER";f;"non";"";f;f;f
+"TADTAD";f;"non";"";f;f;f
+"ALOAEG";f;"non";"";f;f;f
+"ANAACU";f;"non";"";f;f;f
+"AIXSPO";f;"non";"";f;f;f
+"ANACLY";f;"non";"";f;f;f
+"BUTBUTVUL";f;"non";"";f;f;f
+"BUTLAG";f;"non";"";f;f;f
+"AQUPOM";f;"non";"";f;f;f
+"AQUCLA";f;"non";"";f;f;f
+"AQUHEL";f;"non";"";f;f;f
+"FALELE";f;"non";"";f;f;f
+"FALBIA";f;"non";"";f;f;f
+"FALCHE";f;"non";"";f;f;f
+"FALRUS";f;"non";"";f;f;f
+"LAGLAGSCO";f;"non";"";f;f;f
+"CALCAL";f;"non";"";f;f;f
+"ALECHU";f;"non";"";f;f;f
+"ALEBAR";f;"non";"";f;f;f
+"TURSYL";f;"non";"";f;f;f
+"PORCAR";f;"non";"";f;f;f
+"PORPAR";f;"non";"";f;f;f
+"PORPUS";f;"non";"";f;f;f
+"PORALL";f;"non";"";f;f;f
+"CIRPYG";f;"non";"";f;f;f
+"FALSUB";f;"non";"";f;f;f
+"BUTRUF";f;"non";"";f;f;f
+"LAGLAG";f;"non";"";f;f;f
+"TETRIX";f;"non";"";f;f;t
+"CIRAER";f;"non";"";f;f;f
+"CIRCYA";f;"non";"";f;f;f
+"CIRGAL";f;"non";"";f;f;f
+"CIRMAC";f;"non";"";f;f;f
+"COLVIR";f;"non";"";f;f;f
+"COTCOT";t;"milieux agricoles";"farmland";f;t;f
+"CRECRE";f;"non";"";f;f;f
+"FALCOL";f;"non";"";f;f;f
+"FALNAU";f;"non";"";f;f;f
+"ACCGEN";f;"non";"";f;f;f
+"FALPER";f;"non";"";f;f;f
+"FALTIN";t;"milieux agricoles";"farmland";t;t;t
+"FALVES";f;"non";"";f;f;f
+"GALCHL";f;"non";"";f;f;f
+"HIEFAS";f;"non";"";f;f;f
+"HIEPEN";f;"non";"";f;f;f
+"LAGMUT";f;"non";"";f;f;t
+"PANHAL";f;"non";"";f;f;f
+"PERPER";t;"milieux agricoles";"farmland";t;t;f
+"PHACOL";f;"non";"";f;f;f
+"PORPOR";f;"non";"";f;f;f
+"RALAQU";f;"non";"";f;f;f
+"SYRREE";f;"non";"";f;f;f
+"TETURO";f;"non";"";f;f;f
+"ALEGRA";f;"non";"";f;f;t
+"AQUCHR";f;"non";"";f;f;t
+"ACCNIS";f;"non";"";f;f;f
+"BONBON";f;"non";"";f;f;f
+"PORRIO";f;"non";"";f;f;f
+"CHLUND";f;"non";"";f;f;f
+"CHAVOC";f;"non";"";f;f;f
+"CHALES";f;"non";"";f;f;f
+"CHAASI";f;"non";"";f;f;f
+"PLUDOM";f;"non";"";f;f;f
+"PLUAPRAPR";f;"non";"";f;f;f
+"PLUAPRALT";f;"non";"";f;f;f
+"HOPSPI";f;"non";"";f;f;f
+"CHEGRE";f;"non";"";f;f;f
+"CALPUS";f;"non";"";f;f;f
+"CALMAU";f;"non";"";f;f;f
+"CALLIS";f;"non";"";f;f;f
+"CALTEM";f;"non";"";f;f;f
+"CALLLA";f;"non";"";f;f;f
+"CALFUS";f;"non";"";f;f;f
+"CALBAI";f;"non";"";f;f;f
+"CALMEL";f;"non";"";f;f;f
+"CALFER";f;"non";"";f;f;f
+"CALMAR";f;"non";"";f;f;f
+"CALALPALP";f;"non";"";f;f;f
+"CALALPSCH";f;"non";"";f;f;f
+"LIMFAL";f;"non";"";f;f;f
+"MICHIM";f;"non";"";f;f;f
+"TRYSUB";f;"non";"";f;f;f
+"LYMMIN";f;"non";"";f;f;f
+"CALCAN";f;"non";"";f;f;f
+"CHADUB";f;"non";"";f;f;f
+"CALMIN";f;"non";"";f;f;f
+"CHAHIA";f;"non";"";f;f;f
+"CHELEU";f;"non";"";f;f;f
+"CURCUR";f;"non";"";f;f;f
+"FULATR";f;"non";"";f;f;f
+"CALACU";f;"non";"";f;f;f
+"FULCRI";f;"non";"";f;f;f
+"GALGAL";f;"non";"";f;f;f
+"GLAPRA";f;"non";"";f;f;f
+"GRUGRU";f;"non";"";f;f;f
+"HAEOST";f;"non";"";f;f;f
+"HIMHIM";f;"non";"";f;f;f
+"OTITAR";f;"non";"";f;f;f
+"PHIPUG";f;"non";"";f;f;f
+"PLUAPR";f;"non";"";f;f;f
+"PLUSQU";f;"non";"";f;f;f
+"RECAVO";f;"non";"";f;f;f
+"TETRAX";f;"non";"";t;f;f
+"VANVAN";t;"milieux agricoles";"farmland";t;t;f
+"CALALB";f;"non";"";f;f;f
+"CALALP";f;"non";"";f;f;f
+"GALMED";f;"non";"";f;f;f
+"LIMSCO";f;"non";"";f;f;f
+"NUMTEN";f;"non";"";f;f;f
+"BARLON";f;"non";"";f;f;f
+"TRITOTTOT";f;"non";"";f;f;f
+"TRITOTROB";f;"non";"";f;f;f
+"TRISTA";f;"non";"";f;f;f
+"TRIMEL";f;"non";"";f;f;f
+"TRIFLA";f;"non";"";f;f;f
+"TRISOL";f;"non";"";f;f;f
+"XENCIN";f;"non";"";f;f;f
+"ACTMAC";f;"non";"";f;f;f
+"CATSEM";f;"non";"";f;f;f
+"PHATRI";f;"non";"";f;f;f
+"PHALOB";f;"non";"";f;f;f
+"STEPOM";f;"non";"";f;f;f
+"STECUS";f;"non";"";f;f;f
+"STELON";f;"non";"";f;f;f
+"STESKU";f;"non";"";f;f;f
+"LARATR";f;"non";"";f;f;f
+"LARPIP";f;"non";"";f;f;f
+"LARPHI";f;"non";"";f;f;f
+"LARAUD";f;"non";"";f;f;f
+"LARDEL";f;"non";"";f;f;f
+"LARFUSFUS";f;"non";"";f;f;f
+"LARFUSGRA";f;"non";"";f;f;f
+"LARGLA";f;"non";"";f;f;f
+"LARHYP";f;"non";"";f;f;f
+"RHOROS";f;"non";"";f;f;f
+"RISTRI";f;"non";"";f;f;f
+"LARFUS";f;"non";"";f;f;f
+"LARGEN";f;"non";"";f;f;f
+"LARMAR";f;"non";"";f;f;f
+"LARMEL";f;"non";"";f;f;f
+"LARMIN";f;"non";"";f;f;f
+"LARRID";f;"non";"";f;f;f
+"LARSAB";f;"non";"";f;f;f
+"LIMLAP";f;"non";"";f;f;f
+"NUMARQ";f;"non";"";f;f;f
+"NUMPHA";f;"non";"";f;f;f
+"SCORUS";f;"non";"";f;f;f
+"TRIERY";f;"non";"";f;f;f
+"TRIGLA";f;"non";"";f;f;f
+"TRINEB";f;"non";"";f;f;f
+"TRIOCH";f;"non";"";f;f;f
+"TRITOT";f;"non";"";f;f;f
+"LARARG";f;"non";"";f;f;f
+"AREINT";f;"non";"";f;f;f
+"LARCAN";f;"non";"";f;f;f
+"PAGEBU";f;"non";"";f;f;f
+"STECAS";f;"non";"";f;f;f
+"STEMAX";f;"non";"";f;f;f
+"STEBEN";f;"non";"";f;f;f
+"STEELE";f;"non";"";f;f;f
+"STEPAR";f;"non";"";f;f;f
+"STEANA";f;"non";"";f;f;f
+"STEFUS";f;"non";"";f;f;f
+"CHLLEU";f;"non";"";f;f;f
+"URIAAL";f;"non";"";f;f;f
+"URILOM";f;"non";"";f;f;f
+"CEPGRY";f;"non";"";f;f;f
+"PTEORI";f;"non";"";f;f;f
+"SYRPAR";f;"non";"";f;f;f
+"COCAME";f;"non";"";f;f;f
+"NYCSCA";f;"non";"";f;f;f
+"STRURA";f;"non";"";f;f;f
+"STRNEB";f;"non";"";f;f;f
+"AEGFUN";f;"non";"";f;f;f
+"BUBBUB";f;"non";"";f;f;f
+"CAPEUR";f;"non";"";f;f;f
+"CHLHYB";f;"non";"";f;f;f
+"CHLNIG";f;"non";"";f;f;f
+"CLAGLA";f;"non";"";f;f;f
+"COLLIV";f;"non";"";f;f;f
+"COLOEN";f;"non";"";f;f;f
+"COLPAL";t;"generaliste";"generalist";f;f;f
+"CUCCAN";t;"generaliste";"generalist";f;f;f
+"FRAARC";f;"non";"";f;f;f
+"ALCTOR";f;"non";"";f;f;f
+"GELNIL";f;"non";"";f;f;f
+"GLAPAS";f;"non";"";f;f;f
+"OTUSCO";f;"non";"";f;f;f
+"PSIKRA";f;"non";"";f;f;f
+"PTEALC";f;"non";"";f;f;f
+"STEALB";f;"non";"";f;f;f
+"STEDOU";f;"non";"";f;f;f
+"STEHIR";f;"non";"";f;f;f
+"STESAN";f;"non";"";f;f;f
+"STRALU";f;"non";"";f;f;f
+"STRDEC";t;"milieux bâtis";"urban";f;f;f
+"STRORI";f;"non";"";f;f;f
+"STRROS";f;"non";"";f;f;f
+"STRSEN";f;"non";"";f;f;f
+"SURULU";f;"non";"";f;f;f
+"TYTALB";f;"non";"";f;f;f
+"ALLALL";f;"non";"";f;f;f
+"APUAPU";t;"milieux bâtis";"urban";f;f;f
+"ASIFLA";f;"non";"";f;f;f
+"ASIOTU";f;"non";"";f;f;f
+"DENSYR";f;"non";"";f;f;f
+"CHEDUP";f;"non";"";f;f;f
+"CALRUF";f;"non";"";f;f;f
+"ANTHOD";f;"non";"";f;f;f
+"ANTGUS";f;"non";"";f;f;f
+"MOTFLAFLA";t;"milieux agricoles";"farmland";f;f;f
+"MOTFLATHU";t;"milieux agricoles";"farmland";f;f;f
+"MOTFLAFEL";t;"milieux agricoles";"farmland";f;f;f
+"MOTFLACIN";t;"milieux agricoles";"farmland";f;f;f
+"MOTFLAIBE";t;"milieux agricoles";"farmland";f;f;f
+"MOTALBALB";f;"non";"";f;f;f
+"DENMIN";f;"non";"";f;f;f
+"APUPAL";f;"non";"";f;f;f
+"MELCAL";f;"non";"";t;f;f
+"LULARB";t;"milieux agricoles";"farmland";f;t;f
+"MOTALB";f;"non";"";f;f;f
+"MOTCIT";f;"non";"";f;f;f
+"MOTFLA";t;"milieux agricoles";"farmland";t;t;f
+"ANTTRI";f;"non";"";f;f;f
+"UPUEPO";t;"milieux agricoles";"farmland";t;t;f
+"ANTSPI";f;"non";"";f;f;t
+"APUCAF";f;"non";"";f;f;f
+"APUMEL";f;"non";"";f;f;f
+"CALBRA";f;"non";"";t;f;f
+"CORGAR";f;"non";"";f;f;f
+"DELURB";t;"milieux bâtis";"urban";f;f;f
+"DENLEU";f;"non";"";f;f;f
+"DENMAJ";t;"milieux forestiers";"woodland";f;f;f
+"DENMED";t;"milieux forestiers";"woodland";f;f;f
+"DRYMAR";t;"milieux forestiers";"woodland";f;f;f
+"EREALP";f;"non";"";f;f;f
+"GALCRI";t;"milieux agricoles";"farmland";t;t;f
+"ALCATT";f;"non";"";f;f;f
+"GALTHE";f;"non";"";t;f;f
+"HIRDAU";f;"non";"";f;f;f
+"HIRRUS";t;"milieux bâtis";"urban";t;f;f
+"JYNTOR";f;"non";"";f;f;f
+"MERAPI";f;"non";"";f;f;f
+"MOTCIN";f;"non";"";f;f;f
+"PICCAN";t;"milieux forestiers";"woodland";f;f;f
+"PICVIR";t;"generaliste";"generalist";f;f;f
+"PTYRUP";f;"non";"";f;f;t
+"RIPRIP";f;"non";"";f;f;f
+"ANTCER";f;"non";"";f;f;f
+"ANTPRA";t;"milieux agricoles";"farmland";t;t;f
+"ANTRIC";f;"non";"";f;f;f
+"MOTALBYAR";f;"non";"";f;f;f
+"CERGAL";f;"non";"";f;f;f
+"LUSSVESVE";f;"non";"";f;f;f
+"LUSSVECYA";f;"non";"";f;f;f
+"LUSSVENAM";f;"non";"";f;f;f
+"TARCYA";f;"non";"";f;f;f
+"PHOMOU";f;"non";"";f;f;f
+"SAXTORMAU";f;"non";"";f;f;f
+"OENISA";f;"non";"";f;f;f
+"OENOENOEN";t;"milieux agricoles";"farmland";f;f;f
+"OENOENLEU";t;"milieux agricoles";"farmland";f;f;f
+"OENDES";f;"non";"";f;f;f
+"OENLEU";f;"non";"";f;f;f
+"ZOOSIB";f;"non";"";f;f;f
+"CATUST";f;"non";"";f;f;f
+"CATMIN";f;"non";"";f;f;f
+"TURTORALP";f;"non";"";f;f;f
+"TUROBS";f;"non";"";f;f;f
+"TURNAU";f;"non";"";f;f;f
+"TURRUFRUF";f;"non";"";f;f;f
+"TURRUFATR";f;"non";"";f;f;f
+"PRUMOD";t;"generaliste";"generalist";f;f;f
+"BOMGAR";f;"non";"";f;f;f
+"TURPHI";t;"milieux forestiers";"woodland";f;f;f
+"TURPIL";f;"non";"";f;f;f
+"LUSLUS";f;"non";"";f;f;f
+"LUSSVE";f;"non";"";f;f;f
+"MONSAX";f;"non";"";f;f;t
+"MONSOL";f;"non";"";f;f;f
+"OENOEN";t;"milieux agricoles";"farmland";f;t;t
+"OENPLE";f;"non";"";f;f;f
+"PHOOCH";t;"milieux bâtis";"urban";f;f;t
+"PHOPHO";t;"milieux bâtis";"urban";f;f;f
+"PRUCOL";f;"non";"";f;f;t
+"SAXRUB";t;"milieux agricoles";"farmland";t;t;t
+"SAXTOR";t;"milieux agricoles";"farmland";t;t;f
+"TROTRO";t;"milieux forestiers";"woodland";f;f;f
+"TURILI";f;"non";"";f;f;f
+"TURMER";t;"generaliste";"generalist";f;f;f
+"TURRUF";f;"non";"";f;f;f
+"TURTOR";f;"non";"";f;f;t
+"TURVIS";t;"milieux forestiers";"woodland";f;f;f
+"ZOODAU";f;"non";"";f;f;f
+"CETCET";f;"non";"";f;f;f
+"CINCIN";f;"non";"";f;f;f
+"ERIRUB";t;"milieux forestiers";"woodland";f;f;f
+"GRIVES";f;"milieux forestiers";"woodland";f;f;f
+"LOCCER";f;"non";"";f;f;f
+"LOCLAN";f;"non";"";f;f;f
+"LOCFAS";f;"non";"";f;f;f
+"ACRAGR";f;"non";"";f;f;f
+"ACRDUM";f;"non";"";f;f;f
+"HIPCAL";f;"non";"";f;f;f
+"SYLRUE";f;"non";"";f;f;f
+"PHYDES";f;"non";"";f;f;f
+"PHYPRO";f;"non";"";f;f;f
+"PHYINO";f;"non";"";f;f;f
+"PHYSCH";f;"non";"";f;f;f
+"PHYFUS";f;"non";"";f;f;f
+"PHYCOLTRI";t;"milieux forestiers";"woodland";f;f;f
+"PHYCOLABI";t;"milieux forestiers";"woodland";f;f;f
+"PHYCOLBRE";t;"milieux forestiers";"woodland";f;f;f
+"PHYTROACR";t;"milieux forestiers";"woodland";f;f;f
+"CISJUN";f;"non";"";f;f;f
+"HIPICT";f;"non";"";f;f;f
+"ACRMEL";f;"non";"";f;f;f
+"ACRARU";f;"non";"";f;f;f
+"HIPOLI";f;"non";"";f;f;f
+"HIPPAL";f;"non";"";f;f;f
+"LOCFLU";f;"non";"";f;f;f
+"LOCLUS";f;"non";"";f;f;f
+"LOCNAE";f;"non";"";f;f;f
+"PHYBON";t;"milieux forestiers";"woodland";f;f;f
+"PHYBOR";f;"non";"";f;f;f
+"PHYCOL";t;"milieux forestiers";"woodland";f;f;f
+"PHYSIB";t;"milieux forestiers";"woodland";f;f;f
+"PHYTRO";t;"milieux forestiers";"woodland";f;f;f
+"REGREG";t;"milieux forestiers";"woodland";f;f;f
+"SYLATR";t;"generaliste";"generalist";f;f;f
+"SYLBOR";f;"non";"";f;f;f
+"SYLCAN";f;"non";"";f;f;f
+"SYLCON";f;"non";"";f;f;f
+"SYLCUR";f;"non";"";f;f;t
+"SYLHOR";f;"non";"";f;f;f
+"SYLMEL";t;"milieux forestiers";"woodland";f;f;f
+"SYLNIS";f;"non";"";f;f;f
+"SYLSAR";f;"non";"";f;f;f
+"SYLUND";f;"non";"";f;f;f
+"ACRPAL";f;"non";"";f;f;f
+"ACRRIS";f;"non";"";f;f;f
+"ACRSCH";f;"non";"";f;f;f
+"ACRSCI";f;"non";"";f;f;f
+"AEGCAUCAU";f;"non";"";f;f;f
+"AEGCAUROS";f;"non";"";f;f;f
+"PARCIN";f;"non";"";f;f;f
+"SITNEU";f;"non";"";f;f;f
+"REMPEN";f;"non";"";f;f;f
+"LANISA";f;"non";"";f;f;f
+"PERINF";f;"non";"";f;f;f
+"CYACYA";f;"non";"";f;f;f
+"NUCCARCAR";f;"non";"";f;f;f
+"NUCCARMAC";f;"non";"";f;f;f
+"CORMONMON";t;"milieux bâtis";"urban";f;f;f
+"CORDAU";f;"non";"";f;f;f
+"CORCORNIX";f;"non";"";f;f;f
+"ORIORI";t;"generaliste";"generalist";f;f;f
+"MUSSTR";f;"non";"";f;f;f
+"PANBIA";f;"non";"";f;f;f
+"CORRAX";f;"non";"";f;f;f
+"FICALB";f;"non";"";f;f;f
+"AEGCAU";f;"non";"";f;f;f
+"FICHYP";f;"non";"";f;f;f
+"FICPAR";f;"non";"";f;f;f
+"GARGLA";t;"generaliste";"generalist";f;f;f
+"LANCOL";t;"milieux agricoles";"farmland";t;t;f
+"LANEXC";f;"non";"";f;f;f
+"LANMIN";f;"non";"";t;f;f
+"LANSEN";f;"non";"";t;f;f
+"LEILUT";f;"non";"";f;f;f
+"NUCCAR";f;"non";"";f;f;f
+"PARATE";t;"milieux forestiers";"woodland";f;f;f
+"PARCAE";t;"generaliste";"generalist";f;f;f
+"PARCRI";t;"milieux forestiers";"woodland";f;f;f
+"PARCYA";f;"non";"";f;f;f
+"PARLUG";f;"non";"";f;f;f
+"PARMON";f;"non";"";f;f;f
+"PARPAL";t;"milieux forestiers";"woodland";f;f;f
+"PICPIC";t;"milieux bâtis";"urban";f;f;f
+"PYRGRA";f;"non";"";f;f;t
+"PYRRAX";f;"non";"";f;f;t
+"REGIGN";t;"milieux forestiers";"woodland";f;f;f
+"SITEUR";t;"milieux forestiers";"woodland";f;f;f
+"SITWHI";f;"non";"";f;f;f
+"TICMUR";f;"non";"";f;f;t
+"CERFAM";t;"milieux forestiers";"woodland";f;f;f
+"CERBRA";t;"milieux forestiers";"woodland";f;f;f
+"CORCOR";t;"generaliste";"generalist";f;f;f
+"CORMON";t;"milieux bâtis";"urban";f;f;f
+"VIROLI";f;"non";"";f;f;f
+"CARFLAFLA";f;"non";"";f;f;f
+"CARFLAROS";f;"non";"";f;f;f
+"CARFLACAB";f;"non";"";f;f;t
+"CARHORHOR";f;"non";"";f;f;f
+"CARHOREXI";f;"non";"";f;f;f
+"LOXSCO";f;"non";"";f;f;f
+"LOXPYT";f;"non";"";f;f;f
+"CARERY";f;"non";"";f;f;f
+"PINENU";f;"non";"";f;f;f
+"PYRPYRPYR";t;"milieux forestiers";"woodland";f;f;f
+"PARAME";f;"non";"";f;f;f
+"DENSTR";f;"non";"";f;f;f
+"SETRUT";f;"non";"";f;f;f
+"SEINOV";f;"non";"";f;f;f
+"CALLAP";f;"non";"";f;f;f
+"PLENIV";f;"non";"";f;f;f
+"EMBPUS";f;"non";"";f;f;f
+"STUROS";f;"non";"";f;f;f
+"CARCHL";t;"milieux bâtis";"urban";f;f;f
+"FRIMON";f;"non";"";f;f;f
+"LOXCUR";f;"non";"";f;f;f
+"STUUNI";f;"non";"";t;f;f
+"CARFLA";f;"non";"";f;f;t
+"CARRIS";f;"non";"";f;f;f
+"CARSPI";f;"non";"";f;f;f
+"COCCOC";t;"milieux forestiers";"woodland";f;f;f
+"EMBCAE";f;"non";"";f;f;f
+"EMBCIA";f;"non";"";f;f;t
+"EMBCIR";t;"milieux agricoles";"farmland";t;t;f
+"EMBCIT";t;"milieux agricoles";"farmland";t;t;f
+"EMBHOR";f;"non";"";t;t;f
+"EMBLEU";f;"non";"";f;f;f
+"EUOMAL";f;"non";"";f;f;f
+"FRICOE";t;"generaliste";"generalist";f;f;f
+"LOXLEU";f;"non";"";f;f;f
+"MONNIV";f;"non";"";f;f;t
+"PASDOM";t;"milieux bâtis";"urban";f;f;f
+"PASHIS";f;"non";"";f;f;f
+"PASMON";t;"milieux bâtis";"urban";t;f;f
+"PETPET";f;"non";"";t;f;f
+"PYRPYR";t;"milieux forestiers";"woodland";f;f;f
+"SERCIT";f;"non";"";f;f;t
+"SERSER";t;"milieux bâtis";"urban";t;f;f
+"STUVUL";f;"non";"";t;f;f
+"CARHOR";f;"non";"";f;f;f
+"ARDMEL";f;"non";"";f;f;f
+"AQUNIP";f;"non";"";f;f;f
+"CAPRUF";f;"non";"";f;f;f
+"CARCAN";t;"milieux agricoles";"farmland";t;t;t
+"AGAROS";f;"non";"";f;f;f
+"EMBMEL";f;"non";"";t;f;f
+"CARCAR";t;"milieux bâtis";"urban";f;f;f
+"EMBSCH";f;"non";"";f;f;f
+"ALAARV";t;"milieux agricoles";"farmland";t;t;t
+"ALERUF";t;"milieux agricoles";"farmland";t;t;f
+"CHAALE";f;"non";"";f;f;f
+"CORFRU";t;"milieux agricoles";"farmland";t;t;f
+"CYGATR";f;"non";"";f;f;f
+"HALALB";f;"non";"";f;f;f
+"HIPPOL";t;"generaliste";"generalist";f;f;f
+"LANMER";f;"non";"";f;f;f
+"LIMLIM";f;"non";"";t;f;f
+"ANTCAM";t;"milieux agricoles";"farmland";t;t;f
+"ATHNOC";f;"non";"";f;f;f
+"BUBIBI";f;"non";"";t;f;f
+"OENHIS";f;"non";"";t;f;f
+"PARMAJ";t;"generaliste";"generalist";f;f;f
+"PHOCHI";f;"non";"";f;f;f
+"PODCRI";f;"non";"";f;f;f
+"RHOGIT";f;"non";"";f;f;f
+"CYGCOL";f;"non";"";f;f;f
+"LUSMEG";t;"generaliste";"generalist";f;f;f
+"STRTUR";f;"non";"";t;f;f
+"SYLCOM";t;"milieux agricoles";"farmland";t;t;f
+"ACTHYP";f;"non";"";f;f;f
+"AEGMON";f;"non";"";f;f;f
+"BUROED";f;"non";"";t;f;f
+"BUTBUT";t;"milieux agricoles";"farmland";f;t;f
+"MILCAL";t;"milieux agricoles";"farmland";t;t;f
+"EMBAUR";f;"non";"";f;f;f

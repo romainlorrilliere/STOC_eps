@@ -62,12 +62,12 @@ openDB.PSQL <- function(nomDB=NULL){
 
 
 
-prepaData <- function(dateExportVP="2017-11-14",nomFileVP="export_stoc_14112017.txt",nomFileVP_ONF="export_stoc-onf_14112017.txt",
+prepaData <- function(dateExportVP="2018-02-14",nomFileVP="export_stoc_14022018.txt",nomFileVP_ONF="export_stoc_ONF_14022018.txt",
                       dateExportFNat="2017-01-04", importACCESS=FALSE,
-                      nomFileFNat="FNat_plat_2017-01-04.csv",nomDBFNat="Base FNat2000.MDB",importationDataBrut=TRUE,
+                      nomFileFNat="FNat_plat_2017-01-04.csv",nomDBFNat="Base FNat2000.MDB",importationDataBrut=FALSE,
                       constructionPoint=FALSE,constructionCarre=FALSE,constructionInventaire=FALSE,
-                      constructionObservation = TRUE, constructionHabitat = TRUE,
-                      dateConstruction=NULL,postgresql_import=TRUE,nomDBpostgresql=NULL,
+                      constructionObservation = FALSE, constructionHabitat = FALSE,
+                      dateConstruction=NULL,postgresql_import=FALSE,nomDBpostgresql=NULL,
                       postgresql_createAll=FALSE,postgresUser="romain",
                       postGIS_initiation=FALSE,repertoire=NULL,postgresql_abondanceSeuil=FALSE,seuilAbondance = .99,historiqueCarre=TRUE,
                       pointCarreAnnee=TRUE,importPointCarreAnnee=TRUE,fileTemp=FALSE)
@@ -1594,7 +1594,7 @@ createDB_postgres <- function(dateConstruction,nomDBpostgresql=NULL,postgresUser
 
 ########  linux <- Sys.info()[1]=="Linux"
     
-    cat("\n  Importation des tables generiques et creation des index\n   ----------------------------------\n")
+    cat("\n  Importation des tables des données STOC-eps et creation des index\n   ----------------------------------\n")
     cat("     1- point\n")
     cat("     2- carre\n")
     cat("     3- inventaire\n")
@@ -1673,7 +1673,7 @@ openDB.PSQL <- function(nomDB=NULL){
 maketableGenerique <- function(repertoire=NULL,nomDBpostgresql=NULL,postgresUser="romain", fileTemp=TRUE) {
 
                                         # require(ggplot2)
-                                       #   repertoire=NULL;savePostgres=TRUE;nomDBpostgresql=NULL;postgresUser="romain"; fileTemp=FALSE;
+                                          repertoire=NULL;savePostgres=TRUE;nomDBpostgresql=NULL;postgresUser="romain"; fileTemp=FALSE;
     cat("\n  Importation des tables generiques et creation des index\n   ------------------------------------\n")
     cat("     1- carrenat\n")
     cat("     2- espece\n")
@@ -1703,7 +1703,7 @@ maketableGenerique <- function(repertoire=NULL,nomDBpostgresql=NULL,postgresUser
 
     cat(" \\copy species_indicateur_fonctionnel FROM ",repertoire,
         "DB_import/tablesGeneriques/espece_indicateur_fonctionel.csv",
-        " with (format csv, header, delimiter ';')\n",sep="",
+        " with (format csv, header, delimiter ',')\n",sep="",
         file=paste(repertoire,"sql/_sqlR_importationDataTableGenerique.sql",sep=""),append=TRUE)
 
     commande <- paste("psql -U ",postgresUser," ",nomDBpostgresql," -f ",repertoire,"sql/_sqlR_importationDataTableGenerique.sql",sep="")

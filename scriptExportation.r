@@ -1132,4 +1132,69 @@ return(d)
 
 
 
+makeTableSampledCarre <- function(con=NULL,output=TRUE,sp=NULL,champSp = "code_sp",nomChampSp="espece",
+                          altitude=NULL,firstYear=NULL,lastYear=NULL,
+                           departement=NULL,carre = NULL,onf=TRUE,
+                           selectHabitat = NULL, selectTypeHabitat= NULL,
+                          formatTrend = FALSE,isEnglish=FALSE,addAbscence=FALSE,
+                           id_output="AlexR_2017-11-23", #"NicolasM",
+                           operateur=c("Lorrilliere Romain",
+                                       "lorrilliere@mnhn.fr"),
+                           encodingSave="utf-8",test=FALSE) {
+
+
+  con=NULL;savePostgres=FALSE;output=TRUE;sp=NULL;champSp = "code_sp";
+  spExcluPassage1=c("MOTFLA","SAXRUB","ANTPRA")  ;seuilAbondance=.99;
+  champsHabitat=TRUE;champsCoordGrid=TRUE;altitude=NULL;firstYear=NULL;lastYear=NULL;
+  departement="44";onf=TRUE;distance_contact="100";
+ selectHabitat = NULL; selectTypeHabitat= NULL#c("urbain_ps","agri_ps");
+  formatTrend = FALSE;anglais=FALSE;addAbscence=FALSE;
+  id_output="VincentP_2017-10-16"; #"NicolasM";
+  operateur=c("Lorrilliere Romain",
+              "lorrilliere@mnhn.fr");
+  encodingSave="utf-8"
+
+    
+
+   depts <- paste("'",paste(departement,collapse="','"),"'",sep="")
+    start <-  Sys.time()
+   dateExport <- format(start,"%Y-%m-%d")
+
+
+    if(is.null(con)) con <- openDB.PSQL()
+    if(is.null(firstYear)) firstYear <- 2001
+    if(is.null(lastYear)) lastYear <- as.numeric(format(start,"%Y"))
+    if(is.null(altitude)) altitude <- 8000
+ 
+        
+ 
+    if(!is.null(sp)) {
+        if(champSp != "code_sp") {
+          
+            sp <- getCode_sp(con,champSp,sp)
+  
+        }
+             spList <- paste("('",paste(sp,collapse="' , '"),"')",sep="")
+        
+    }
+    
+
+    if(!is.null(selectHabitat)) habList <- paste("('",paste(selectHabitat,collapse="' , '"),"')",sep="")
+    if(!is.null(departement)) depList <- paste("('",paste(departement,collapse="' , '"),"')",sep="")
+    
+    selectQuery <- paste(ifelse(is.null(sp),"",paste(" code_sp in ",spList," and
+                                ")),"
+"," i.annee >= ",firstYear,"  and i.annee <= ",lastYear,
+" and c.etude in ('STOC_EPS'",ifelse(onf,", 'STOC_ONF'",""),")  and  p.altitude <= ",altitude,"
+",
+ifelse(is.null(departement),"",paste(" and p.departement in ",depList," ")),"
+",
+ifelse(!is.null(selectHabitat),paste(" and p_milieu in ",habList," ")," "),"
+"," ", sep="")
+
+    
+
+
+ }
+
 

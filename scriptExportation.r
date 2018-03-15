@@ -16,13 +16,19 @@ library(doBy)
 library(reshape2)
 
 
-openDB.PSQL <- function(nomDB=NULL){
+openDB.PSQL <- function(user=NULL,mp=NULL,nomDB=NULL){
     
     library(RPostgreSQL)
+    drv <- dbDriver("PostgreSQL")
+   
     if(is.null(nomDB)) nomDB <- "stoc_eps"
 
-    drv <- dbDriver("PostgreSQL")
-    con <- dbConnect(drv, dbname="stoc_eps")
+    if(is.null(user)) {
+        con <- dbConnect(drv, dbname=nomDB)
+    } else {
+        con <- dbConnect(drv, dbname=nomDB,user=user, password=mp)
+    }
+                                                                   
     return(con)
 }
 
@@ -62,7 +68,7 @@ trad_fr2eng <- function(d) {
 
 
 
-makeTableCarre <- function(con=NULL,savePostgres=FALSE,output=TRUE,sp=NULL,champSp = "code_sp",nomChampSp="espece",
+makeTableCarre <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,savePostgres=FALSE,output=TRUE,sp=NULL,champSp = "code_sp",nomChampSp="espece",
                            spExcluPassage1=c("MOTFLA","SAXRUB","ANTPRA","OENOEN","PHYTRO"),# (Prince et al. 2013 Env. Sc. and Pol.) + "OENOEN","PHYTRO" avis d'expert F. Jiguet
                            seuilAbondance=.99,
                            champsHabitat=TRUE,altitude=NULL,firstYear=NULL,lastYear=NULL,
@@ -78,7 +84,7 @@ makeTableCarre <- function(con=NULL,savePostgres=FALSE,output=TRUE,sp=NULL,champ
     start <- Sys.time()
     dateExport <- format(start,"%Y-%m-%d")
 
-    if(is.null(con)) con <- openDB.PSQL()
+    if(is.null(con)) con <- openDB.PSQL(user,mp,nomDB)
     if(is.null(firstYear)) firstYear <- 2001
     if(is.null(lastYear)) lastYear <- as.numeric(format(start,"%Y"))
     if(is.null(altitude)) altitude <- 8000
@@ -340,7 +346,7 @@ ca.id_carre, year;",sep="")
 
 
 
-makeTablePoint <- function(con=NULL,savePostgres=FALSE,output=FALSE,sp=NULL,champSp = "code_sp",nomChampSp="espece",
+makeTablePoint <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,savePostgres=FALSE,output=FALSE,sp=NULL,champSp = "code_sp",nomChampSp="espece",
                            spExcluPassage1=c("MOTFLA","SAXRUB","ANTPRA","OENOEN","PHYTRO"),# (Prince et al. 2013 Env. Sc. and Pol.) + "OENOEN","PHYTRO" avis d'expert F. Jiguet
                            seuilAbondance=.99,
                            champsHabitat=TRUE,champsCoordGrid=TRUE,altitude=NULL,firstYear=NULL,lastYear=NULL,
@@ -373,7 +379,7 @@ makeTablePoint <- function(con=NULL,savePostgres=FALSE,output=FALSE,sp=NULL,cham
     
     
    
-    if(is.null(con)) con <- openDB.PSQL()
+    if(is.null(con)) con <- openDB.PSQL(user,mp,nomDB)
     if(is.null(firstYear)) firstYear <- 2001
     if(is.null(lastYear)) lastYear <- as.numeric(format(start,"%Y"))
     if(is.null(altitude)) altitude <- 8000
@@ -652,7 +658,7 @@ pa.id_point, annee;",sep="")
 
 
 
-makeTableTRIM <- function(con=NULL,savePostgres=FALSE,output=TRUE,sp=NULL,champSp = "euring", onf=TRUE, champsHabitat=FALSE,altitude=NULL,firstYear=NULL,lastYear=NULL,
+makeTableTRIM <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,savePostgres=FALSE,output=TRUE,sp=NULL,champSp = "euring", onf=TRUE, champsHabitat=FALSE,altitude=NULL,firstYear=NULL,lastYear=NULL,
                           departement=NULL,
                           id_output="2017-09-19", 
                           operateur=c("Lorrilliere Romain",
@@ -670,7 +676,7 @@ makeTableTRIM <- function(con=NULL,savePostgres=FALSE,output=TRUE,sp=NULL,champS
     start <- Sys.time()
     dateExport <- format(start,"%Y-%m-%d")
 
-    if(is.null(con)) con <- openDB.PSQL()
+    if(is.null(con)) con <- openDB.PSQL(user,mp,nomDB)
     if(is.null(firstYear)) firstYear <- 2000
     if(is.null(lastYear)) lastYear <- 9999
     if(is.null(altitude)) altitude <- 10000
@@ -798,7 +804,7 @@ group by id_carre, annee;",sep="")
 
 
 
-makeTableBrut <- function(con=NULL,output=TRUE,sp=NULL,champSp = "code_sp",nomChampSp="espece",
+makeTableBrut <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,output=TRUE,sp=NULL,champSp = "code_sp",nomChampSp="espece",
                           altitude=NULL,firstYear=NULL,lastYear=NULL,
                            departement=NULL,onf=TRUE,
                            selectHabitat = NULL, selectTypeHabitat= NULL,
@@ -813,7 +819,7 @@ makeTableBrut <- function(con=NULL,output=TRUE,sp=NULL,champSp = "code_sp",nomCh
    dateExport <- format(start,"%Y-%m-%d")
 
 
-    if(is.null(con)) con <- openDB.PSQL()
+    if(is.null(con)) con <- openDB.PSQL(user,mp,nomDB)
     if(is.null(firstYear)) firstYear <- 2001
     if(is.null(lastYear)) lastYear <- as.numeric(format(start,"%Y"))
     if(is.null(altitude)) altitude <- 8000
@@ -1049,13 +1055,13 @@ historicCarre  <- function(con,anneeMax=2016) {
 
 
 
-testDistanceContact <- function(con=NULL) {
+testDistanceContact <- function(con=NULLuser=NULL,mp=NULL,nomDB=NULL) {
     require(reshape2)
     con <- NULL
     start <- Sys.time()
     dateExport <- format(start,"%Y-%m-%d")
 
-    if(is.null(con)) con <- openDB.PSQL()
+    if(is.null(con)) con <- openDB.PSQL(user,mp,nomDB)
 
     query <- "
 select id_inventaire,date,annee,code_sp, abondance,distance_contact,db
@@ -1080,10 +1086,10 @@ from observation;
 
 
 
-makeTableEBBA2 <- function(con=NULL,output=FALSE,encodingSave="utf-8") {
+makeTableEBBA2 <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,output=FALSE,encodingSave="utf-8") {
   #spExcluPassage1=c("MOTFLA","SAXRUB","ANTPRA","OENOEN","PHYTRO"),# (Prince et al. 2013 Env. Sc. and Pol.) + "OENOEN","PHYTRO" avis d'expert F. Jiguet
                         
-    if(is.null(con)) con <- openDB.PSQL()
+    if(is.null(con)) con <- openDB.PSQL(user,mp,nomDB)
 
 query <- paste("select sp.id_carre||to_char(to_date(sp.date,'YYYY-MM-DD'),'YYYYMMDD') as \"Survey number\",
 to_char(to_date(sp.date,'YYYY-MM-DD'),'DD.MM.YYYY') as \"Date of survey\",nbp * 5 as \"Duration of survey\", 1 as \"Field Method\",
@@ -1132,7 +1138,7 @@ return(d)
 
 
 
-makeTableSampledCarre <- function(con=NULL,output=TRUE,sp=NULL,champSp = "code_sp",nomChampSp="espece",
+makeTableSampledCarre <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,output=TRUE,sp=NULL,champSp = "code_sp",nomChampSp="espece",
                           altitude=NULL,firstYear=NULL,lastYear=NULL,
                            departement=NULL,carre = NULL,onf=TRUE,
                            selectHabitat = NULL, selectTypeHabitat= NULL,
@@ -1161,10 +1167,10 @@ makeTableSampledCarre <- function(con=NULL,output=TRUE,sp=NULL,champSp = "code_s
    dateExport <- format(start,"%Y-%m-%d")
 
 
-    if(is.null(con)) con <- openDB.PSQL()
-    if(is.null(firstYear)) firstYear <- 2001
-    if(is.null(lastYear)) lastYear <- as.numeric(format(start,"%Y"))
-    if(is.null(altitude)) altitude <- 8000
+    if(is.null(con)) con <- openDB.PSQL(user,mp,nomDB)
+    if(is.null(firstYear)) firstYear <- 2001 if(is.null(lastYear))
+    lastYear <- as.numeric(format(start,"%Y")) if(is.null(altitude))
+    altitude <- 8000
  
         
  

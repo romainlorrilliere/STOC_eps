@@ -1055,7 +1055,7 @@ historicCarre  <- function(con,anneeMax=2016) {
 
 
 
-testDistanceContact <- function(con=NULLuser=NULL,mp=NULL,nomDB=NULL) {
+testDistanceContact <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL) {
     require(reshape2)
     con <- NULL
     start <- Sys.time()
@@ -1168,8 +1168,10 @@ makeTableSampledCarre <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,output=T
 
 
     if(is.null(con)) con <- openDB.PSQL(user,mp,nomDB)
-    if(is.null(firstYear)) firstYear <- 2001 if(is.null(lastYear))
-    lastYear <- as.numeric(format(start,"%Y")) if(is.null(altitude))
+    if(is.null(firstYear)) firstYear <- 2001 
+   if(is.null(lastYear))
+    lastYear <- as.numeric(format(start,"%Y"))
+   d<-if(is.null(altitude))
     altitude <- 8000
  
         

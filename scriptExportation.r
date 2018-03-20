@@ -510,8 +510,7 @@ from(
 		 )-- ## end ## obs max par point sur 2 passages 
 		 as om , point as p, carre as c, species as e , point_annee as pa , carre_annee as ca 
 where 
-om.id_point = p.pk_point and p.id_carre = c.pk_carre and om.code_sp = e.pk_species and p.altitude <= 800 and 
-om.id_point = pa.id_point and om.annee = pa.annee and p.id_carre = ca.id_carre and om.annee = ca.annee  
+om.id_point = p.pk_point and p.id_carre = c.pk_carre and om.code_sp = e.pk_species and om.id_point = pa.id_point and om.annee = pa.annee and p.id_carre = ca.id_carre and om.annee = ca.annee  
 order by 
 om.id_point, annee,code_sp; ",sep="")
 

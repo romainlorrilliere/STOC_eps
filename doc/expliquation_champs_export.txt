@@ -1,0 +1,46 @@
+table point
+
+point	:	identifiant du point
+carre	:	identifient du carré
+annee	:	année
+id_point_annee	:	identifiant point année
+etude	:	type d’etude 
+commune	:	commune
+insee	:	code insee
+departement	:	departement
+code_sp	:	code espece en 6 caractères
+nom_scientifique	:	nom scientifique
+nom_francais	:	nom français
+nom_anglais	:	nom anglais
+code_espece_euring	:	code euring de l’espèce
+code_espece_taxref	:	code taxref de l’espèce
+abondance_brut	:	maximum sur les deux passage des sommes des abondances observée sur les différentes classe de distance 
+abondance	:	 maximum sur les deux passages des sommes des abondances observée ecrétée (pour retirer les abondances abbérantes) sur les différentes classe de distance 
+qualite_inventaire_stoc	:	1 = 2 passage, 0.5 = 1 seul passage
+altitude	:	altitude
+longitude_wgs84	:	longitude du point en WGS84
+latitude_wgs84	:	latitude du point en WGS 84
+longitude_grid_wgs84	:	longitude du centre du carré en WGS84
+latitude_grid_wgs84	:	latitude ud centre du carré en WGS 84
+habitat_principal	:	habitat principal
+habitat_secondaire	:	habitat secondaire
+temps_depuis_derniere_description_habitat	:	nombre d’année depuis la dernière description
+foret_p	:	habitat principal forestier
+agricole_p	:	habitat principal agricole
+urbain_p	:	habitat principal urbain
+foret_ps	:	habitat principal ou secondaire forestier
+agricole_ps	:	habitat principal ou secondaire agricole
+urbain_ps	:	habitat principal ou secondaire urbain
+carre_nb_pts_foret_p	:	nombre de points dont l’habitat principal est forestier
+carre_nb_pts_ouvert_p	:	nombre de points dont l’habitat principal est ouvert
+carre_nb_pts_agricole_p	:	nombre de points dont l’habitat principal est agricole
+carre_nb_pts_urbain_p	:	nombre de points dont l’habitat principal est urbain
+carre_nb_pts_foret_ps	:	nombre de points dont l’habitat principal ou secondaire est forestier
+carre_nb_pts_ouvert_ps	:	nombre de points dont l’habitat principal ou secondaire est ouvert
+carre_nb_pts_agricole_ps	:	nombre de points dont l’habitat principal ou secondaire est agricole
+carre_nb_pts_urbain_ps	:	nombre de points dont l’habitat principal ou secondaire est urbain
+data_base_name	:	nom de la base de données d'importation
+date_export	:	date de l'export des base d'origine
+operateur	:	nom de l'opérateur
+email_operateur	:	email de l'operateur
+

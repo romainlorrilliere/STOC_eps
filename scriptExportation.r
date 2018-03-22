@@ -83,7 +83,7 @@ makeTableCarre <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,savePostgres=FA
     
     start <- Sys.time()
     dateExport <- format(start,"%Y-%m-%d")
-
+    
     if(is.null(con)) con <- openDB.PSQL(user,mp,nomDB)
     if(is.null(firstYear)) firstYear <- 2001
     if(is.null(lastYear)) lastYear <- as.numeric(format(start,"%Y"))
@@ -961,10 +961,83 @@ test <- function() {
 
 
 
+historicCarre <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,
+                          firstYear = NULL,lastYear=NULL,altitude=NULL,
+                          departement=NULL,id_carre=NULL,onf=TRUE,output=TRUE,
+                          isEnglish=FALSE,addAbscence=FALSE,
+                           id_output="",
+                           operateur=c("Lorrilliere Romain",
+                                       "lorrilliere@mnhn.fr"),
+                           encodingSave="utf-8") {
+
+    ## --------------------------
+#con=NULL;user=NULL;mp=NULL;nomDB=NULL;firstYear = NULL;lastYear=NULL;altitude=NULL;departement=NULL;id_carre=c("010100","010120");onf=TRUE;output=TRUE
+    
+    ## --------------------------
+
+    
+    
+    start <-  Sys.time()
+    dateExport <- format(start,"%Y-%m-%d")
+    
+
+    if(is.null(con)) con <- openDB.PSQL(user,mp,nomDB)
+    if(is.null(firstYear)) firstYear <- 2001
+    if(is.null(lastYear)) lastYear <- as.numeric(format(start,"%Y"))
+    if(is.null(altitude)) altitude <- 8000
+
+    if(!is.null(departement)) depList <- paste("('",paste(departement,collapse="' , '"),"')",sep="")
+
+    if(!is.null(id_carre)) carreList <- paste("('",paste(id_carre,collapse="' , '"),"')",sep="")
+    
+  
+    selectQuery <- paste(" i.annee >= ",firstYear,"  and i.annee <= ",lastYear,
+" and i.etude in ('STOC_EPS'",ifelse(onf,", 'STOC_ONF'",""),")  and  c.altitude <= ",altitude,"
+",
+ifelse(is.null(departement),"",paste(" and c.departement in ",depList," ")),"
+",
+ifelse(!is.null(id_carre),paste(" and i.id_carre in ",carreList," ")," "),"
+"," ", sep="")
+    
+
+ query <-paste("select i.id_carre, c.departement,c.altitude,
+i.annee, i.etude,  i.observateur, i.email 
+from inventaire as i, carre as c
+where i.id_carre = c.pk_carre and ",selectQuery,"
+group by i.id_carre, i.etude,c.departement,c.altitude,i.annee,i.observateur,i.email
+order by i.id_carre, i.annee;")
+
+    cat("\n QUERY historique CARRE:\n--------------\n\n",query,"\n")
+  
+                                        # browser()
+    d <- dbGetQuery(con, query)
+
+      if(isEnglish) {
+        cat(" - Traduction des noms de colonnes\n")
+        d <- trad_fr2eng(d)
+
+    }
+    
+
+      fileOut <- paste("export/Historic_carre_",id_output,"_",firstYear,"_",lastYear,ifelse(isEnglish,"eng","fr"),".csv",sep="")
+    write.csv2(d,fileOut,row.names=FALSE)
+    cat(" --> ",fileOut,"\n")
+
+
+     end <- Sys.time() ## heure de fin 
+
+    dbDisconnect(con)
+
+    cat("\n     #      ==> Duree:",round(as.difftime(end - start,units="mins")),"minutes\n")
+    if(output) return(d)
+
+
+    }
 
 
 
-historicCarre  <- function(con,anneeMax=2016) {
+
+historicToutCarre  <- function(con,anneeMax=2016) {
     require(ggplot2)
     require(reshape2)
     query <-paste("select id_carre, annee from inventaire where annee <= ",anneeMax," group by id_carre, annee order by id_carre, annee;")
@@ -1203,5 +1276,6 @@ ifelse(!is.null(selectHabitat),paste(" and p_milieu in ",habList," ")," "),"
 
 
  }
+
 
 

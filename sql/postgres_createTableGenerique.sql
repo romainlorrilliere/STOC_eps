@@ -43,7 +43,8 @@ CREATE TABLE species_list_indicateur
      	 	european_fbi boolean,
      	 	french_fbi boolean,
      	 	montane_lehikoinen boolean,
-     	 	french_trim boolean);
+     	 	french_trim boolean,
+     	 	ebcc boolean);
 
        
  --------------------

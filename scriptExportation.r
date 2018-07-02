@@ -1,5 +1,5 @@
 
-vecPackage=c("RODBC","reshape","data.table","rgdal","lubridate","RPostgreSQL","doBy","reshape2")
+vecPackage=c("RODBC","dplyr","reshape","data.table","rgdal","lubridate","RPostgreSQL","doBy","reshape2")
 ip <- installed.packages()[,1]
 
 for(p in vecPackage)
@@ -83,8 +83,8 @@ makeTableCarre <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,savePostgres=FA
                                        "lorrilliere@mnhn.fr"),
                            encodingSave="utf-8") {#"ISO-8859-1") {
 
- ##   spExcluPassage1=c("MOTFLA","SAXRUB","ANTPRA") ;seuilAbondance=.99;distance_contact=100;champSp = "code_sp";nomChampSp="espece";onf=TRUE
- ##   sp=NULL;champsHabitat=TRUE;id_output="France";con=NULL;savePostgres=FALSE;output=FALSE;altitude=NULL;firstYear=2001;lastYear=2017;operateur=c("Lorrilliere Romain","lorrilliere@mnhn.fr"); encodingSave="ISO-8859-1";formatTrend = TRUE;anglais=FALSE;departement="44"
+    ##   spExcluPassage1=c("MOTFLA","SAXRUB","ANTPRA") ;seuilAbondance=.99;distance_contact=100;champSp = "code_sp";nomChampSp="espece";onf=TRUE
+    ##   sp=NULL;champsHabitat=TRUE;id_output="France";con=NULL;savePostgres=FALSE;output=FALSE;altitude=NULL;firstYear=2001;lastYear=2017;operateur=c("Lorrilliere Romain","lorrilliere@mnhn.fr"); encodingSave="ISO-8859-1";formatTrend = TRUE;anglais=FALSE;departement="44"
 
     start <- Sys.time()
     dateExport <- format(start,"%Y-%m-%d")
@@ -165,7 +165,7 @@ makeTableCarre <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,savePostgres=FA
 				o.id_carre = ca.id_carre and o.annee=ca.annee and
 				ca.qualite_inventaire_stoc > 0 and
                                 "
-     selectQueryOp2 <- "
+    selectQueryOp2 <- "
 			GROUP BY
 			id_inventaire, code_sp"
 
@@ -187,8 +187,8 @@ ifelse(!is.null(selectTypeHabitat),queryTypeHab," ")," ", sep="")
 
     if(flag.query1) {
         selectQueryOp <- paste(selectQueryOp,selectQueryOp1,
-				ifelse(is.null(sp),paste("code_sp not  in ",spListExclud," and "),paste(" code_sp in ",spList1," and ")),"  passage_stoc in (1,2) and",
-                                selectQuery,selectQueryOp2)
+                               ifelse(is.null(sp),paste("code_sp not  in ",spListExclud," and "),paste(" code_sp in ",spList1," and ")),"  passage_stoc in (1,2) and",
+                               selectQuery,selectQueryOp2)
         if(flag.query2) {
             selectQueryOp <- paste(selectQueryOp,"
                                 union
@@ -196,13 +196,13 @@ ifelse(!is.null(selectTypeHabitat),queryTypeHab," ")," ", sep="")
         }
     }
 
-        if(flag.query2) {
-            selectQueryOp <- paste(selectQueryOp," --  ## begin ## ajout des especes tardives dont on ne garde que le second passage
+    if(flag.query2) {
+        selectQueryOp <- paste(selectQueryOp," --  ## begin ## ajout des especes tardives dont on ne garde que le second passage
             ",
             selectQueryOp1,
-				ifelse(is.null(sp),paste("code_sp in ",spListExclud," and "),paste(" code_sp in ",spList2," and ")),"  passage_stoc = 2 and",
+            ifelse(is.null(sp),paste("code_sp in ",spListExclud," and "),paste(" code_sp in ",spList2," and ")),"  passage_stoc = 2 and",
             selectQuery,selectQueryOp2)
-        }
+    }
 
 
 
@@ -213,7 +213,7 @@ ifelse(!is.null(selectTypeHabitat),queryTypeHab," ")," ", sep="")
 
 
 
-        queryObs <- paste("
+    queryObs <- paste("
 select oc.id_carre as carre, oc.annee, (oc.annee::varchar(4)||oc.id_carre::varchar(100))::varchar(100) as id_carre_annee, c.etude,
 qualite_inventaire_stoc, commune,insee,departement,
 code_sp, e.scientific_name, e.french_name, e.english_name as nom_anglais, e.euring,e.taxref,
@@ -257,14 +257,14 @@ oc.id_carre, annee,code_sp;",sep="")
 
 
                                         # browser()
-        cat("\nRequete principale:\n\n",queryObs,"\n\n")
+    cat("\nRequete principale:\n\n",queryObs,"\n\n")
 
-        d <- dbGetQuery(con, queryObs)
-
-
+    d <- dbGetQuery(con, queryObs)
 
 
-  if(addAbscence) {
+
+
+    if(addAbscence) {
         cat("\n Ajout des absences: \n")
         ##browser()
         colSp <- c("code_sp","euring","taxref",colnames(d)[grep("name",colnames(d))])
@@ -320,34 +320,34 @@ ca.id_carre, year;",sep="")
         dCarreAbs <- subset(dToutCarreAn,!(id_carre_annee %in% dd$id_carre_annee))
 
         if(nrow(dCarreAbs)>0) {
-        nbSp <- nrow(dsp)
-        nbCarreAbs <- nrow(dCarreAbs)
+            nbSp <- nrow(dsp)
+            nbCarreAbs <- nrow(dCarreAbs)
 
-        dCarreAbs2 <- as.data.frame(lapply(dCarreAbs, rep,nbSp))
-        dspAbs <- as.data.frame(lapply(dsp, rep,each= nbCarreAbs))
-        dCarreAbs <- cbind(dCarreAbs2,dspAbs)
-        dCarreAbs$abundance <- 0
-        dCarreAbs$abundance_raw <- 0
+            dCarreAbs2 <- as.data.frame(lapply(dCarreAbs, rep,nbSp))
+            dspAbs <- as.data.frame(lapply(dsp, rep,each= nbCarreAbs))
+            dCarreAbs <- cbind(dCarreAbs2,dspAbs)
+            dCarreAbs$abundance <- 0
+            dCarreAbs$abundance_raw <- 0
 
-        dCarreAbs <- dCarreAbs[,colnames(d)]
+            dCarreAbs <- dCarreAbs[,colnames(d)]
 
-        d <- rbind(dd,dCarreAbs)
+            d <- rbind(dd,dCarreAbs)
         } else {
             d <- dd
         }
 
-      #  browser()
+                                        #  browser()
         d <- d[order(d$carre,d$annee,d$code_sp),]
 
-  }
+    }
 
     if (formatTrend){
-      #  browser()
+                                        #  browser()
         d <- subset(d,select=c("carre","annee","code_sp","abondance"))
         colnames(d)[3:4] <- c(nomChampSp,"abond")
     }
 
-      if(isEnglish) {
+    if(isEnglish) {
         cat(" - Traduction des noms de colonnes\n\n")
         d <- trad_fr2eng(d)
 
@@ -355,9 +355,9 @@ ca.id_carre, year;",sep="")
 
 
 ################### as ",ifelse(formatTrend,"abond","abondance"),"
-    ############# ",ifelse(!(is.null(nomChampSp)),paste(" as ",nomChampSp,sep="")),"
+############# ",ifelse(!(is.null(nomChampSp)),paste(" as ",nomChampSp,sep="")),"
                                         #if(savePostgres) sqlCreateTable(con,"outcome.FrenchBBS_montaneOpen",d)
-##  as longitude_square_grid_wgs84   as latitude_squarre_grid_wgs84
+    ##  as longitude_square_grid_wgs84   as latitude_squarre_grid_wgs84
 
 
     if(is.null(sp)) suffSp <- "allSp" else if(length(sp)<4) suffSp <- paste(sp,collapse="-") else suffSp <- paste(length(sp),"sp",sep="")
@@ -392,7 +392,7 @@ makeTablePoint <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,savePostgres=FA
                            seuilAbondance=.99,
                            champsHabitat=TRUE,champsCoordGrid=TRUE,altitude_min=NULL,altitude_max=NULL,
                            firstYear=NULL,lastYear=NULL,
-                           departement=NULL,onf=TRUE,
+                           departement=NULL,insee=NULL,onf=TRUE,
                            id_carre=NULL,
                            selectHabitat = NULL, selectTypeHabitat= NULL,
                            distance_contact="inf",formatTrend = FALSE,isEnglish=FALSE,addAbscence=FALSE,
@@ -401,16 +401,16 @@ makeTablePoint <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,savePostgres=FA
                                        "lorrilliere@mnhn.fr"),
                            encodingSave="utf-8") {#"ISO-8859-1") {
 
- ## con=NULL;savePostgres=FALSE;output=TRUE;sp=NULL;champSp = "code_sp";
- ## spExcluPassage1=c("MOTFLA","SAXRUB","ANTPRA")  ;seuilAbondance=.99;
- ## champsHabitat=TRUE;champsCoordGrid=TRUE;altitude=NULL;firstYear=NULL;lastYear=NULL;
- ## departement="44";onf=TRUE;distance_contact="100";
- ## selectHabitat = NULL; selectTypeHabitat= NULL#c("urbain_ps","agri_ps");
- ## formatTrend = FALSE;anglais=FALSE;addAbscence=FALSE;
- ## id_output="VincentP_2017-10-16"; #"NicolasM";
- ## operateur=c("Lorrilliere Romain",
- ##             "lorrilliere@mnhn.fr");
- ## encodingSave="utf-8"
+    ## con=NULL;savePostgres=FALSE;output=TRUE;sp=NULL;champSp = "code_sp";
+    ## spExcluPassage1=c("MOTFLA","SAXRUB","ANTPRA")  ;seuilAbondance=.99;
+    ## champsHabitat=TRUE;champsCoordGrid=TRUE;altitude=NULL;firstYear=NULL;lastYear=NULL;
+    ## departement="44";onf=TRUE;distance_contact="100";
+    ## selectHabitat = NULL; selectTypeHabitat= NULL#c("urbain_ps","agri_ps");
+    ## formatTrend = FALSE;anglais=FALSE;addAbscence=FALSE;
+    ## id_output="VincentP_2017-10-16"; #"NicolasM";
+    ## operateur=c("Lorrilliere Romain",
+    ##             "lorrilliere@mnhn.fr");
+    ## encodingSave="utf-8"
 
 
 
@@ -462,7 +462,7 @@ makeTablePoint <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,savePostgres=FA
                 }}}}
 
 
-   if(!is.null(sp)) {
+    if(!is.null(sp)) {
         if(champSp != "code_sp") {
 
             sp <- getCode_sp(con,champSp,sp)
@@ -509,7 +509,7 @@ nbp_foret_ps as carre_nb_pts_foret_ps, nbp_ouvert_ps as carre_nb_pts_ouvert_ps, 
 				o.id_point = pa.id_point and o.annee=pa.annee and
 				pa.qualite_inventaire_stoc > 0 and
                                 "
-     selectQueryOp2 <- "
+    selectQueryOp2 <- "
 			GROUP BY
 			id_inventaire, code_sp"
 
@@ -533,11 +533,11 @@ ifelse(!is.null(selectTypeHabitat),queryTypeHab," ")," ", sep="")
 
     if(flag.query1) {
         selectQueryOp <- paste(selectQueryOp,selectQueryOp1,
-				ifelse(is.null(sp),paste("code_sp not  in ",spListExclud," and
+                               ifelse(is.null(sp),paste("code_sp not  in ",spListExclud," and
                                 "),paste(" code_sp in ",spList1," and
                                 ")),"
                                 passage_stoc in (1,2) and",
-                                selectQuery,selectQueryOp2)
+                               selectQuery,selectQueryOp2)
         if(flag.query2) {
             selectQueryOp <- paste(selectQueryOp,"
                                 union
@@ -545,17 +545,17 @@ ifelse(!is.null(selectTypeHabitat),queryTypeHab," ")," ", sep="")
         }
     }
 
-        if(flag.query2) {
-            selectQueryOp <- paste(selectQueryOp," --  ajout des especes tardives dont on ne garde que le second passage
+    if(flag.query2) {
+        selectQueryOp <- paste(selectQueryOp," --  ajout des especes tardives dont on ne garde que le second passage
             ",
             selectQueryOp1,
-				ifelse(is.null(sp),paste("code_sp in ",spListExclud," and "),paste(" code_sp in ",spList2," and ")),"  passage_stoc = 2 and",
+            ifelse(is.null(sp),paste("code_sp in ",spListExclud," and "),paste(" code_sp in ",spList2," and ")),"  passage_stoc = 2 and",
             selectQuery,selectQueryOp2)
-        }
+    }
 
 
-        queryObs <- paste(
-"select om.id_point as point, p.id_carre as carre, om.annee as annee,
+    queryObs <- paste(
+        "select om.id_point as point, p.id_carre as carre, om.annee as annee,
 (om.annee::varchar(4)||om.id_point::varchar(100))::varchar(100) as id_point_annee,
 c.etude as etude, p.commune,p.insee,p.departement as departement,
 code_sp , e.scientific_name as nom_scientifique, e.french_name as nom_francais, e.english_name as nom_anglais, e.euring as code_espece_euring,e.taxref as code_espece_taxref,
@@ -591,17 +591,17 @@ om.id_point, annee,code_sp; ",sep="")
 
 
                                         # browser()
-        cat("\nRequete principale:\n\n",queryObs,"\n\n")
+    cat("\nRequete principale:\n\n",queryObs,"\n\n")
 
-   # browser()
-        d <- dbGetQuery(con, queryObs)
+                                        # browser()
+    d <- dbGetQuery(con, queryObs)
 
 
 
 
     if(addAbscence) {
         cat("\n Ajout des absences: \n")
-     #  browser()
+                                        #  browser()
         colSp <- c("code_sp","code_espece_euring","code_espece_taxref",colnames(d)[grep("nom",colnames(d))])
         colPointAn<- setdiff(colnames(d),c(colSp,"abondance_brut","abondance","qualite_inventaire_stoc"))
         colAbond <- c("code_sp","id_point_annee","abondance_brut","abondance","qualite_inventaire_stoc")
@@ -627,12 +627,12 @@ om.id_point, annee,code_sp; ",sep="")
         dd <- dd[,colnames(d)]
 
         if(!is.null(sp)) {
-        queryPointAn <- paste("select pa.id_point as point, pa.id_carre as carre, pa.annee as annee, pk_point_annee as id_point_annee, ''::varchar(25) as etude,
+            queryPointAn <- paste("select pa.id_point as point, pa.id_carre as carre, pa.annee as annee, pk_point_annee as id_point_annee, ''::varchar(25) as etude,
  p.commune,p.insee,p.departement as departement,pa.qualite_inventaire_stoc as qualite_inventaire_stoc,p.altitude, longitude_wgs84,  latitude_wgs84,
  ",ifelse(champsCoordGrid," longitude_grid_wgs84,latitude_grid_wgs84, ",""),"
  ",ifelse(champsHabitat,listChampsHabitat,""),
-" p.db as data_base_name, ",
-"'",dateExport,"'::varchar(10) as date_export,
+ " p.db as data_base_name, ",
+ "'",dateExport,"'::varchar(10) as date_export,
 '",operateur[1],"'::varchar(50) as operateur,
 '",operateur[2],"'::varchar(50) as email_operateur
 from
@@ -645,27 +645,27 @@ pa.id_point, annee;",sep="")
 
 
 
-        cat("\nRequete inventaire: Recherche de tous les inventaires\n\n",queryPointAn,"\n\n")
+            cat("\nRequete inventaire: Recherche de tous les inventaires\n\n",queryPointAn,"\n\n")
 
-        dToutPointAn <- dbGetQuery(con, queryPointAn)
+            dToutPointAn <- dbGetQuery(con, queryPointAn)
 
-        dPointAbs <- subset(dToutPointAn,!(id_point_annee %in% dd$id_point_annee))
-        if(nrow(dPointAbs)>0) {
-        nbSp <- nrow(dsp)
-        nbPointAbs <- nrow(dPointAbs)
+            dPointAbs <- subset(dToutPointAn,!(id_point_annee %in% dd$id_point_annee))
+            if(nrow(dPointAbs)>0) {
+                nbSp <- nrow(dsp)
+                nbPointAbs <- nrow(dPointAbs)
 
-        dPointAbs2 <- as.data.frame(lapply(dPointAbs, rep,nbSp))
-        dspAbs <- as.data.frame(lapply(dsp, rep,each= nbPointAbs))
-        dPointAbs <- cbind(dPointAbs2,dspAbs)
-        dPointAbs$abondance <- 0
-        dPointAbs$abondance_brut <- 0
-           #    browser()
-        dPointAbs <- dPointAbs[,colnames(d)]
+                dPointAbs2 <- as.data.frame(lapply(dPointAbs, rep,nbSp))
+                dspAbs <- as.data.frame(lapply(dsp, rep,each= nbPointAbs))
+                dPointAbs <- cbind(dPointAbs2,dspAbs)
+                dPointAbs$abondance <- 0
+                dPointAbs$abondance_brut <- 0
+                                        #    browser()
+                dPointAbs <- dPointAbs[,colnames(d)]
 
-        d <- rbind(dd,dPointAbs)
-        } else {
-            d <- dd
-        }
+                d <- rbind(dd,dPointAbs)
+            } else {
+                d <- dd
+            }
         }else {
             d <- dd
 
@@ -691,7 +691,7 @@ pa.id_point, annee;",sep="")
 
 
 
-                                      #if(savePostgres) sqlCreateTable(con,"outcome.FrenchBBS_montaneOpen",d)
+                                        #if(savePostgres) sqlCreateTable(con,"outcome.FrenchBBS_montaneOpen",d)
     if(is.null(sp)) suffSp <- "allSp" else if(length(sp)<4) suffSp <- paste(sp,collapse="-") else suffSp <- paste(length(sp),"sp",sep="")
 
     fileOut <- paste("export/data_FrenchBBS_point_",id_output,"_",suffSp,"_",firstYear,"_",lastYear,ifelse(isEnglish,"eng","fr"),".csv",sep="")
@@ -717,7 +717,7 @@ pa.id_point, annee;",sep="")
 
 
 
-# 2017-11-14 ajout champs nom sp en sortie nomChampSp= "espece"
+                                        # 2017-11-14 ajout champs nom sp en sortie nomChampSp= "espece"
 
 
 
@@ -738,7 +738,7 @@ makeTableTRIM <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,savePostgres=FAL
                           onf=TRUE,
                           altitude_min=NULL,altitude_max=800,firstYear=NULL,lastYear=NULL,
                           departement=NULL,
-                           id_carre=NULL,insee=NULL,distance_contact="inf",
+                          id_carre=NULL,insee=NULL,distance_contact="inf",
                           id_output="",
                           operateur=c("Lorrilliere Romain",
                                       "lorrilliere@mnhn.fr"),
@@ -747,34 +747,34 @@ makeTableTRIM <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,savePostgres=FAL
 
 
 
-    
+
     require(reshape2)
 ##############################
                                         #tabSpTrim <- read.csv("DB_import/tablesGeneriques/spTRIM_france.csv")
                                         # sps <- tabSpTrim$Code
-##con=NULL;user=NULL;mp=NULL;nomDB=NULL;savePostgres=FALSE;output=TRUE;
- ##                         sp=NULL;champSp = "euring";
-  ##  spExcluPassage1=c("MOTFLA","SAXRUB","ANTPRA","OENOEN","PHYTRO");# (Prince et al. 2013 Env. Sc. and Pol.) + "OENOEN","PHYTRO" avis d'expert F. Jiguet;
-   ## seuilAbondance=.99
-   ##                       onf=TRUE;
+    ##con=NULL;user=NULL;mp=NULL;nomDB=NULL;savePostgres=FALSE;output=TRUE;
+    ##                         sp=NULL;champSp = "euring";
+    ##  spExcluPassage1=c("MOTFLA","SAXRUB","ANTPRA","OENOEN","PHYTRO");# (Prince et al. 2013 Env. Sc. and Pol.) + "OENOEN","PHYTRO" avis d'expert F. Jiguet;
+    ## seuilAbondance=.99
+    ##                       onf=TRUE;
     ##                      altitude_min=NULL;altitude_max=800;firstYear=NULL;lastYear=NULL;
-     ##                     departement=NULL;onf=TRUE;
-     ##                      id_carre=NULL;insee=NULL;distance_contact="inf";
-     ##                     id_output="2017-09-19";
-     ##                     operateur=c("Lorrilliere Romain",
-      ##                                "lorrilliere@mnhn.fr");
-      ##                    encodingSave="ISO-8859-1"
+    ##                     departement=NULL;onf=TRUE;
+    ##                      id_carre=NULL;insee=NULL;distance_contact="inf";
+    ##                     id_output="2017-09-19";
+    ##                     operateur=c("Lorrilliere Romain",
+    ##                                "lorrilliere@mnhn.fr");
+    ##                    encodingSave="ISO-8859-1"
 
 ##############################
 
-    
+
     start <- Sys.time()
     dateExport <- format(start,"%Y-%m-%d")
 
 
 
     if(is.null(con)) con <- openDB.PSQL(user,mp,nomDB)
-      if(is.null(firstYear)) firstYear <- 2001
+    if(is.null(firstYear)) firstYear <- 2001
     if(is.null(lastYear)) lastYear <- as.numeric(format(start,"%Y"))
     if(is.null(altitude_max)) altitude_max <- 8000
     if(is.null(altitude_min)) altitude_min <- 0
@@ -782,7 +782,7 @@ makeTableTRIM <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,savePostgres=FAL
     selectTypeHabitat <- NULL
 
 
-    
+
     if(is.null(distance_contact)) {
         distance_contact_txt <- ""
     } else {
@@ -855,13 +855,13 @@ makeTableTRIM <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,savePostgres=FAL
 				ca.qualite_inventaire_stoc > 0 and
                                 s.ebcc and
                                 "
-     selectQueryOp2 <- "
+    selectQueryOp2 <- "
 			GROUP BY
 			id_inventaire, code_sp"
 
     if(!is.null(departement)) depList <- paste("('",paste(departement,collapse="' , '"),"')",sep="")
     if(!is.null(id_carre)) carreList <- paste("('",paste(id_carre,collapse="' , '"),"')",sep="")
-       if(!is.null(selectTypeHabitat)) queryTypeHab <- paste(" AND ( ",paste(selectTypeHabitat,collapse=" = TRUE OR ")," = TRUE) ",sep="") else queryTypeHab <- " "
+    if(!is.null(selectTypeHabitat)) queryTypeHab <- paste(" AND ( ",paste(selectTypeHabitat,collapse=" = TRUE OR ")," = TRUE) ",sep="") else queryTypeHab <- " "
 
     selectQuery <- paste(distance_contact_txt," i.annee >= ",firstYear,"
 and i.annee <= ",lastYear," and c.etude in ('STOC_EPS'",ifelse(onf,", 'STOC_ONF'",""),")  and  c.altitude <= ",altitude_max," and  c.altitude >= ",altitude_min," ",ifelse(is.null(departement),"",paste(" and departement in ",depList," ")),"
@@ -874,8 +874,8 @@ ifelse(!is.null(selectTypeHabitat),queryTypeHab," ")," ", sep="")
 
     if(flag.query1) {
         selectQueryOp <- paste(selectQueryOp,selectQueryOp1,
-				ifelse(is.null(sp),paste("code_sp not  in ",spListExclud," and "),paste(" code_sp in ",spList1," and ")),"  passage_stoc in (1,2) and",
-                                selectQuery,selectQueryOp2)
+                               ifelse(is.null(sp),paste("code_sp not  in ",spListExclud," and "),paste(" code_sp in ",spList1," and ")),"  passage_stoc in (1,2) and",
+                               selectQuery,selectQueryOp2)
         if(flag.query2) {
             selectQueryOp <- paste(selectQueryOp,"
                                 union
@@ -883,13 +883,13 @@ ifelse(!is.null(selectTypeHabitat),queryTypeHab," ")," ", sep="")
         }
     }
 
-        if(flag.query2) {
-            selectQueryOp <- paste(selectQueryOp," --  ## begin ## ajout des especes tardives dont on ne garde que le second passage
+    if(flag.query2) {
+        selectQueryOp <- paste(selectQueryOp," --  ## begin ## ajout des especes tardives dont on ne garde que le second passage
             ",
             selectQueryOp1,
-				ifelse(is.null(sp),paste("code_sp in ",spListExclud," and "),paste(" code_sp in ",spList2," and ")),"  passage_stoc = 2 and",
+            ifelse(is.null(sp),paste("code_sp in ",spListExclud," and "),paste(" code_sp in ",spList2," and ")),"  passage_stoc = 2 and",
             selectQuery,selectQueryOp2)
-        }
+    }
 
 
 
@@ -900,7 +900,7 @@ ifelse(!is.null(selectTypeHabitat),queryTypeHab," ")," ", sep="")
 
 
 
-        queryObs <- paste("
+    queryObs <- paste("
 select oc.id_carre as site, oc.annee as year, (oc.annee::varchar(4)||oc.id_carre::varchar(100))::varchar(100) as id_carre_annee, oc.id_carre || '_' || oc.annee as carre_annee, c.etude,
 qualite_inventaire_stoc, commune,insee,departement,
 code_sp, e.scientific_name, e.french_name, e.english_name as nom_anglais, e.euring,e.taxref,
@@ -944,9 +944,9 @@ oc.id_carre, year,code_sp;",sep="")
 
 
                                         # browser()
-        cat("\nQUERY 1: Observations:\n\n",queryObs,"\n\n")
+    cat("\nQUERY 1: Observations:\n\n",queryObs,"\n\n")
 
-        dab <- dbGetQuery(con, queryObs)
+    dab <- dbGetQuery(con, queryObs)
 
     cat("\n --> DONE !\n")
 
@@ -1024,24 +1024,31 @@ group by id_carre, annee;",sep="")
 
 
 makeTableBrut <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,output=TRUE,sp=NULL,champSp = "code_sp",nomChampSp="espece",
-                          altitude=NULL,firstYear=NULL,lastYear=NULL,
-                           departement=NULL,onf=TRUE,
-                           selectHabitat = NULL, selectTypeHabitat= NULL,
+                          altitude_min=NULL,altitude_max=NULL,firstYear=NULL,lastYear=NULL,
+                          departement=NULL,onf=TRUE,
+                          id_carre=NULL,insee=NULL,distance_contact="inf",
+                          selectHabitat = NULL, selectTypeHabitat= NULL,champsHabitat=FALSE,
                           formatTrend = FALSE,isEnglish=FALSE,addAbscence=FALSE,
-                           id_output="AlexR_2017-11-23", #"NicolasM",
-                           operateur=c("Lorrilliere Romain",
-                                       "lorrilliere@mnhn.fr"),
-                           encodingSave="utf-8",test=FALSE) {
+                          id_output="AlexR_2017-11-23", #"NicolasM",
+                          operateur=c("Lorrilliere Romain",
+                                      "lorrilliere@mnhn.fr"),
+                          encodingSave="utf-8",test=FALSE) {
+
+
+    ##    sp=c("DENMAJ","DENMED","DRYMAR")
+    ##    nomDB=NULL;id_carre=c("10100");insee=NULL;
+    ##    sp=NULL;champSp = "code_sp";nomChampSp="espece";
+###    altitude=NULL;firstYear=NULL;lastYear=NULL;
+    ##    departement=NULL;onf=TRUE;
+    ##    selectHabitat = NULL; selectTypeHabitat= "urbain_p";
+    ##    formatTrend = FALSE;isEnglish=FALSE;addAbscence=FALSE;
+    ##    operateur=c("Lorrilliere Romain","lorrilliere@mnhn.fr")
+    ##    test=FALSE
+
 
     depts <- paste("'",paste(departement,collapse="','"),"'",sep="")
     start <-  Sys.time()
-   dateExport <- format(start,"%Y-%m-%d")
-
-
-    if(is.null(con)) con <- openDB.PSQL(user,mp,nomDB)
-    if(is.null(firstYear)) firstYear <- 2001
-    if(is.null(lastYear)) lastYear <- as.numeric(format(start,"%Y"))
-    if(is.null(altitude)) altitude <- 8000
+    dateExport <- format(start,"%Y-%m-%d")
 
 
 
@@ -1051,168 +1058,159 @@ makeTableBrut <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,output=TRUE,sp=N
             sp <- getCode_sp(con,champSp,sp)
 
         }
-             spList <- paste("('",paste(sp,collapse="' , '"),"')",sep="")
 
     }
+    if(is.null(con)) con <- openDB.PSQL(user,mp,nomDB)
+    if(is.null(firstYear)) firstYear <- 2001
+    if(is.null(lastYear)) lastYear <- as.numeric(format(start,"%Y"))
+    if(is.null(altitude_max)) altitude_max <- 8000
+    if(is.null(altitude_min)) altitude_min <- 0
 
 
-    if(!is.null(selectHabitat)) habList <- paste("('",paste(selectHabitat,collapse="' , '"),"')",sep="")
-    if(!is.null(departement)) depList <- paste("('",paste(departement,collapse="' , '"),"')",sep="")
+        listChampsHabitat <- "pa.p_milieu as habitat_principal, pa.s_milieu as habitat_secondaire, pa.p_dernier_descri as temps_depuis_derniere_description_habitat ,
+   pa.foret_p as foret_p, pa.agri_p as agricole_p, pa.urbain_p as urbain_p, pa.ouvert_p as ouvert_p, pa.foret_ps as foret_ps, pa.agri_ps as agricole_ps, pa.urbain_ps as urbain_ps, pa.ouvert_ps as ouvert_ps,
+  nbp_foret_p  as carre_nb_pts_foret_p, nbp_ouvert_p as carre_nb_pts_ouvert_p, nbp_agri_p as carre_nb_pts_agricole_p, nbp_urbain_p as carre_nb_pts_urbain_p,
+nbp_foret_ps as carre_nb_pts_foret_ps, nbp_ouvert_ps as carre_nb_pts_ouvert_ps, nbp_agri_ps as carre_nb_pts_agricole_ps, nbp_urbain_ps  as carre_nb_pts_urbain_ps, "
 
-    selectQuery <- paste(ifelse(is.null(sp),"",paste(" code_sp in ",spList," and
+
+        if(is.null(distance_contact)) {
+            distance_contact_txt <- ""
+        } else {
+            if(distance_contact == "100") {
+                distance_contact_txt <- " distance_contact in ('LESS25','LESS100') and "
+            } else {
+                if(distance_contact == "200") {
+                    distance_contact_txt <- " distance_contact in ('LESS25','LESS100','MORE100','LESS200') and "
+                } else {
+                    if(distance_contact == "inf") {
+                        distance_contact_txt <- " distance_contact in ('U','LESS25','LESS100','MORE100','LESS200','MORE200') and "
+                    } else {
+                        stop("distance_contact non pris en charge")
+                    }}}}
+
+
+
+        if(!is.null(sp)) {
+            if(champSp != "code_sp") {
+
+                sp <- getCode_sp(con,champSp,sp)
+
+            }
+            spList <- paste("('",paste(sp,collapse="' , '"),"')",sep="")
+
+        }
+
+        if(!is.null(id_carre)) carreList <- paste("('",paste(id_carre,collapse="' , '"),"')",sep="")
+
+
+        if(!is.null(selectHabitat)) habList <- paste("('",paste(selectHabitat,collapse="' , '"),"')",sep="")
+        if(!is.null(departement)) depList <- paste("('",paste(departement,collapse="' , '"),"')",sep="")
+
+        if(!is.null(insee)) inseeList <- paste("('",paste(insee,collapse="' , '"),"')",sep="")
+
+        selectQuery <- paste(distance_contact_txt,ifelse(is.null(sp),"",paste(" code_sp in ",spList," and
                                 ")),"
 "," i.annee >= ",firstYear,"  and i.annee <= ",lastYear,
-" and c.etude in ('STOC_EPS'",ifelse(onf,", 'STOC_ONF'",""),")  and  p.altitude <= ",altitude,"
+" and c.etude in ('STOC_EPS'",ifelse(onf,", 'STOC_ONF'",""),")  and  c.altitude <= ",altitude_max," and  c.altitude >= ",altitude_min,"
+",
+ifelse(is.null(id_carre),"",paste(" and o.id_carre in ",carreList," ")),"
 ",
 ifelse(is.null(departement),"",paste(" and p.departement in ",depList," ")),"
 ",
+ifelse(is.null(insee),"",paste(" and p.insee in ",inseeList," ")),"
+",
 ifelse(!is.null(selectHabitat),paste(" and p_milieu in ",habList," ")," "),"
-"," ", sep="")
+"," ",sep="")
+
+
+        if(!is.null(selectTypeHabitat)) queryTypeHab <- paste(" AND ( pa.",paste(selectTypeHabitat,collapse=" = TRUE OR pa.")," = TRUE) ",sep="") else queryTypeHab <- ""
+
+        selectQuery <- paste(selectQuery,queryTypeHab)
 
 
 
-    query <- paste("
+        query <- paste("
 SELECT
-  o.pk_observation as code_observation,
-  o.id_fnat_unique_citation as code_observation_fnat,
-  o.id_inventaire as code_inventaire,
-  i.etude,
-   i.observateur,
-  i.email,
- p.site as nom_site,
-  p.commune,
-  p.insee,
-  p.departement,
-  o.id_carre as code_carre,
-    o.id_point as code_point,
-   o.num_point,
-     o.date,
-  o.annee,
-  i.heure_debut,
-  i.heure_fin,
-  i.duree_minute,
-   o.passage,
-  i.info_passage,
-  i.passage_stoc as numero_passage_stoc,
-  i.nombre_de_passage,
-  i.temps_entre_passage,
-  o.espece,
-   s.scientific_name as nom_scientifique,
-  s.french_name as nom_francais,
-s.english_name as nom_anglais,
-s.euring as code_espece_euring,
-s.taxref as code_espece_taxref,
-   o.abondance,
-  o.distance_contact,
- i.nuage,
-  i.pluie,
-  i.vent,
-  i.visibilite,
-  i.neige,
-  p.altitude,
-  p.longitude_wgs84,
-  p.latitude_wgs84,
-  c.longitude_grid_wgs84,
-  c.latitude_grid_wgs84,
-  h.p_milieu,
-  h.p_type,
-  h.p_cat1,
-  h.p_cat2,
-  h.s_milieu,
-  h.s_type,
-  h.s_cat1,
-  h.s_cat2,
-   o.db,
-  o.date_export as date_import,
-'",dateExport,"'::varchar(10) as date_export,
+  o.pk_observation as code_observation,  o.id_fnat_unique_citation as code_observation_fnat,
+  o.id_inventaire as code_inventaire,  i.etude,   i.observateur,  i.email, p.site as nom_site,  p.commune,  p.insee,  p.departement,  o.id_carre as code_carre,    o.id_point as code_point,   o.num_point,     o.date,  o.annee,  i.heure_debut,  i.heure_fin,  i.duree_minute,   o.passage,  i.info_passage,  i.passage_stoc as numero_passage_stoc,  i.nombre_de_passage,  i.temps_entre_passage,  o.espece,   s.scientific_name as nom_scientifique,  s.french_name as nom_francais,s.english_name as nom_anglais,s.euring as code_espece_euring,s.taxref as code_espece_taxref,   o.abondance,  o.distance_contact, i.nuage,  i.pluie,  i.vent,  i.visibilite,  i.neige,  p.altitude,  p.longitude_wgs84,  p.latitude_wgs84,  c.longitude_grid_wgs84,  c.latitude_grid_wgs84,  h.p_milieu,  h.p_type,  h.p_cat1,  h.p_cat2,  h.s_milieu,  h.s_type,  h.s_cat1,  h.s_cat2," , ifelse(champsHabitat,listChampsHabitat,""),"   o.db,  o.date_export as date_import, '",dateExport,"'::varchar(10) as date_export,
 '",operateur[1],"'::varchar(50) as operateur,
 '",operateur[2],"'::varchar(50) as email_operateur
 FROM
-  public.point as p,
-  public.carre as c,
-  public.inventaire as i,
-  public.observation as o,
-  public.species as s,
-  public.habitat as h
+  public.point as p,   public.point_annee as pa,  public.carre as c, public.carre_annee as ca, public.inventaire as i,  public.observation as o,  public.species as s,  public.habitat as h
 WHERE
-  o.id_inventaire = i.pk_inventaire AND
-  o.id_point = p.pk_point AND
-  o.id_carre = c.pk_carre AND
-  o.espece = s.pk_species AND
-  o.id_inventaire = h.pk_habitat AND
-  ",selectQuery,";",sep="")
-    if(test) paste(query," LIMIT 100;") else paste(query,";")
+  o.id_inventaire = i.pk_inventaire AND   o.id_point = p.pk_point AND  o.id_point = pa.id_point AND  o.annee = pa.annee AND  o.id_carre = ca.id_carre AND  o.annee = ca.annee AND  o.id_carre = c.pk_carre AND  o.espece = s.pk_species AND  o.id_inventaire = h.pk_habitat AND  ",selectQuery,";",sep="")
+        if(test) paste(query," LIMIT 100;") else paste(query,";")
 
-    cat("\n QUERY données BRUT:\n--------------\n\n",query,"\n")
+        cat("\n QUERY données BRUT:\n--------------\n\n",query,"\n")
 
                                         # browser()
 
 
-    d <- dbGetQuery(con, query)
+        d <- dbGetQuery(con, query)
 
                                         #if(savePostgres) sqlCreateTable(con,"outcome.FrenchBBS_montaneOpen",d)
 
 
-    if(is.null(sp)) suffSp <- "allSp" else if(length(sp)<4) suffSp <- paste(sp,collapse="-") else suffSp <- paste(length(sp),"sp",sep="")
+        if(is.null(sp)) suffSp <- "allSp" else if(length(sp)<4) suffSp <- paste(sp,collapse="-") else suffSp <- paste(length(sp),"sp",sep="")
 
-    fileOut <- paste("export/data_FrenchBBS_BRUT_",id_output,"_",suffSp,"_",firstYear,"_",lastYear,ifelse(isEnglish,"eng","fr"),".csv",sep="")
-    write.csv2(d,fileOut,row.names=FALSE)
-    cat(" --> ",fileOut,"\n")
+        fileOut <- paste("export/data_FrenchBBS_BRUT_",id_output,"_",suffSp,"_",firstYear,"_",lastYear,ifelse(isEnglish,"eng","fr"),".csv",sep="")
+        write.csv2(d,fileOut,row.names=FALSE)
+        cat(" --> ",fileOut,"\n")
 
-    end <- Sys.time() ## heure de fin
+        end <- Sys.time() ## heure de fin
 
-    dbDisconnect(con)
+        dbDisconnect(con)
 
-    cat("\n     #      ==> Duree:",round(as.difftime(end - start,units="mins")),"minutes\n")
-    if(output) return(d)
-
-
+        cat("\n     #      ==> Duree:",round(as.difftime(end - start,units="mins")),"minutes\n")
+        if(output) return(d)
 
 
 
-}
 
 
-test <- function() {
+    }
 
 
-
-}
-
-
-
-historicCarre <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,
-                          firstYear = NULL,lastYear=NULL,altitude=NULL,
-                          departement=NULL,id_carre=NULL,onf=TRUE,output=TRUE,
-                          isEnglish=FALSE,addAbscence=FALSE,
-                           id_output="",
-                           operateur=c("Lorrilliere Romain",
-                                       "lorrilliere@mnhn.fr"),
-                           encodingSave="utf-8") {
-
-    ## --------------------------
-#con=NULL;user=NULL;mp=NULL;nomDB=NULL;firstYear = NULL;lastYear=NULL;altitude=NULL;departement=NULL;id_carre=c("010100","010120");onf=TRUE;output=TRUE
-
-    ## --------------------------
+    test <- function() {
 
 
 
-    start <-  Sys.time()
-    dateExport <- format(start,"%Y-%m-%d")
+    }
 
 
-    if(is.null(con)) con <- openDB.PSQL(user,mp,nomDB)
-    if(is.null(firstYear)) firstYear <- 2001
-    if(is.null(lastYear)) lastYear <- as.numeric(format(start,"%Y"))
-    if(is.null(altitude)) altitude <- 8000
 
-    if(!is.null(departement)) depList <- paste("('",paste(departement,collapse="' , '"),"')",sep="")
+    historicCarre <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,
+                              firstYear = NULL,lastYear=NULL,altitude=NULL,
+                              departement=NULL,id_carre=NULL,onf=TRUE,output=TRUE,
+                              isEnglish=FALSE,addAbscence=FALSE,
+                              id_output="",
+                              operateur=c("Lorrilliere Romain",
+                                          "lorrilliere@mnhn.fr"),
+                              encodingSave="utf-8") {
 
-    if(!is.null(id_carre)) carreList <- paste("('",paste(id_carre,collapse="' , '"),"')",sep="")
+        ## --------------------------
+                                        #con=NULL;user=NULL;mp=NULL;nomDB=NULL;firstYear = NULL;lastYear=NULL;altitude=NULL;departement=NULL;id_carre=c("010100","010120");onf=TRUE;output=TRUE
+
+        ## --------------------------
 
 
-    selectQuery <- paste(" i.annee >= ",firstYear,"  and i.annee <= ",lastYear,
-" and i.etude in ('STOC_EPS'",ifelse(onf,", 'STOC_ONF'",""),")  and  c.altitude <= ",altitude,"
+
+        start <-  Sys.time()
+        dateExport <- format(start,"%Y-%m-%d")
+
+
+        if(is.null(con)) con <- openDB.PSQL(user,mp,nomDB)
+        if(is.null(firstYear)) firstYear <- 2001
+        if(is.null(lastYear)) lastYear <- as.numeric(format(start,"%Y"))
+        if(is.null(altitude)) altitude <- 8000
+
+        if(!is.null(departement)) depList <- paste("('",paste(departement,collapse="' , '"),"')",sep="")
+
+        if(!is.null(id_carre)) carreList <- paste("('",paste(id_carre,collapse="' , '"),"')",sep="")
+
+
+        selectQuery <- paste(" i.annee >= ",firstYear,"  and i.annee <= ",lastYear,
+                             " and i.etude in ('STOC_EPS'",ifelse(onf,", 'STOC_ONF'",""),")  and  c.altitude <= ",altitude,"
 ",
 ifelse(is.null(departement),"",paste(" and c.departement in ",depList," ")),"
 ",
@@ -1220,170 +1218,141 @@ ifelse(!is.null(id_carre),paste(" and i.id_carre in ",carreList," ")," "),"
 "," ", sep="")
 
 
- query <-paste("select i.id_carre, c.departement,c.altitude,
+        query <-paste("select i.id_carre, c.departement,c.altitude,
 i.annee, i.etude,  i.observateur, i.email
 from inventaire as i, carre as c
 where i.id_carre = c.pk_carre and ",selectQuery,"
 group by i.id_carre, i.etude,c.departement,c.altitude,i.annee,i.observateur,i.email
 order by i.id_carre, i.annee;")
 
-    cat("\n QUERY historique CARRE:\n--------------\n\n",query,"\n")
+        cat("\n QUERY historique CARRE:\n--------------\n\n",query,"\n")
 
                                         # browser()
-    d <- dbGetQuery(con, query)
+        d <- dbGetQuery(con, query)
 
-      if(isEnglish) {
-        cat(" - Traduction des noms de colonnes\n")
-        d <- trad_fr2eng(d)
+        if(isEnglish) {
+            cat(" - Traduction des noms de colonnes\n")
+            d <- trad_fr2eng(d)
+
+        }
+
+
+        fileOut <- paste("export/Historic_carre_",id_output,"_",firstYear,"_",lastYear,ifelse(isEnglish,"eng","fr"),".csv",sep="")
+        write.csv2(d,fileOut,row.names=FALSE)
+        cat(" --> ",fileOut,"\n")
+
+
+        end <- Sys.time() ## heure de fin
+
+        dbDisconnect(con)
+
+        cat("\n     #      ==> Duree:",round(as.difftime(end - start,units="mins")),"minutes\n")
+        if(output) return(d)
+
 
     }
 
 
-      fileOut <- paste("export/Historic_carre_",id_output,"_",firstYear,"_",lastYear,ifelse(isEnglish,"eng","fr"),".csv",sep="")
-    write.csv2(d,fileOut,row.names=FALSE)
-    cat(" --> ",fileOut,"\n")
 
 
-     end <- Sys.time() ## heure de fin
-
-    dbDisconnect(con)
-
-    cat("\n     #      ==> Duree:",round(as.difftime(end - start,units="mins")),"minutes\n")
-    if(output) return(d)
-
-
-    }
-
-
-
-
-historicToutCarre  <- function(con,anneeMax=2016) {
-    require(ggplot2)
-    require(reshape2)
-    query <-paste("select id_carre, annee from inventaire where annee <= ",anneeMax," group by id_carre, annee order by id_carre, annee;")
+    historicToutCarre  <- function(con,anneeMax=2016) {
+        require(ggplot2)
+        require(reshape2)
+        query <-paste("select id_carre, annee from inventaire where annee <= ",anneeMax," group by id_carre, annee order by id_carre, annee;")
 
                                         # browser()
-    d <- dbGetQuery(con, query)
-    d$PA <- 1
+        d <- dbGetQuery(con, query)
+        d$PA <- 1
 
-    dan <- aggregate(PA ~ annee, d, sum)
+        dan <- aggregate(PA ~ annee, d, sum)
 
-    dd <- cast(d,id_carre~annee,mean)
-    rnames <- dd$id_carre
-    cnames <- colnames(dd)[-1]
-    dd <- as.matrix(dd[,-1])
-    rownames(dd) <- rnames
-    colnames(dd) <- cnames
-    dd[is.nan(dd)] <- 0
+        dd <- cast(d,id_carre~annee,mean)
+        rnames <- dd$id_carre
+        cnames <- colnames(dd)[-1]
+        dd <- as.matrix(dd[,-1])
+        rownames(dd) <- rnames
+        colnames(dd) <- cnames
+        dd[is.nan(dd)] <- 0
 
 
-    nb_carre_diff <- nrow(dd)
+        nb_carre_diff <- nrow(dd)
 
-    colnames(dan)[2] <- "nbCarre"
-    dan$Nouveaux <- NA
-    dan$NonAjour <- NA
-    dan$Arrete <- NA
-    dan$Nouveaux[1] <- sum(dd[,1])
-    dan$NonAjour[1] <- 0
-    dan$Arrete[1] <- 0
-    dan$Arrete[ncol(dd)] <- NA
+        colnames(dan)[2] <- "nbCarre"
+        dan$Nouveaux <- NA
+        dan$NonAjour <- NA
+        dan$Arrete <- NA
+        dan$Nouveaux[1] <- sum(dd[,1])
+        dan$NonAjour[1] <- 0
+        dan$Arrete[1] <- 0
+        dan$Arrete[ncol(dd)] <- NA
 
-    for(j in 2:ncol(dd)) {
-        if(j==2)
-            dan$Nouveaux[j] <- sum(dd[dd[,j]==1 & dd[,j-1]==0,j]) else dan$Nouveaux[j] <- sum((dd[dd[,j]==1 & rowSums(dd[,1:j-1])==0,j]))
-    }
+        for(j in 2:ncol(dd)) {
+            if(j==2)
+                dan$Nouveaux[j] <- sum(dd[dd[,j]==1 & dd[,j-1]==0,j]) else dan$Nouveaux[j] <- sum((dd[dd[,j]==1 & rowSums(dd[,1:j-1])==0,j]))
+        }
                                         #-as.numeric(rowSums(dd[dd[,j]==1 & dd[,j-1]==0,1:j-1])>0)))
 
 
-    for(j in 2:ncol(dd))
-        if(j<ncol(dd))
-            dan$NonAjour[j] <- sum(as.numeric(rowSums(dd[(dd[,j]==0 & dd[,j-1]==1),j:ncol(dd)])>0)) else  dan$NonAjour[j] <- sum(dd[(dd[,j]==0 & dd[,j-1]==1),j-1])
+        for(j in 2:ncol(dd))
+            if(j<ncol(dd))
+                dan$NonAjour[j] <- sum(as.numeric(rowSums(dd[(dd[,j]==0 & dd[,j-1]==1),j:ncol(dd)])>0)) else  dan$NonAjour[j] <- sum(dd[(dd[,j]==0 & dd[,j-1]==1),j-1])
 
-    for(j in 2:(ncol(dd)-1))
-        dan$Arrete[j] <- sum(as.numeric(rowSums(dd[(dd[,j]==0 & dd[,j-1]==1),j:ncol(dd)])==0))
-
-
-    write.csv2(dan,"Output/carreSTOCactif.csv")
-
-    ggAnnee <- melt(dan,"annee")
-
-    gg <- ggplot(subset(ggAnnee,variable != "NonAjour"),aes(x=annee,y=value,colour=variable))+geom_line(size=1.5)+geom_point(size=2)
-    gg <- gg + scale_colour_manual(values=c("nbCarre" = "#0d259f","Nouveaux"="#0d9f1b","Arrete" = "#9f0d0d" ),
-                                   labels=c("nbCarre" = "Carrés actif","Nouveaux"="Nouveaux carrés","Arrete" = "Carrés arrêtés"),name="" )
-    gg <- gg + labs(title="",x="",y="")
-    ggsave("Output/carreSTOC.png",gg)
+        for(j in 2:(ncol(dd)-1))
+            dan$Arrete[j] <- sum(as.numeric(rowSums(dd[(dd[,j]==0 & dd[,j-1]==1),j:ncol(dd)])==0))
 
 
+        write.csv2(dan,"Output/carreSTOCactif.csv")
 
-    birth <- apply(dd,1,FUN = function(x) min(which(x==1)))
-    dage <- dd
-    for(i in 1:nrow(dd)) {
-        cc <- names(birth[i])
-        b <- birth[i]
-        dage[cc,b:ncol(dage)] <- 1:(ncol(dage)-b+1)
+        ggAnnee <- melt(dan,"annee")
+
+        gg <- ggplot(subset(ggAnnee,variable != "NonAjour"),aes(x=annee,y=value,colour=variable))+geom_line(size=1.5)+geom_point(size=2)
+        gg <- gg + scale_colour_manual(values=c("nbCarre" = "#0d259f","Nouveaux"="#0d9f1b","Arrete" = "#9f0d0d" ),
+                                       labels=c("nbCarre" = "Carrés actif","Nouveaux"="Nouveaux carrés","Arrete" = "Carrés arrêtés"),name="" )
+        gg <- gg + labs(title="",x="",y="")
+        ggsave("Output/carreSTOC.png",gg)
+
+
+
+        birth <- apply(dd,1,FUN = function(x) min(which(x==1)))
+        dage <- dd
+        for(i in 1:nrow(dd)) {
+            cc <- names(birth[i])
+            b <- birth[i]
+            dage[cc,b:ncol(dage)] <- 1:(ncol(dage)-b+1)
+        }
+
+        dage <- dage*dd
+        dage <- as.data.frame(as.matrix(dage))
+        dage2 <- data.frame(id_carre=row.names(dage),dage)
+
+        dage2 <- melt(dage2,"id_carre")
+        colnames(dage2) <- c("id_carre","annee","age")
+        dage2$annee <- as.numeric(substring(as.character(dage2$annee),2,5))
+
+        dage2 <- subset(dage2,age>0)
+        ggAge <- aggregate(id_carre~annee+age,dage2,length)
+
+
+        gg <- ggplot(ggAge,aes(age,id_carre))+ geom_col() + facet_wrap(~annee)
+        gg <- gg + labs(title="Pyramide des ages des stations STOC EPS",x="Age",y="Nombre de carré STOC actifs")
+
+        ggsave("Output/carreSTOC_pyramideAge.png",gg)
+
+        write.csv2(dan,"Output/carreSTOCage.csv")
+
+
     }
 
-    dage <- dage*dd
-    dage <- as.data.frame(as.matrix(dage))
-    dage2 <- data.frame(id_carre=row.names(dage),dage)
-
-    dage2 <- melt(dage2,"id_carre")
-    colnames(dage2) <- c("id_carre","annee","age")
-    dage2$annee <- as.numeric(substring(as.character(dage2$annee),2,5))
-
-    dage2 <- subset(dage2,age>0)
-    ggAge <- aggregate(id_carre~annee+age,dage2,length)
-
-
-    gg <- ggplot(ggAge,aes(age,id_carre))+ geom_col() + facet_wrap(~annee)
-    gg <- gg + labs(title="Pyramide des ages des stations STOC EPS",x="Age",y="Nombre de carré STOC actifs")
-
-    ggsave("Output/carreSTOC_pyramideAge.png",gg)
-
-    write.csv2(dan,"Output/carreSTOCage.csv")
-
-
-}
-
-
-
-testDistanceContact <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL) {
-    require(reshape2)
-    con <- NULL
-    start <- Sys.time()
-    dateExport <- format(start,"%Y-%m-%d")
-
-    if(is.null(con)) con <- openDB.PSQL(user,mp,nomDB)
-
-    query <- "
-select id_inventaire,date,annee,code_sp, abondance,distance_contact,db
-from observation;
-"
-    d <- dbGetQuery(con, query)
-
-    di <- unique(subset(d,select=c("id_inventaire","date","annee","code_sp","db")))
-    ddist <- subset(d,select=c("id_inventaire","code_sp","distance_contact","abondance"))
-
-
-    dd <- dcast(ddist,id_inventaire + code_sp ~ distance_contact)
 
 
 
 
+    makeTableEBBA2 <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,output=FALSE,encodingSave="utf-8") {
+                                        #spExcluPassage1=c("MOTFLA","SAXRUB","ANTPRA","OENOEN","PHYTRO"),# (Prince et al. 2013 Env. Sc. and Pol.) + "OENOEN","PHYTRO" avis d'expert F. Jiguet
 
-    dbDisconnect(con)
-}
+        if(is.null(con)) con <- openDB.PSQL(user,mp,nomDB)
 
-
-
-
-
-makeTableEBBA2 <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,output=FALSE,encodingSave="utf-8") {
-  #spExcluPassage1=c("MOTFLA","SAXRUB","ANTPRA","OENOEN","PHYTRO"),# (Prince et al. 2013 Env. Sc. and Pol.) + "OENOEN","PHYTRO" avis d'expert F. Jiguet
-
-    if(is.null(con)) con <- openDB.PSQL(user,mp,nomDB)
-
-query <- paste("select sp.id_carre||to_char(to_date(sp.date,'YYYY-MM-DD'),'YYYYMMDD') as \"Survey number\",
+        query <- paste("select sp.id_carre||to_char(to_date(sp.date,'YYYY-MM-DD'),'YYYYMMDD') as \"Survey number\",
 to_char(to_date(sp.date,'YYYY-MM-DD'),'DD.MM.YYYY') as \"Date of survey\",nbp * 5 as \"Duration of survey\", 1 as \"Field Method\",
 c.latitude_points_wgs84 as \"Latitude\",c.longitude_points_wgs84 as \"Longitude\", '' as \"Square code\",
 lpad(euring::text, 5, '0') as \"EBBA2 species code\", s.scientific_name as \"EBBA2 scientific name\"
@@ -1415,14 +1384,14 @@ where
 sp.id_carre = cnbp.id_carre and sp.date = cnbp.date and sp.id_carre = c.pk_carre and sp.code_sp=s.pk_species and  c.etude in ('STOC_EPS', 'STOC_ONF');
 ")
 
-  cat("\n QUERY EBBA2:\n--------------\n\n",query,"\n")
+        cat("\n QUERY EBBA2:\n--------------\n\n",query,"\n")
 
-  d <- dbGetQuery(con, query)
+        d <- dbGetQuery(con, query)
 
-     write.csv2(d,paste("export/data_FrenchBBS_EBBA2_2003_2017.csv",sep=""),row.names=FALSE,fileEncoding=encodingSave)
+        write.csv2(d,paste("export/data_FrenchBBS_EBBA2_2003_2017.csv",sep=""),row.names=FALSE,fileEncoding=encodingSave)
 
- dbDisconnect(con)
-return(d)
+        dbDisconnect(con)
+        return(d)
 
     }
 
@@ -1430,59 +1399,59 @@ return(d)
 
 
 
-makeTableSampledCarre <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,output=TRUE,sp=NULL,champSp = "code_sp",nomChampSp="espece",
-                          altitude=NULL,firstYear=NULL,lastYear=NULL,
-                           departement=NULL,carre = NULL,onf=TRUE,
-                           selectHabitat = NULL, selectTypeHabitat= NULL,
-                          formatTrend = FALSE,isEnglish=FALSE,addAbscence=FALSE,
-                           id_output="AlexR_2017-11-23", #"NicolasM",
-                           operateur=c("Lorrilliere Romain",
-                                       "lorrilliere@mnhn.fr"),
-                           encodingSave="utf-8",test=FALSE) {
+    makeTableSampledCarre <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,output=TRUE,sp=NULL,champSp = "code_sp",nomChampSp="espece",
+                                      altitude=NULL,firstYear=NULL,lastYear=NULL,
+                                      departement=NULL,carre = NULL,onf=TRUE,
+                                      selectHabitat = NULL, selectTypeHabitat= NULL,
+                                      formatTrend = FALSE,isEnglish=FALSE,addAbscence=FALSE,
+                                      id_output="AlexR_2017-11-23", #"NicolasM",
+                                      operateur=c("Lorrilliere Romain",
+                                                  "lorrilliere@mnhn.fr"),
+                                      encodingSave="utf-8",test=FALSE) {
 
 
-  con=NULL;savePostgres=FALSE;output=TRUE;sp=NULL;champSp = "code_sp";
-  spExcluPassage1=c("MOTFLA","SAXRUB","ANTPRA")  ;seuilAbondance=.99;
-  champsHabitat=TRUE;champsCoordGrid=TRUE;altitude=NULL;firstYear=NULL;lastYear=NULL;
-  departement="44";onf=TRUE;distance_contact="100";
- selectHabitat = NULL; selectTypeHabitat= NULL#c("urbain_ps","agri_ps");
-  formatTrend = FALSE;anglais=FALSE;addAbscence=FALSE;
-  id_output="VincentP_2017-10-16"; #"NicolasM";
-  operateur=c("Lorrilliere Romain",
-              "lorrilliere@mnhn.fr");
-  encodingSave="utf-8"
-
-
-
-   depts <- paste("'",paste(departement,collapse="','"),"'",sep="")
-    start <-  Sys.time()
-   dateExport <- format(start,"%Y-%m-%d")
-
-
-    if(is.null(con)) con <- openDB.PSQL(user,mp,nomDB)
-    if(is.null(firstYear)) firstYear <- 2001
-   if(is.null(lastYear))
-    lastYear <- as.numeric(format(start,"%Y"))
-   d<-if(is.null(altitude))
-    altitude <- 8000
+        con=NULL;savePostgres=FALSE;output=TRUE;sp=NULL;champSp = "code_sp";
+        spExcluPassage1=c("MOTFLA","SAXRUB","ANTPRA")  ;seuilAbondance=.99;
+        champsHabitat=TRUE;champsCoordGrid=TRUE;altitude=NULL;firstYear=NULL;lastYear=NULL;
+        departement="44";onf=TRUE;distance_contact="100";
+        selectHabitat = NULL; selectTypeHabitat= NULL#c("urbain_ps","agri_ps");
+        formatTrend = FALSE;anglais=FALSE;addAbscence=FALSE;
+        id_output="VincentP_2017-10-16"; #"NicolasM";
+        operateur=c("Lorrilliere Romain",
+                    "lorrilliere@mnhn.fr");
+        encodingSave="utf-8"
 
 
 
-    if(!is.null(sp)) {
-        if(champSp != "code_sp") {
+        depts <- paste("'",paste(departement,collapse="','"),"'",sep="")
+        start <-  Sys.time()
+        dateExport <- format(start,"%Y-%m-%d")
 
-            sp <- getCode_sp(con,champSp,sp)
+
+        if(is.null(con)) con <- openDB.PSQL(user,mp,nomDB)
+        if(is.null(firstYear)) firstYear <- 2001
+        if(is.null(lastYear))
+            lastYear <- as.numeric(format(start,"%Y"))
+        d<-if(is.null(altitude))
+               altitude <- 8000
+
+
+
+        if(!is.null(sp)) {
+            if(champSp != "code_sp") {
+
+                sp <- getCode_sp(con,champSp,sp)
+
+            }
+            spList <- paste("('",paste(sp,collapse="' , '"),"')",sep="")
 
         }
-             spList <- paste("('",paste(sp,collapse="' , '"),"')",sep="")
-
-    }
 
 
-    if(!is.null(selectHabitat)) habList <- paste("('",paste(selectHabitat,collapse="' , '"),"')",sep="")
-    if(!is.null(departement)) depList <- paste("('",paste(departement,collapse="' , '"),"')",sep="")
+        if(!is.null(selectHabitat)) habList <- paste("('",paste(selectHabitat,collapse="' , '"),"')",sep="")
+        if(!is.null(departement)) depList <- paste("('",paste(departement,collapse="' , '"),"')",sep="")
 
-    selectQuery <- paste(ifelse(is.null(sp),"",paste(" code_sp in ",spList," and
+        selectQuery <- paste(ifelse(is.null(sp),"",paste(" code_sp in ",spList," and
                                 ")),"
 "," i.annee >= ",firstYear,"  and i.annee <= ",lastYear,
 " and c.etude in ('STOC_EPS'",ifelse(onf,", 'STOC_ONF'",""),")  and  p.altitude <= ",altitude,"
@@ -1495,7 +1464,11 @@ ifelse(!is.null(selectHabitat),paste(" and p_milieu in ",habList," ")," "),"
 
 
 
- }
+    }
+
+
+
+
 
 
 

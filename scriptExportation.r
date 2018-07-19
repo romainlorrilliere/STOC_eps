@@ -1171,6 +1171,209 @@ WHERE
     }
 
 
+
+
+
+
+makeTableVP <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,output=TRUE,sp=NULL,champSp = "code_sp",nomChampSp="espece",
+                          altitude_min=NULL,altitude_max=NULL,firstYear=NULL,lastYear=NULL,
+                          departement=NULL,onf=TRUE,
+                          id_carre=NULL,insee=NULL,distance_contact="inf",
+                          selectHabitat = NULL, selectTypeHabitat= NULL,champsHabitat=FALSE,
+                          formatTrend = FALSE,isEnglish=FALSE,addAbscence=FALSE,
+                          id_output="AlexR_2017-11-23", #"NicolasM",
+                          operateur=c("Lorrilliere Romain",
+                                      "lorrilliere@mnhn.fr"),
+                          encodingSave="utf-8",test=FALSE) {
+
+
+    ##    sp=c("DENMAJ","DENMED","DRYMAR")
+        nomDB=NULL;id_carre=NULL;insee=NULL;
+        sp=NULL;champSp = "code_sp";nomChampSp="espece";
+    altitude_min=NULL;altitude_max=NULL;firstYear=NULL;lastYear=NULL;distance_contact=NULL
+        departement=NULL;onf=TRUE;champsHabitat=FALSE
+        selectHabitat = NULL; selectTypeHabitat= "urbain_p";
+        formatTrend = FALSE;isEnglish=FALSE;addAbscence=FALSE;
+        operateur=c("Lorrilliere Romain","lorrilliere@mnhn.fr")
+        test=FALSE
+
+
+    depts <- paste("'",paste(departement,collapse="','"),"'",sep="")
+    start <-  Sys.time()
+    dateExport <- format(start,"%Y-%m-%d")
+
+
+
+    if(!is.null(sp)) {
+        if(champSp != "code_sp") {
+
+            sp <- getCode_sp(con,champSp,sp)
+
+        }
+
+    }
+    if(is.null(con)) con <- openDB.PSQL(user,mp,nomDB)
+    if(is.null(firstYear)) firstYear <- 2001
+    if(is.null(lastYear)) lastYear <- as.numeric(format(start,"%Y"))
+    if(is.null(altitude_max)) altitude_max <- 8000
+    if(is.null(altitude_min)) altitude_min <- 0
+
+
+        listChampsHabitat <- "pa.p_milieu as habitat_principal, pa.s_milieu as habitat_secondaire, pa.p_dernier_descri as temps_depuis_derniere_description_habitat ,
+   pa.foret_p as foret_p, pa.agri_p as agricole_p, pa.urbain_p as urbain_p, pa.ouvert_p as ouvert_p, pa.foret_ps as foret_ps, pa.agri_ps as agricole_ps, pa.urbain_ps as urbain_ps, pa.ouvert_ps as ouvert_ps,
+  nbp_foret_p  as carre_nb_pts_foret_p, nbp_ouvert_p as carre_nb_pts_ouvert_p, nbp_agri_p as carre_nb_pts_agricole_p, nbp_urbain_p as carre_nb_pts_urbain_p,
+nbp_foret_ps as carre_nb_pts_foret_ps, nbp_ouvert_ps as carre_nb_pts_ouvert_ps, nbp_agri_ps as carre_nb_pts_agricole_ps, nbp_urbain_ps  as carre_nb_pts_urbain_ps, "
+
+
+        if(is.null(distance_contact)) {
+            distance_contact_txt <- ""
+        } else {
+            if(distance_contact == "100") {
+                distance_contact_txt <- " distance_contact in ('LESS25','LESS100') and "
+            } else {
+                if(distance_contact == "200") {
+                    distance_contact_txt <- " distance_contact in ('LESS25','LESS100','MORE100','LESS200') and "
+                } else {
+                    if(distance_contact == "inf") {
+                        distance_contact_txt <- " distance_contact in ('U','LESS25','LESS100','MORE100','LESS200','MORE200') and "
+                    } else {
+                        stop("distance_contact non pris en charge")
+                    }}}}
+
+
+
+        if(!is.null(sp)) {
+            if(champSp != "code_sp") {
+
+                sp <- getCode_sp(con,champSp,sp)
+
+            }
+            spList <- paste("('",paste(sp,collapse="' , '"),"')",sep="")
+
+        }
+
+        if(!is.null(id_carre)) carreList <- paste("('",paste(id_carre,collapse="' , '"),"')",sep="")
+
+
+        if(!is.null(selectHabitat)) habList <- paste("('",paste(selectHabitat,collapse="' , '"),"')",sep="")
+        if(!is.null(departement)) depList <- paste("('",paste(departement,collapse="' , '"),"')",sep="")
+
+        if(!is.null(insee)) inseeList <- paste("('",paste(insee,collapse="' , '"),"')",sep="")
+
+        selectQuery <- paste(distance_contact_txt,ifelse(is.null(sp),"",paste(" code_sp in ",spList," and
+                                ")),"
+"," i.annee >= ",firstYear,"  and i.annee <= ",lastYear,
+" and c.etude in ('STOC_EPS'",ifelse(onf,", 'STOC_ONF'",""),")  and  c.altitude <= ",altitude_max," and  c.altitude >= ",altitude_min,"
+",
+ifelse(is.null(id_carre),"",paste(" and o.id_carre in ",carreList," ")),"
+",
+ifelse(is.null(departement),"",paste(" and p.departement in ",depList," ")),"
+",
+ifelse(is.null(insee),"",paste(" and p.insee in ",inseeList," ")),"
+",
+ifelse(!is.null(selectHabitat),paste(" and p_milieu in ",habList," ")," "),"
+"," ",sep="")
+
+
+        if(!is.null(selectTypeHabitat)) queryTypeHab <- paste(" AND ( pa.",paste(selectTypeHabitat,collapse=" = TRUE OR pa.")," = TRUE) ",sep="") else queryTypeHab <- ""
+
+        selectQuery <- paste(selectQuery,queryTypeHab)
+
+
+
+        query <- paste("
+SELECT
+  o.pk_observation as code_observation,  o.id_fnat_unique_citation as code_observation_fnat,
+  o.id_inventaire as code_inventaire,  i.etude,   i.observateur,  i.email, p.site as nom_site,  p.commune,  p.insee,  p.departement,  o.id_carre as code_carre,    o.id_point as code_point,   o.num_point,     o.date,  o.annee,  i.heure_debut,  i.heure_fin,  i.duree_minute,   o.passage,  i.info_passage,  i.passage_stoc as numero_passage_stoc,  i.nombre_de_passage,  i.temps_entre_passage,  o.espece,   s.scientific_name as nom_scientifique,  s.french_name as nom_francais,s.english_name as nom_anglais,s.euring as code_espece_euring,s.taxref as code_espece_taxref,   o.abondance,  o.distance_contact, i.nuage,  i.pluie,  i.vent,  i.visibilite,  i.neige,  p.altitude,  p.longitude_wgs84,  p.latitude_wgs84,  c.longitude_grid_wgs84,  c.latitude_grid_wgs84,  h.p_milieu,  h.p_type,  h.p_cat1,  h.p_cat2,  h.s_milieu,  h.s_type,  h.s_cat1,  h.s_cat2," , ifelse(champsHabitat,listChampsHabitat,""),"   o.db,  o.date_export as date_import, '",dateExport,"'::varchar(10) as date_export,
+'",operateur[1],"'::varchar(50) as operateur,
+'",operateur[2],"'::varchar(50) as email_operateur
+FROM
+  public.point as p,   public.point_annee as pa,  public.carre as c, public.carre_annee as ca, public.inventaire as i,  public.observation as o,  public.species as s,  public.habitat as h
+WHERE
+  o.id_inventaire = i.pk_inventaire AND   o.id_point = p.pk_point AND  o.id_point = pa.id_point AND  o.annee = pa.annee AND  o.id_carre = ca.id_carre AND  o.annee = ca.annee AND  o.id_carre = c.pk_carre AND  o.espece = s.pk_species AND  o.id_inventaire = h.pk_habitat AND  ",selectQuery,";",sep="")
+        if(test) paste(query," LIMIT 100;") else paste(query,";")
+
+        cat("\n QUERY données BRUT:\n--------------\n\n",query,"\n")
+
+     query <- " SELECT
+  o.pk_inventaire as code_inventaire,  i.etude as Etude, 
+  p.site as Site, FALSE as Pays, 
+  p.departement as Département, p.insee as INSEE, p.commune as Commune,
+  ("CARRE N°"||o.id_carre::varchar) as N..Carré.EPS
+  o.id_fnat_unique_citation as code_observation_fnat,
+  o.date as Date,i.heure_debut as Heure,  i.heure_fin as Heure.fin,
+  i.passage_stoc as N..Passage,
+  i.observateur as Observateur,  i.email as Email,
+  ("Point N°"||o.num_point::varchar) as EXPORT_STOC_TEXT_EPS,
+  p.altitude as Altitude,
+  "0" as Classe, o.espece as Espèce,
+  o.abondance as Nombre,o.distance_contact as Distance.de.contact,
+   p.longitude_wgs84 as Longitude, p.latitude_wgs84 as Latitude,  
+   
+  
+  o.id_inventaire as code_inventaire, ,   , p.site as nom_site,  
+  p.commune,      o.id_carre as code_carre,    o.id_point as code_point,  
+   o.num_point,     ,  o.annee,  i.heure_debut,  i.heure_fin, 
+    i.duree_minute,   o.passage, 
+    i.info_passage,  i.passage_stoc as numero_passage_stoc, 
+     i.nombre_de_passage,  i.temps_entre_passage, 
+     o.espece,   s.scientific_name as nom_scientifique, 
+      s.french_name as nom_francais,s.english_name as nom_anglais,
+     s.euring as code_espece_euring,s.taxref as code_espece_taxref,   
+     o.abondance,  o.distance_contact, i.nuage,  i.pluie, 
+      i.vent,  i.visibilite,  i.neige,  , c.longitude_grid_wgs84,  c.latitude_grid_wgs84, 
+        h.p_milieu,  h.p_type,  h.p_cat1,  h.p_cat2,  h.s_milieu,  h.s_type,  h.s_cat1,  h.s_cat2, 
+          o.db,  o.date_export as date_import, '2018-07-19'::varchar(10) as date_export,
+'Lorrilliere Romain'::varchar(50) as operateur,
+'lorrilliere@mnhn.fr'::varchar(50) as email_operateur
+FROM
+  public.point as p,   public.point_annee as pa,  public.carre as c, public.carre_annee as ca, public.inventaire as i,  public.observation as o,  public.species as s,  public.habitat as h
+WHERE
+  o.id_inventaire = i.pk_inventaire AND   o.id_point = p.pk_point AND  o.id_point = pa.id_point AND  o.annee = pa.annee AND  o.id_carre = ca.id_carre AND  o.annee = ca.annee AND  o.id_carre = c.pk_carre AND  o.espece = s.pk_species AND  o.id_inventaire = h.pk_habitat AND  
+ i.annee >=   and i.annee <=  and c.etude in ('STOC_EPS', 'STOC_ONF')  and  c.altitude <= 8000 and  c.altitude >= 0
+
+ "                                  # browser()
+
+
+        d <- dbGetQuery(con, query)
+
+                                        #if(savePostgres) sqlCreateTable(con,"outcome.FrenchBBS_montaneOpen",d)
+
+
+        if(is.null(sp)) suffSp <- "allSp" else if(length(sp)<4) suffSp <- paste(sp,collapse="-") else suffSp <- paste(length(sp),"sp",sep="")
+
+        fileOut <- paste("export/data_FrenchBBS_BRUT_",id_output,"_",suffSp,"_",firstYear,"_",lastYear,ifelse(isEnglish,"eng","fr"),".csv",sep="")
+        write.csv2(d,fileOut,row.names=FALSE)
+        cat(" --> ",fileOut,"\n")
+
+        end <- Sys.time() ## heure de fin
+
+        dbDisconnect(con)
+
+        cat("\n     #      ==> Duree:",round(as.difftime(end - start,units="mins")),"minutes\n")
+        if(output) return(d)
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     test <- function() {
 
 

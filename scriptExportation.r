@@ -1226,28 +1226,29 @@ ifelse(is.null(insee),"",paste(" and p.insee in ",inseeList," ")),sep="")
 
 
      query <- paste(" SELECT
-  o.pk_inventaire as code_inventaire,  i.etude as Etude,
+  o.id_inventaire as code_inventaire,  i.etude as Etude,
   p.site as Site, FALSE as Pays,
   p.departement as Département, p.insee as INSEE,
-  p.commune as Commune, ('CARRE N°'||o.id_carre::varchar) as N°..Carré.EPS,
+  p.commune as Commune, ('CARRE N°'||o.id_carre::varchar) as \"N°..Carré.EPS\",
   o.date as Date,i.heure_debut as Heure,
-  i.heure_fin as Heure.fin,  i.passage_stoc as N°..Passage,
+  i.heure_fin as \"Heure.fin\",  i.passage_stoc as \"N°..Passage\",
   i.observateur as Observateur,  i.email as Email,
   ('Point N°'||o.num_point::varchar) as EXPORT_STOC_TEXT_EPS, p.altitude as Altitude,
   '0'::varchar(1) as Classe, o.espece as Espèce,
-  o.abondance as Nombre,o.distance_contact as Distance.de.contact,
+  o.abondance as Nombre,o.distance_contact as \"Distance.de.contact\",
   p.longitude_wgs84 as Longitude, p.latitude_wgs84 as Latitude,
-  '2' as Type.de.coodonnées, 'WGS84' as Type.de.coordonnées.lambert,
-  i.nuage as EPS.Nuage,  i.pluie as EPS.Pluie,
-  i.vent as EPS.Vent,  i.visibilite as EPS.Visibilité,
-  i.neige as EPS.Neige, 'NA' as EPS.Transport
-  h.p_milieu as EPS.P.Milieu,  h.p_type as EPS.P.Type,
-  h.p_cat1 as EPS.P.Cat1, h.p_cat2 as EPS.P.Cat2,
-  h.s_milieu as EPS.S.Milieu,  h.s_type as EPS.S.Type,
-  h.s_cat1 as EPS.S.Cat1, h.s_cat2 as EPS.S.Cat2,
-  o.db,  o.date_export as date_import, '",dateExport,"'::varchar(10) as date_export,
- 'Lorrilliere Romain'::varchar(50) as operateur,
- 'lorrilliere@mnhn.fr'::varchar(50) as email_operateur
+  '2' as \"Type.de.coodonnées\", 'WGS84' as \"Type.de.coordonnées.lambert\",
+  i.nuage as \"EPS.Nuage\",  i.pluie as \"EPS.Pluie\",
+  i.vent as \"EPS.Vent\",  i.visibilite as \"EPS.Visibilité\",
+  i.neige as \"EPS.Neige\", 'NA' as \"EPS.Transport\",
+  h.p_milieu as \"EPS.P.Milieu\",  h.p_type as \"EPS.P.Type\",
+  h.p_cat1 as \"EPS.P.Cat1\", h.p_cat2 as \"EPS.P.Cat2\",
+  h.s_milieu as \"EPS.S.Milieu\",  h.s_type as \"EPS.S.Type\",
+  h.s_cat1 as \"EPS.S.Cat1\", h.s_cat2 as \"EPS.S.Cat2\",
+  o.db,  o.date_export as date_import,
+  '",dateExport,"'::varchar(10) as date_export,
+  '",operateur[1],"'::varchar(50) as operateur,
+  '",operateur[2],"'::varchar(50) as email_operateur
 FROM
   public.point as p,   public.point_annee as pa,  public.carre as c, public.carre_annee as ca, public.inventaire as i,  public.observation as o,  public.species as s,  public.habitat as h
 WHERE
@@ -1260,9 +1261,8 @@ WHERE
 
     d <- dbGetQuery(con, query)
 
-    if(is.null(sp)) suffSp <- "allSp" else if(length(sp)<4) suffSp <- paste(sp,collapse="-") else suffSp <- paste(length(sp),"sp",sep="")
-
-    fileOut <- paste("export/data_FrenchBBS_VigiePlume_",id_output,"_",suffSp,"_",firstYear,"_",lastYear,".csv",sep="")
+  
+    fileOut <- paste("export/data_FrenchBBS_VigiePlume_",id_output,"_",firstYear,"_",lastYear,".csv",sep="")
     write.csv2(d,fileOut,row.names=FALSE)
     cat(" --> ",fileOut,"\n")
 

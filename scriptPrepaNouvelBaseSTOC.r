@@ -1706,7 +1706,10 @@ maketableGenerique <- function(repertoire=NULL,nomDBpostgresql=NULL,postgresUser
         " with (format csv, header, delimiter ',')\n",sep="",
         file=paste(repertoire,"sql/_sqlR_importationDataTableGenerique.sql",sep=""),append=TRUE)
 
-    commande <- paste("psql -U ",postgresUser," ",nomDBpostgresql," -f ",repertoire,"sql/_sqlR_importationDataTableGenerique.sql",sep="")
+
+    commande <- paste("psql -U ",postgresUser," ",nomDBpostgresql," < ",repertoire,"sql/_sqlR_importationDataTableGenerique.sql",sep="")
+   cat("System command: ",commande,"\n",paste="")
+
     shell(commande)
 
 

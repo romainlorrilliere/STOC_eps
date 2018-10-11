@@ -48,7 +48,7 @@ clean.PSQL <- function(nomDB=NULL) {
 getCode_sp <- function(con,champSp,sp) {
     if(is.null(con)) con <- openDB.PSQL()
     querySp <- paste(" select ",champSp,", pk_species as code_sp, french_name from species where ",champSp," in  ",paste("('",paste(sp,collapse="' , '"),"')",";",sep=""),sep="")
-    cat("\nRequete recupération des code_sp:\n\n",querySp,"\n\n")
+    cat("\nRequete recupÃ©ration des code_sp:\n\n",querySp,"\n\n")
 
     dsp <- dbGetQuery(con, querySp)
 
@@ -1141,7 +1141,7 @@ WHERE
   o.id_inventaire = i.pk_inventaire AND   o.id_point = p.pk_point AND  o.id_point = pa.id_point AND  o.annee = pa.annee AND  o.id_carre = ca.id_carre AND  o.annee = ca.annee AND  o.id_carre = c.pk_carre AND  o.espece = s.pk_species AND  o.id_inventaire = h.pk_habitat AND  ",selectQuery,";",sep="")
         if(test) paste(query," LIMIT 100;") else paste(query,";")
 
-        cat("\n QUERY données BRUT:\n--------------\n\n",query,"\n")
+        cat("\n QUERY donnÃ©es BRUT:\n--------------\n\n",query,"\n")
 
                                         # browser()
 
@@ -1228,18 +1228,18 @@ ifelse(is.null(insee),"",paste(" and p.insee in ",inseeList," ")),sep="")
      query <- paste(" SELECT
   o.id_inventaire as code_inventaire,  i.etude as Etude,
   p.site as Site, FALSE as Pays,
-  p.departement as D�partement, p.insee as INSEE,
-  p.commune as Commune, ('CARRE N�'||o.id_carre::varchar) as \"N�..Carr�.EPS\",
+  p.departement as Département, p.insee as INSEE,
+  p.commune as Commune, ('CARRE N°'||o.id_carre::varchar) as \"N°..Carré.EPS\",
   o.date as Date,i.heure_debut as Heure,
-  i.heure_fin as \"Heure.fin\",  i.passage_stoc as \"N�..Passage\",
+  i.heure_fin as \"Heure.fin\",  i.passage_stoc as \"N°..Passage\",
   i.observateur as Observateur,  i.email as Email,
-  ('Point N�'||o.num_point::varchar) as EXPORT_STOC_TEXT_EPS, p.altitude as Altitude,
-  '0'::varchar(1) as Classe, o.espece as Esp�ce,
+  ('Point N°'||o.num_point::varchar) as EXPORT_STOC_TEXT_EPS, p.altitude as Altitude,
+  '0'::varchar(1) as Classe, o.espece as Espèce,
   o.abondance as Nombre,o.distance_contact as \"Distance.de.contact\",
   p.longitude_wgs84 as Longitude, p.latitude_wgs84 as Latitude,
-  '2' as \"Type.de.coodonn�es\", 'WGS84' as \"Type.de.coordonn�es.lambert\",
+  '2' as \"Type.de.coodonnées\", 'WGS84' as \"Type.de.coordonnées.lambert\",
   i.nuage as \"EPS.Nuage\",  i.pluie as \"EPS.Pluie\",
-  i.vent as \"EPS.Vent\",  i.visibilite as \"EPS.Visibilit�\",
+  i.vent as \"EPS.Vent\",  i.visibilite as \"EPS.Visibilité\",
   i.neige as \"EPS.Neige\", 'NA' as \"EPS.Transport\",
   h.p_milieu as \"EPS.P.Milieu\",  h.p_type as \"EPS.P.Type\",
   h.p_cat1 as \"EPS.P.Cat1\", h.p_cat2 as \"EPS.P.Cat2\",
@@ -1423,7 +1423,7 @@ order by i.id_carre, i.annee;")
 
         gg <- ggplot(subset(ggAnnee,variable != "NonAjour"),aes(x=annee,y=value,colour=variable))+geom_line(size=1.5)+geom_point(size=2)
         gg <- gg + scale_colour_manual(values=c("nbCarre" = "#0d259f","Nouveaux"="#0d9f1b","Arrete" = "#9f0d0d" ),
-                                       labels=c("nbCarre" = "Carrés actif","Nouveaux"="Nouveaux carrés","Arrete" = "Carrés arrêtés"),name="" )
+                                       labels=c("nbCarre" = "CarrÃ©s actif","Nouveaux"="Nouveaux carrÃ©s","Arrete" = "CarrÃ©s arrÃªtÃ©s"),name="" )
         gg <- gg + labs(title="",x="",y="")
         ggsave("Output/carreSTOC.png",gg)
 
@@ -1450,7 +1450,7 @@ order by i.id_carre, i.annee;")
 
 
         gg <- ggplot(ggAge,aes(age,id_carre))+ geom_col() + facet_wrap(~annee)
-        gg <- gg + labs(title="Pyramide des ages des stations STOC EPS",x="Age",y="Nombre de carré STOC actifs")
+        gg <- gg + labs(title="Pyramide des ages des stations STOC EPS",x="Age",y="Nombre de carrÃ© STOC actifs")
 
         ggsave("Output/carreSTOC_pyramideAge.png",gg)
 

@@ -1,6 +1,51 @@
 
 ### Log ex #####
 
+
+
+ dFC <- makeTableBrut(departement=c(21,25,39,58,70,71,89,90),distance_contact=NULL,champsHabitat=TRUE,id_output="SimonRolland_Bourgogne_Franche_Comte_2018")
+
+ QUERY donnÃ©es BRUT:
+--------------
+
+ 
+SELECT
+  o.pk_observation as code_observation,  o.id_fnat_unique_citation as code_observation_fnat,
+  o.id_inventaire as code_inventaire,  i.etude,   i.observateur,  i.email, p.site as nom_site,  p.commune,  p.insee,  p.departement,  o.id_carre as code_carre,    o.id_point as code_point,   o.num_point,     o.date,  o.annee,  i.heure_debut,  i.heure_fin,  i.duree_minute,   o.passage,  i.info_passage,  i.passage_stoc as numero_passage_stoc,  i.nombre_de_passage,  i.temps_entre_passage,  o.espece,   s.scientific_name as nom_scientifique,  s.french_name as nom_francais,s.english_name as nom_anglais,s.euring as code_espece_euring,s.taxref as code_espece_taxref,   o.abondance,  o.distance_contact, i.nuage,  i.pluie,  i.vent,  i.visibilite,  i.neige,  p.altitude,  p.longitude_wgs84,  p.latitude_wgs84,  c.longitude_grid_wgs84,  c.latitude_grid_wgs84,  h.p_milieu,  h.p_type,  h.p_cat1,  h.p_cat2,  h.s_milieu,  h.s_type,  h.s_cat1,  h.s_cat2,pa.p_milieu as habitat_principal, pa.s_milieu as habitat_secondaire, pa.p_dernier_descri as temps_depuis_derniere_description_habitat ,
+   pa.foret_p as foret_p, pa.agri_p as agricole_p, pa.urbain_p as urbain_p, pa.ouvert_p as ouvert_p, pa.foret_ps as foret_ps, pa.agri_ps as agricole_ps, pa.urbain_ps as urbain_ps, pa.ouvert_ps as ouvert_ps,
+  nbp_foret_p  as carre_nb_pts_foret_p, nbp_ouvert_p as carre_nb_pts_ouvert_p, nbp_agri_p as carre_nb_pts_agricole_p, nbp_urbain_p as carre_nb_pts_urbain_p,
+nbp_foret_ps as carre_nb_pts_foret_ps, nbp_ouvert_ps as carre_nb_pts_ouvert_ps, nbp_agri_ps as carre_nb_pts_agricole_ps, nbp_urbain_ps  as carre_nb_pts_urbain_ps,    o.db,  o.date_export as date_import, '2018-08-20'::varchar(10) as date_export,
+'Lorrilliere Romain'::varchar(50) as operateur,
+'lorrilliere@mnhn.fr'::varchar(50) as email_operateur
+FROM
+  public.point as p,   public.point_annee as pa,  public.carre as c, public.carre_annee as ca, public.inventaire as i,  public.observation as o,  public.species as s,  public.habitat as h
+WHERE
+  o.id_inventaire = i.pk_inventaire AND   o.id_point = p.pk_point AND  o.id_point = pa.id_point AND  o.annee = pa.annee AND  o.id_carre = ca.id_carre AND  o.annee = ca.annee AND  o.id_carre = c.pk_carre AND  o.espece = s.pk_species AND  o.id_inventaire = h.pk_habitat AND  
+ i.annee >= 2001  and i.annee <= 2018 and c.etude in ('STOC_EPS', 'STOC_ONF')  and  c.altitude <= 8000 and  c.altitude >= 0
+
+ and p.departement in  ('21' , '25' , '39' , '58' , '70' , '71' , '89' , '90')  
+
+ 
+  ; 
+ -->  export/data_FrenchBBS_BRUT_SimonRolland_Bourgogne_Franche_Comte_2018_allSp_2001_2018fr.csv 
+
+     #      ==> Duree: 2 minutes
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 > d44 <- makeTableVP(departement=44,id_output="44")
 
 QUERY: 

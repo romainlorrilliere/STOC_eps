@@ -27,6 +27,8 @@
 
 
 
+### 2018-10-16 ajout des couches shape PRA et maille_atlas
+
 ### 2017-11-14 modification de l'entete de colonne des nom de point de la table vigieplume
 
 
@@ -50,6 +52,10 @@ library(maptools)
 library(maps)
 library(animation)
 
+
+if("STOC_eps" %in% dir()) setwd("STOC_eps")
+
+
 openDB.PSQL <- function(nomDB=NULL){
 
     library(RPostgreSQL)
@@ -69,7 +75,7 @@ prepaData <- function(dateExportVP="2018-02-14",nomFileVP="export_stoc_14022018.
                       constructionObservation = FALSE, constructionHabitat = FALSE,
                       dateConstruction=NULL,postgresql_import=FALSE,nomDBpostgresql=NULL,
                       postgresql_createAll=FALSE,postgresUser="romain",
-                      postGIS_initiation=FALSE,repertoire=NULL,postgresql_abondanceSeuil=FALSE,seuilAbondance = .99,historiqueCarre=TRUE,
+                      postGIS_initiation=FALSE,import_shape=FALSE,repertoire=NULL,postgresql_abondanceSeuil=FALSE,seuilAbondance = .99,historiqueCarre=TRUE,
                       pointCarreAnnee=TRUE,importPointCarreAnnee=TRUE,fileTemp=FALSE)
 {
     library(RODBC)
@@ -100,7 +106,7 @@ prepaData <- function(dateExportVP="2018-02-14",nomFileVP="export_stoc_14022018.
 ##   constructionObservation = TRUE; constructionHabitat = TRUE;
 ##   dateConstruction=NULL;postgresql_import=TRUE;nomDBpostgresql=NULL;
 ##   postgresql_createAll=TRUE;postgresUser="romain";
-##   postGIS_initiation=TRUE;repertoire=NULL;postgresql_abondanceSeuil=TRUE;historiqueCarre=TRUE;
+##   postGIS_initiation=TRUE;import_shape=FALSE;repertoire=NULL;postgresql_abondanceSeuil=TRUE;historiqueCarre=TRUE;
 ##   pointCarreAnnee=TRUE;importPointCarreAnnee=TRUE;fileTemp=FALSE
 
 
@@ -1670,10 +1676,10 @@ openDB.PSQL <- function(nomDB=NULL){
 }
 
 
-maketableGenerique <- function(repertoire=NULL,nomDBpostgresql=NULL,postgresUser="romain", fileTemp=TRUE) {
+maketableGenerique <- function(repertoire=NULL,nomDBpostgresql=NULL,postgresUser="romain", fileTemp=TRUE,savePostgres=TRUE) {
 
                                         # require(ggplot2)
-                                          repertoire=NULL;savePostgres=TRUE;nomDBpostgresql=NULL;postgresUser="romain"; fileTemp=FALSE;
+                                        #  repertoire=NULL;savePostgres=TRUE;nomDBpostgresql=NULL;postgresUser="romain"; fileTemp=FALSE;
     cat("\n  Importation des tables generiques et creation des index\n   ------------------------------------\n")
     cat("     1- carrenat\n")
     cat("     2- espece\n")
@@ -2371,3 +2377,72 @@ order by id_carre;")
 
 
 
+import_shape <- function(vecShape=c("pra_93","L93_10x10_TerreMer"),vecNameTable=c("pra","maille_atlas"),vecEPSG = NULL,
+                         repertoire=NULL,nomDBpostgresql=NULL,postgresUser="romain",
+                         fileTemp=TRUE,savePostgres=TRUE) {
+
+   
+                                        # require(ggplot2)
+vecShape=c("pra_93","L93_10x10_TerreMer");vecNameTable=c("pra","maille_atlas");vecEPSG = NULL
+
+    repertoire=NULL;savePostgres=TRUE;nomDBpostgresql=NULL;postgresUser="romain"; fileTemp=FALSE;
+
+
+    cat("\n  Importation des shapes files \n   ------------------------------------\n")
+cat(vecShape)
+    
+
+    if(is.null(repertoire)) repertoire <- paste(getwd(),"/",sep="")
+    if(is.null(nomDBpostgresql)) nomDBpostgresql <- "stoc_eps"
+
+    
+    
+    for (i in length(vecShape)) {
+        
+        sh <- vecShape[i]
+        epsg <- vecEPSG[i]
+        if(is.null(epsg)) epsg <- 2154 #Lambert 93
+        
+        fsh <- fsql <- paste("DB_import/tableGeneriques/",sh,"/",sh,sep="")
+        fsql <- paste("DB_import/tableGeneriques/",sh,"/",sh,".sql",sep="")
+
+        cmd <- paste("shp2pgsql -I -s ",epsg,"  ",fsh," >  ",fsql," \n",sep="")
+        cat(cmd,"\n")
+        system(cmd)
+
+        name_table <- tail(readLines(fsql, n=4),1)
+        name_table <- gsub("CREATE TABLE \"","",name_table)
+        name_table <- gsub("\" (gid serial,","",name_table,fixed=TRUE)
+ 
+        
+        query <- paste("DROP TABLE IF EXISTS ",name_table,";")
+        cat("drop query:", query,"\n")
+        dbSendQuery(con, query)
+          
+        
+        cmd <- paste("psql -U ",postgresUser," -d ",nomDBpostgresql," -f ",fsql,sep="")
+        cat(cmd,"\n")
+        shell(cmd,invisible=TRUE)
+
+
+
+
+        name_table <-  vecNameTable[i]
+        if(!(is.na(name_table))) {
+
+        }
+        
+    
+        
+
+    }
+
+
+         cat("\n\n --- Importation SQL ---\n\n")
+             cat("\n\n - file: ",fsql,"\n")
+        
+
+commande <- paste("psql -U ",postgresUser," ",nomDBpostgresql," -f ",repertoire,"sql/postgres_createTableGenerique.sql",sep="")
+    shell(commande)
+
+}

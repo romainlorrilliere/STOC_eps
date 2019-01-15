@@ -21,7 +21,6 @@ CREATE TABLE point_annee
     version varchar(10) NOT NULL);
 
 
- \copy point_annee FROM /home/romain/git/STOC_eps/DB_import/point_annee.csv with (format csv, header, delimiter ';')
 
 
 
@@ -64,7 +63,7 @@ CREATE TABLE carre_annee
 		date_export varchar(10) NOT NULL,
     version varchar(10) NOT NULL);
 
-\copy carre_annee FROM /home/romain/git/STOC_eps/DB_import/carre_annee.csv with (format csv, header, delimiter ';')
+
 
 CREATE INDEX ca_carre ON carre_annee(id_carre);
 CREATE INDEX ca_an ON carre_annee(annee);

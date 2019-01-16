@@ -6,12 +6,6 @@
 ###################################################################################################################
 
 
-### mon compte windows romain crex
-### mon compte windows admin postgres crexCREX44!
-### mon compte linux romain
-
-
-
 
 ### Beta 1.0
 
@@ -55,6 +49,7 @@ library(animation)
 
 if("STOC_eps" %in% dir()) setwd("STOC_eps")
 
+if(!("scriptPrepaNouvelBaseSTOC.r" %in% dir())) stop("ERREUR !!! \n Changer le repertoire de travail \n STOC_eps/\n\n")
 
 
 
@@ -127,11 +122,11 @@ prepaData <- function(dateExportVP="2018-12-14",nomFileVP="export_stoc14122018.t
 
     cat("\n     # Debut du process:",format(start, "%Y-%m-%d %H:%M\n"))
 
-    nomFileVP=paste("Data/",nomFileVP,sep="")
-    nomFileVPonf=paste("Data/",nomFileVP_ONF,sep="")
+    nomFileVP=paste("data/",nomFileVP,sep="")
+    nomFileVPonf=paste("data/",nomFileVP_ONF,sep="")
 
-    nomDBFNat=paste("Data/",nomDBFNat,sep="")
-    nomFileFNat=paste("Data/",nomFileFNat,sep="")
+    nomDBFNat=paste("data/",nomDBFNat,sep="")
+    nomFileFNat=paste("data/",nomFileFNat,sep="")
 
 
     cat("\n\n 1) Importation\n----------------------\n")
@@ -805,13 +800,10 @@ vp2observation <- function(d,dateExport,output=FALSE) {
 
         cat(" \n Pour chaque doublon nous conservons la valeur maximum\n")
 
-browser()
+## browser()
 
-        tAbMax <- aggregate(subset(tDoublon,select=c("abondance")),list(id_data=tDoublon$id_data),max)
-        tAbMax$conservee <- TRUE
-
-        tDoublon <- merge(tDoublon,tAbMax,by=c("id_data","abondance"),all=TRUE)
-        tDoublon$conservee[is.na(tDoublon$conservee)] <- FALSE
+        tDoublon <- tDoublon[order(tDoublon$id_data, -tDoublon$abondance),]
+        tDoublon$conservee <- !duplicated(tDoublon$id_data)
 
         dataExclues <- subset(tDoublon,!conservee)
         dataEclues <-subset(dataExclues,select=c("pk_observation","id_fnat_unique_citation","id_inventaire","id_point","id_carre","num_point","passage","date","annee","classe","espece","code_sp","distance_contact","abondance","db","date_export"))
@@ -1357,13 +1349,10 @@ FNat2observation <- function(d,dateExport,output=FALSE) {
 
         cat(" \n Pour chaque doublon nous conservons la valeur maximum\n")
 
-browser()
+## browser()
 
-        tAbMax <- aggregate(subset(tDoublon,select=c("abondance")),list(id_data=tDoublon$id_data),max)
-        tAbMax$conservee <- TRUE
-
-        tDoublon <- merge(tDoublon,tAbMax,by=c("id_data","abondance"),all=TRUE)
-        tDoublon$conservee[is.na(tDoublon$conservee)] <- FALSE
+        tDoublon <- tDoublon[order(tDoublon$id_data, -tDoublon$abondance),]
+        tDoublon$conservee <- !duplicated(tDoublon$id_data)
 
         dataExclues <- subset(tDoublon,!conservee)
         dataEclues <-subset(dataExclues,select=c("pk_observation","id_fnat_unique_citation","id_inventaire","id_point","id_carre","num_point","passage","date","annee","classe","espece","code_sp","distance_contact","abondance","db","date_export"))
@@ -2267,163 +2256,195 @@ group by pk_point_annee;"
 ###############################################################################################
 
 
-    historicCarre  <- function(con=NULL,nomDBpostgresql="stoc_eps",postgresUser="romain",postgresPassword=NULL,anneeMax=NULL) {
+historicCarre  <- function(con=NULL,nomDBpostgresql="stoc_eps",postgresUser="romain",postgresPassword=NULL,anneeMax=NULL) {
 
-                              ##  con=NULL;anneeMax=2017 ##
+    ##  con=NULL;anneeMax=2017 ##
 
-        require(ggplot2)
-        require(reshape2)
-        require(maps)
-        require(maptools)
-        require(animation)
+    require(ggplot2)
+    require(reshape2)
+    require(maps)
+    require(maptools)
+    require(animation)
 
-        if(is.null(con))     con <- openDB.PSQL(user=postgresUser,pw=postgresPassword,DBname=nomDBpostgresql)
-
-
-
-        if(is.null(anneeMax)) anneeTxt <- NULL else anneeTxt <- anneeMax
-        if(is.null(anneeMax)) anneeMax = 9999
-
-        query <-paste("select  from carre_annee where annee <= ",anneeMax," and annee > 2000 and qualite_inventaire_stoc > 0 group by id_carre, annee order by id_carre, annee;")
-
-      #  browser()
-
-        query <-paste("select  * from carre_annee where annee <= ",anneeMax," and annee > 2000 and qualite_inventaire_stoc > 0;")
-        d <- dbGetQuery(con, query)
-        d$PA <- 1
-
-        dan <- aggregate(PA ~ annee, d, sum)
-
-        dd <- cast(d,id_carre~annee,mean)
-        rnames <- dd$id_carre
-        cnames <- colnames(dd)[-1]
-        dd <- as.matrix(dd[,-1])
-        rownames(dd) <- rnames
-        colnames(dd) <- cnames
-        dd[is.nan(dd)] <- 0
+    if(is.null(con))     con <- openDB.PSQL(user=postgresUser,pw=postgresPassword,DBname=nomDBpostgresql)
 
 
 
-        nb_carre_diff <- nrow(dd)
+    if(is.null(anneeMax)) anneeTxt <- NULL else anneeTxt <- anneeMax
+    if(is.null(anneeMax)) anneeMax = 9999
 
-        colnames(dan)[2] <- "nbCarre"
-        dan$Nouveaux <- NA
-        dan$NonRealise <- NA
-        dan$Arrete <- NA
-        dan$Nouveaux[1] <- sum(dd[,1])
-        dan$NonRealise[1] <- 0
-        dan$Arrete[1] <- 0
-        dan$Arrete[ncol(dd)] <- NA
+    ##        query <-paste("select  from carre_annee where annee <= ",anneeMax," and annee > 2000 and qualite_inventaire_stoc > 0 group by id_carre, annee order by id_carre, annee;")
 
-        for(j in 2:ncol(dd)) {
-            if(j==2)
-                dan$Nouveaux[j] <- sum(dd[dd[,j]==1 & dd[,j-1]==0,j]) else dan$Nouveaux[j] <- sum(dd[dd[,j]==1 & rowSums(dd[,1:j-1])==0,j])
-        }
+                                        #  browser()
+
+    query <-paste("select  * from carre_annee where annee <= ",anneeMax," and annee > 2000 and qualite_inventaire_stoc > 0;")
+
+    cat("Query:\n",query,"\n")
+
+    d <- dbGetQuery(con, query)
+    d$PA <- 1
+
+    dan <- aggregate(PA ~ annee, d, sum)
+
+    dd <- cast(d,id_carre~annee,mean)
+    rnames <- dd$id_carre
+    cnames <- colnames(dd)[-1]
+    dd <- as.matrix(dd[,-1])
+    rownames(dd) <- rnames
+    colnames(dd) <- cnames
+    dd[is.nan(dd)] <- 0
+
+
+
+    nb_carre_diff <- nrow(dd)
+
+    colnames(dan)[2] <- "nbCarre"
+    dan$Nouveaux <- NA
+    dan$NonRealise <- NA
+    dan$Arrete <- NA
+    dan$Nouveaux[1] <- sum(dd[,1])
+    dan$NonRealise[1] <- 0
+    dan$Arrete[1] <- 0
+    dan$Arrete[ncol(dd)] <- NA
+
+    for(j in 2:ncol(dd)) {
+        if(j==2)
+            dan$Nouveaux[j] <- sum(dd[dd[,j]==1 & dd[,j-1]==0,j]) else dan$Nouveaux[j] <- sum(dd[dd[,j]==1 & rowSums(dd[,1:j-1])==0,j])
+    }
                                         #-as.numeric(rowSums(dd[dd[,j]==1 & dd[,j-1]==0,1:j-1])>0)))
 
 
-        for(j in 2:ncol(dd))
-            if(j<ncol(dd))
-                dan$NonRealise[j] <- sum(dd[dd[,j]==0 & rowSums(dd[,j:ncol(dd)])>0 & dd[,j-1]==1,(j-1)])  else  dan$NonRealise[j] <- sum(dd[(dd[,j]==0 & dd[,j-1]==1),j-1])
+    for(j in 2:ncol(dd))
+        if(j<ncol(dd))
+            dan$NonRealise[j] <- sum(dd[dd[,j]==0 & rowSums(dd[,j:ncol(dd)])>0 & dd[,j-1]==1,(j-1)])  else  dan$NonRealise[j] <- sum(dd[(dd[,j]==0 & dd[,j-1]==1),j-1])
 
-        for(j in 2:(ncol(dd)-1))
-            dan$Arrete[j] <- sum(dd[rowSums(dd[,j:ncol(dd)])==0 & dd[,j-1]==1,(j-1)])
+    for(j in 2:(ncol(dd)-1))
+        dan$Arrete[j] <- sum(dd[rowSums(dd[,j:ncol(dd)])==0 & dd[,j-1]==1,(j-1)])
 
-        write.csv2(dan,paste("OutputImport/carreSTOCactif_",anneeTxt,".csv",sep=""))
+    fileCSV <- paste("OutputImport/carreSTOCactif_",anneeTxt,".csv",sep="")
+    cat( "\n  CSV --> ", fileCSV,"\n")
+    write.csv2(dan,fileCSV)
 
-        ggAnnee <- melt(dan,"annee")
+    ggAnnee <- melt(dan,"annee")
 
-        gg <- ggplot(ggAnnee,aes(x=annee,y=value,colour=variable))+geom_line(size=1.1)+geom_point(size=1.3)
-        gg <- gg + scale_colour_manual(values=c("nbCarre" = "#0d259f","Nouveaux"="#0d9f1b","Arrete" = "#9f0d0d" ,"NonRealise" = "#ff9d00"),
-                                       labels=c("nbCarre" = "Carrés actif","Nouveaux"="Nouveaux carrés","Arrete" = "Carrés arrêtés","NonRealise" = "Carrés non réalisés"),name="" )
-        gg <- gg + labs(title="",x="",y="")
-        ggsave(paste("OutputImport/carreSTOC_",anneeTxt,".png",sep=""),gg)
+    gg <- ggplot(ggAnnee,aes(x=annee,y=value,colour=variable))+geom_line(size=1.1)+geom_point(size=1.3)
+    gg <- gg + scale_colour_manual(values=c("nbCarre" = "#0d259f","Nouveaux"="#0d9f1b","Arrete" = "#9f0d0d" ,"NonRealise" = "#ff9d00"),
+                                   labels=c("nbCarre" = "Carrés actif","Nouveaux"="Nouveaux carrés","Arrete" = "Carrés arrêtés","NonRealise" = "Carrés non réalisés"),name="" )
+    gg <- gg + labs(title="",x="",y="")
 
-
-
-        birth <- apply(dd,1,FUN = function(x) min(which(x==1)))
-        dage <- dd
-        for(i in 1:nrow(dd)) {
-            cc <- names(birth[i])
-            b <- birth[i]
-            dage[cc,b:ncol(dage)] <- 1:(ncol(dage)-b+1)
-        }
-
-        dage <- dage*dd
-        dage <- as.data.frame(as.matrix(dage))
-        dage2 <- data.frame(id_carre=row.names(dage),dage)
-
-        dage2 <- melt(dage2,"id_carre")
-        colnames(dage2) <- c("id_carre","annee","age")
-        dage2$annee <- as.numeric(substring(as.character(dage2$annee),2,5))
-
-        dage2 <- subset(dage2,age>0)
-        ggAge <- aggregate(id_carre~annee+age,dage2,length)
+    filePNG <- paste("OutputImport/carreSTOC_",anneeTxt,".png",sep="")
+    cat( "\n  PNG --> ", filePNG,"\n")
+    ggsave(filePNG,gg)
 
 
-        gg <- ggplot(ggAge,aes(age,id_carre))+ geom_col() + facet_wrap(~annee)
-        gg <- gg + labs(title="Pyramide des ages des stations STOC EPS",x="Age",y="Nombre de carré STOC actifs")
 
-        ggsave(paste("OutputImport/carreSTOC_pyramideAge_",anneeTxt,".png",sep=""),gg)
+    birth <- apply(dd,1,FUN = function(x) min(which(x==1)))
+    dage <- dd
+    for(i in 1:nrow(dd)) {
+        cc <- names(birth[i])
+        b <- birth[i]
+        dage[cc,b:ncol(dage)] <- 1:(ncol(dage)-b+1)
+    }
 
-        write.csv2(dan,paste("OutputImport/carreSTOCage_",anneeTxt,".csv",sep=""))
+    dage <- dage*dd
+    dage <- as.data.frame(as.matrix(dage))
+    dage2 <- data.frame(id_carre=row.names(dage),dage)
+
+    dage2 <- melt(dage2,"id_carre")
+    colnames(dage2) <- c("id_carre","annee","age")
+    dage2$annee <- as.numeric(substring(as.character(dage2$annee),2,5))
+
+    dage2 <- subset(dage2,age>0)
+    ggAge <- aggregate(id_carre~annee+age,dage2,length)
 
 
-        query <-paste("select id_carre, longitude_grid_wgs84, latitude_grid_wgs84
+    gg <- ggplot(ggAge,aes(age,id_carre))+ geom_col() + facet_wrap(~annee)
+    gg <- gg + labs(title="Pyramide des ages des stations STOC EPS",x="Age",y="Nombre de carré STOC actifs")
+
+    filePNG <- paste("OutputImport/carreSTOC_pyramideAge_",anneeTxt,".png",sep="")
+    cat( "\n  PNG --> ", filePNG,"\n")
+    ggsave(filePNG,gg)
+
+
+
+    fileCSV <- paste("OutputImport/carreSTOCage_",anneeTxt,".csv",sep="")
+    cat( "\n  CSV --> ", fileCSV,"\n")
+    write.csv2(dan,fileCSV)
+
+
+
+    query <-paste("select id_carre, longitude_grid_wgs84, latitude_grid_wgs84
 from carre_annee as i, carre as c
 where i.id_carre = c.pk_carre and annee <= 9999 and annee > 2000 and qualite_inventaire_stoc > 0
 group by id_carre, longitude_grid_wgs84, latitude_grid_wgs84
 order by id_carre;")
 
+    cat("Query:\n",query,"\n")
                                         # browser()
-        dcoord <- dbGetQuery(con, query)
-        write.csv2(dcoord,paste("OutputImport/coord_carreSTOC_",anneeTxt,".csv",sep=""))
+    dcoord <- dbGetQuery(con, query)
 
-        france <- map_data("france")
-
-        gg <- ggplot(dcoord,aes(longitude_grid_wgs84,latitude_grid_wgs84))+
-            geom_polygon( data=france, aes(x=long, y=lat, group = group),colour="gray", fill="white",size=0.3 )+
-            geom_point(size=.8,alpha=.8,colour="black")
-        gg <- gg + theme(axis.ticks = element_blank(), axis.text = element_blank()) + labs(title="Localisation des carré STOC-EPS suivis au moins 1 année depuis 2001",x="",y="")
-        gg <- gg + coord_fixed(ratio=1.2)
-        ggsave(paste("OutputImport/carreSTOC_map_simple_",anneeTxt,".png",sep=""),gg)
+    fileCSV <- paste("OutputImport/coord_carreSTOC_",anneeTxt,".csv",sep="")
+    cat( "\n  CSV --> ", fileCSV,"\n")
+    write.csv2(dcoord,fileCSV)
 
 
-        dage2 <- merge(dage2,dcoord,by="id_carre")
-        dage2$creation <- dage2$annee-dage2$age + 1
 
-        ageMax <- max(dage2$age)
-       # dage2 <- subset(dage2,annee<=2016)
+    france <- map_data("france")
 
-        gg <- ggplot(dage2,aes(longitude_grid_wgs84,latitude_grid_wgs84,colour=creation))+
-            geom_polygon( data=france, aes(x=long, y=lat, group = group),colour="gray", fill="white",size=0.3 )+
-            geom_point(size=.8,alpha=.8,colour="black")+ geom_point(size=0.6,alpha=.8) + facet_wrap(~annee)
-        gg <- gg + scale_colour_gradientn(colours=c("#4d004b","#8c6bb1","#bfd3e6"),name="Date de\ncréation")
-        gg <- gg + theme(axis.ticks = element_blank(), axis.text = element_blank()) + labs(title="Localisation et age des suivis STOC-EPS",x="",y="")
-        gg <- gg + coord_fixed(ratio=1.2)
-        ggsave(paste("OutputImport/carreSTOC_map_age_",anneeTxt,".png",sep=""),gg,height = 10.5,width = 13)
+    gg <- ggplot(dcoord,aes(longitude_grid_wgs84,latitude_grid_wgs84))+
+        geom_polygon( data=france, aes(x=long, y=lat, group = group),colour="gray", fill="white",size=0.3 )+
+        geom_point(size=.8,alpha=.8,colour="black")
+    gg <- gg + theme(axis.ticks = element_blank(), axis.text = element_blank()) + labs(title="Localisation des carré STOC-EPS suivis au moins 1 année depuis 2001",x="",y="")
+    gg <- gg + coord_fixed(ratio=1.2)
 
-        saveGIF({
-            for(a in sort(unique(dage2$annee))) {
-                dage2a <- subset(dage2,annee==a)
-                gg <- ggplot(dage2a,aes(longitude_grid_wgs84,latitude_grid_wgs84,colour=creation))+
-                    geom_polygon( data=france, aes(x=long, y=lat, group = group),colour="gray", fill="white",size=0.3 )+
-                    geom_point(size=1.5,alpha=.8,colour="black")+geom_point(size=1.3,alpha=.8) + facet_wrap(~annee)
-                gg <- gg + scale_colour_gradientn(colours=c("#4d004b","#8c6bb1","#bfd3e6"),name="Date de\ncréation",limits=c(min(dage2$annee),max(dage2$annee)))
-                gg <- gg + coord_fixed(ratio=1.2)
-                gg <- gg + theme(axis.ticks = element_blank(), axis.text = element_blank()) + labs(title="Localisation et age des suivis STOC-EPS",x="",y="")
-                print(gg)
-                ani.pause()
-            }
-        },
-        interval = 1.3,
-        movie.name = paste("OutputImport/carreSTOC_mapGIF_",anneeTxt,".gif",sep=""),ani.width = 500, ani.height = 500)
+    filePNG <- paste("OutputImport/carreSTOC_map_simple_",anneeTxt,".png",sep="")
+    cat( "\n  PNG --> ", filePNG,"\n")
+    ggsave(filePNG,gg)
 
 
 
 
+    dage2 <- merge(dage2,dcoord,by="id_carre")
+    dage2$creation <- dage2$annee-dage2$age + 1
 
-    }
+    ageMax <- max(dage2$age)
+                                        # dage2 <- subset(dage2,annee<=2016)
+
+    gg <- ggplot(dage2,aes(longitude_grid_wgs84,latitude_grid_wgs84,colour=creation))+
+        geom_polygon( data=france, aes(x=long, y=lat, group = group),colour="gray", fill="white",size=0.3 )+
+        geom_point(size=.8,alpha=.8,colour="black")+ geom_point(size=0.6,alpha=.8) + facet_wrap(~annee)
+    gg <- gg + scale_colour_gradientn(colours=c("#4d004b","#8c6bb1","#bfd3e6"),name="Date de\ncréation")
+    gg <- gg + theme(axis.ticks = element_blank(), axis.text = element_blank()) + labs(title="Localisation et age des suivis STOC-EPS",x="",y="")
+    gg <- gg + coord_fixed(ratio=1.2)
+
+    fileGIF <- paste("OutputImport/carreSTOC_mapGIF_",anneeTxt,".gif",sep="")
+    cat( "\n  GIF --> ", fileGIF,"\n")
+    ggsave(fileGIF,gg,height = 10.5,width = 13)
+
+
+
+
+    saveGIF({
+        for(a in sort(unique(dage2$annee))) {
+            dage2a <- subset(dage2,annee==a)
+            gg <- ggplot(dage2a,aes(longitude_grid_wgs84,latitude_grid_wgs84,colour=creation))+
+                geom_polygon( data=france, aes(x=long, y=lat, group = group),colour="gray", fill="white",size=0.3 )+
+                geom_point(size=1.5,alpha=.8,colour="black")+geom_point(size=1.3,alpha=.8) + facet_wrap(~annee)
+            gg <- gg + scale_colour_gradientn(colours=c("#4d004b","#8c6bb1","#bfd3e6"),name="Date de\ncréation",limits=c(min(dage2$annee),max(dage2$annee)))
+            gg <- gg + coord_fixed(ratio=1.2)
+            gg <- gg + theme(axis.ticks = element_blank(), axis.text = element_blank()) + labs(title="Localisation et age des suivis STOC-EPS",x="",y="")
+            print(gg)
+            ani.pause()
+        }
+    },
+    interval = 1.3,
+    movie.name = fileGIF,ani.width = 500, ani.height = 500)
+
+
+
+
+
+}
 
 
 
@@ -2476,30 +2497,21 @@ cat(vecShape)
         ## \copy species_list_indicator FROM c:/git/BirdLab/generic_data/espece_list_indicateur.csv with (format csv, header, delimiter ',')
         myshell(cmd,invisible=TRUE)
 
-
-
-
         name_table <-  vecNameTable[i]
         if(!(is.na(name_table))) {
 
         }
-
-
-
-
     }
 
+    cat("\n\n --- Importation SQL ---\n\n")
+    cat("\n\n - file: ",fsql,"\n")
 
-         cat("\n\n --- Importation SQL ---\n\n")
-             cat("\n\n - file: ",fsql,"\n")
-
-
-commande <- paste("psql -U ",postgresUser," ",nomDBpostgresql," < ",repertoire,"sql/postgres_createTableGenerique.sql",sep="")
+    commande <- paste("psql -U ",postgresUser," ",nomDBpostgresql," < ",repertoire,"sql/postgres_createTableGenerique.sql",sep="")
     shell(commande)
 
 }
 
-findDataInVP <- function(d=NULL,nomFile="export_stoc14122018.txt",id_carre=NULL,num_point=NULL,date=NULL,annee=NULL,espece=NULL,distance_contact=NULL) {
+findDataInVP <- function(d=NULL,nomFile="export_stoc_14122018.txt",id_carre=NULL,num_point=NULL,date=NULL,annee=NULL,espece=NULL,distance_contact=NULL) {
     library(lubridate)
     if(is.null(d)) {
         nomFileVP <- paste("data/",nomFile,sep="")
@@ -2508,7 +2520,7 @@ findDataInVP <- function(d=NULL,nomFile="export_stoc14122018.txt",id_carre=NULL,
 
   #  browser()
     if(!is.null(id_carre)) d <- subset(d,N..Carré.EPS %in% paste("CARRE N°",id_carre,sep=""))
-    if(!is.null(num_point))  d <- subset(d, EXPORT_STOC_TEXT_EPS_POINT %in% paste("Point N°",sprintf("%02",num_point),sep=""))
+    if(!is.null(num_point))  d <- subset(d, EXPORT_STOC_TEXT_EPS_POINT %in% paste("Point N°",sprintf("%02d",num_point),sep=""))
     if(!is.null(date))  d <- subset(data,Date== format(as.Date(date),"%d.%m.%Y"))
     if(!is.null(annee)) d <- subset(d,year(as.Date(Date,"%d.%m.%Y"))%in% annee)
     if(!is.null(espece)) d <- subset(d,Espèce %in% espece)
@@ -2516,3 +2528,6 @@ findDataInVP <- function(d=NULL,nomFile="export_stoc14122018.txt",id_carre=NULL,
 
     return(d)
 }
+
+
+

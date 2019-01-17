@@ -135,7 +135,9 @@ prepaData <- function(dateExportVP="2018-12-14",nomFileVP="export_stoc14122018.t
         cat("\n - VigiePlume\n <-- Fichier a plat:",nomFileVP,"\n")
         flush.console()
         dVP <- read.csv(nomFileVP,h=TRUE,stringsAsFactors=FALSE,fileEncoding="utf-8",sep="\t")
-        cat("\n    !!! suppression des ligne issue d'une etude LPO ahiqutaine hors echantillonage STOC-EPS 'PRANAT','Frolet'\n")
+
+
+        cat("\n    !!! suppression des lignes  issue d'une etude LPO ahiqutaine hors echantillonage STOC-EPS 'PRANAT','Frolet'\n")
 
 
         ligneExclu <- union(grep("NAT",dVP$N..Carré.EPS),grep("Frolet",dVP$N..Carré.EPS))
@@ -146,6 +148,20 @@ prepaData <- function(dateExportVP="2018-12-14",nomFileVP="export_stoc14122018.t
         flush.console()
         dVPonf <- read.csv(nomFileVPonf,h=TRUE,stringsAsFactors=FALSE,fileEncoding="utf-8",sep="\t")
         dVP <- rbind(dVP,dVPonf)
+
+       cat("\n    !!! suppression des lignes pour les quelles le numéros du point n'est pas saisie\n")
+
+        dVP.sansPoint <- subset(dVP,EXPORT_STOC_TEXT_EPS_POINT=="")
+
+        if(nrow(dVP.sansPoint) > 0) {
+            cat("\   il y a ",nrow(dVP.sansPoint)," observation dans les données vigiplume qui n'ont pas de numéros de point\n")
+            fileCSV <- "OutputImport/_erreur_abscence_numeros_point.csv"
+            cat("  -->",fileCSV,"\n")
+            write.csv(dVP.sansPoint,fileCSV,row.names=FALSE)
+            dVP <- subset(dVP,EXPORT_STOC_TEXT_EPS_POINT != "")
+        }
+
+
 
         dVP <-subset(dVP,!is.na(Nombre) & !is.na(Espèce) & Espèce != "")
         dVP$INSEE <-sprintf("%05d", dVP$INSEE)
@@ -2511,7 +2527,7 @@ cat(vecShape)
 
 }
 
-findDataInVP <- function(d=NULL,nomFile="export_stoc_14122018.txt",id_carre=NULL,num_point=NULL,date=NULL,annee=NULL,espece=NULL,distance_contact=NULL) {
+findDataInVP <- function(d=NULL,nomFile="export_stoc_10012019.txt",id_carre=NULL,num_point=NULL,date=NULL,annee=NULL,espece=NULL,distance_contact=NULL) {
     library(lubridate)
     if(is.null(d)) {
         nomFileVP <- paste("data/",nomFile,sep="")

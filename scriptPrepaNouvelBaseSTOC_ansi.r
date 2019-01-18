@@ -68,6 +68,7 @@ myshell <- function(mycmd,myinvisible=TRUE) {
 
 
 
+
 prepaData <- function(dateExportVP="2018-12-14",nomFileVP="export_stoc14122018.txt",
                       nomFileVP_ONF="export_stoc_ONF_14122018.txt",
                       dateExportFNat="2017-01-04", importACCESS=FALSE,
@@ -77,8 +78,8 @@ prepaData <- function(dateExportVP="2018-12-14",nomFileVP="export_stoc14122018.t
                       constructionInventaire=TRUE,
                       constructionObservation = TRUE, constructionHabitat = TRUE,
                       dateConstruction=NULL,postgresql_import=TRUE,nomDBpostgresql=NULL,
-                      postgresql_createAll=TRUE,postgresUser="romain",
-                      postgresPassword=NULL,
+                      postgresql_createAll=TRUE,postgresUser="postgres",
+                      postgresPassword="postgres",
                       postGIS_initiation=FALSE,import_shape=FALSE,repertoire=NULL,
                       postgresql_abondanceSeuil=TRUE,seuilAbondance = .99,
                       historiqueCarre=TRUE,
@@ -2547,3 +2548,84 @@ findDataInVP <- function(d=NULL,nomFile="export_stoc_10012019.txt",id_carre=NULL
 
 
 
+
+
+make_table_functionnal_indicator <- function() {
+
+    dinc <- read.csv("DB_import/tablesGeneriques/espece_indicateur_fonctionel.csv",encoding="UTF-8")
+    dim(dinc)
+    dbl <- read.csv("DB_import/tablesGeneriques/espece_indicateur_fonctionel_birdalb.csv",encoding="UTF-8",sep=";")
+    dim(dbl)
+    dsti <- read.csv("DB_import/tablesGeneriques/OLD_CTI_sti.csv",sep=";")
+    dim(dsti)
+    dstri <- read.table("DB_import/tablesGeneriques/STrI.txt",sep="\t",header=TRUE)
+    dim(dstri)
+    dssi <- read.table("DB_import/tablesGeneriques/SSI.txt",sep="\t",header=TRUE)
+    dim(dssi)
+    dssiold <- read.csv2("DB_import/tablesGeneriques/SSInew100m_2007.csv")
+    dim(dssiold)
+
+    lescolonnes <- colnames(dbl)[1:15]
+    print(lescolonnes)
+
+    touteslescolonnes <- colnames(dbl)
+    print(touteslescolonnes)
+
+    dprevHiv <- dbl[,c(1,16:ncol(dbl))]
+    print(colnames(dprevHiv))
+
+    print(colnames(dinc))
+    dstieu <- dinc[,c(1,9:13,16:18)]
+    print(colnames(dstieu))
+
+   print(colnames(dssi))
+    colnames(dssi) <- c("pk_species","ssi")
+
+    print(colnames(dssiold))
+    head(dssiold)
+    dssiold <- dssiold[,c(1,3,4)]
+    print(colnames(dssiold))
+    colnames(dssiold) <- c("pk_species","ssi_old","ssi_2007")
+
+
+    print(colnames(dsti))
+    head(dsti)
+    dsti <- dsti[,c(1,5)]
+    print(colnames(dsti))
+    colnames(dsti) <- c("pk_species","sti")
+
+    print(colnames(dstri))
+    head(dstri)
+    colnames(dstri) <- c("pk_species","stri")
+    dstri$exp_stri <- round(exp(dstri$stri),2)
+    head(dstri)
+
+
+    dim(dstieu)
+    dd <- merge(dstieu,dssi,by="pk_species",all=TRUE)
+    dim(dd)
+    dd <- merge(dd,dssiold,by="pk_species",all=TRUE)
+    dim(dd)
+    dd <- merge(dd,dsti,by="pk_species",all=TRUE)
+    dim(dd)
+    dd <- merge(dd,dstri,by="pk_species",all=TRUE)
+    dim(dd)
+
+    print(head(dd))
+
+    dd <- dd[,lescolonnes]
+    dim(dd)
+    print(head(dd))
+
+    write.csv(dd,"DB_import/tablesGeneriques/espece_indicateur_fonctionel.csv",fileEncoding="UTF-8",row.names=FALSE,quote=TRUE,na="")
+
+
+    ddd <- merge(dd,dprevHiv,by="pk_species",all=TRUE)
+    dim(ddd)
+    print(head(ddd))
+    ddd <- ddd[,touteslescolonnes]
+    print(head(ddd))
+
+    write.csv(dd,"DB_import/tablesGeneriques/espece_indicateur_fonctionel_BL.csv",fileEncoding="UTF-8",row.names=FALSE,quote=TRUE,na="")
+
+}

@@ -52,14 +52,11 @@ CREATE TABLE species_list_indicateur
 DROP table if exists species_indicateur_fonctionnel;
 CREATE TABLE species_indicateur_fonctionnel
 				(pk_species varchar(9) PRIMARY KEY,
-				euring int,
-				taxref int,
-				scientific_name varchar(150),
-				french_name varchar(150),
-				english_name varchar(150),
- 				ssi real,
-				sti_france real, -- Vincent Devictor
-				sti_europe real,  -- Aleksi Lehikoinen
+				ssi real,
+				ssi_old real,
+				ssi_2007 real,
+				sti real,
+				sti_europe real,
 				thermal_niche_mean real,
 				thermal_niche_range real,
 				thermal_niche_max real,
@@ -70,5 +67,5 @@ CREATE TABLE species_indicateur_fonctionnel
 				trophic_invertebrate smallint,
 				trophic_vertebrate smallint);
 
-
+	
 

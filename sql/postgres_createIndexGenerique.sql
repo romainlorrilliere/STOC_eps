@@ -32,4 +32,4 @@ CREATE INDEX indic_montane ON species_list_indicateur (montane_lehikoinen);
 --drop INDEX if exists indic_montane;
 CREATE INDEX indic_trim ON species_list_indicateur (french_trim);
 
-CREATE INDEX indic_ebcc ON species_list_indicateur (french_ebcc);
+--- CREATE INDEX indic_ebcc ON species_list_indicateur (french_ebcc);

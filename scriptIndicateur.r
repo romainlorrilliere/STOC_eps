@@ -1222,7 +1222,7 @@ cti_europe <- function(con=NULL,user=NULL,mp=NULL,query=TRUE,carre = TRUE,method
 
 
         d.sti <- dbReadTable(con,"species_indicateur_fonctionnel")
-        d.sti <- d.sti[,c("pk_species","sti_france","sti_europe")]
+        d.sti <- d.sti[,c("pk_species","sti","sti_europe")]
         colnames(d.sti)[1] <- "ESPECE"
 
 
@@ -1231,19 +1231,19 @@ cti_europe <- function(con=NULL,user=NULL,mp=NULL,query=TRUE,carre = TRUE,method
    ##     d.old$ESPECE <- toupper(d.old$ESPECE)
 
    ##     d.old <- merge(d.old,d.sti,by="ESPECE",all.x=TRUE)
-   ##     d.old$nsti_france <- ifelse(is.na(d.old$sti_france),0,d.old$TOTAL * d.old$sti_france)
+   ##     d.old$nsti <- ifelse(is.na(d.old$sti),0,d.old$TOTAL * d.old$sti)
    ##     d.old$nsti_europe <- ifelse(is.na(d.old$sti_europe),0,d.old$TOTAL * d.old$sti_europe)
 
-   ##     d.old$n_france <- d.old$TOTAL*as.numeric(!is.na(d.old$sti_france))
+   ##     d.old$n_france <- d.old$TOTAL*as.numeric(!is.na(d.old$sti))
    ##     d.old$n_europe <- d.old$TOTAL*as.numeric(!is.na(d.old$sti_europe))
 
 
 
 
-   ##     agg.old <- aggregate(cbind(d.old$n_france,d.old$n_europe,d.old$nsti_france,d.old$nsti_europe)~ ROUTE + ANNEE,data=d.old,FUN=sum)
+   ##     agg.old <- aggregate(cbind(d.old$n_france,d.old$n_europe,d.old$nsti,d.old$nsti_europe)~ ROUTE + ANNEE,data=d.old,FUN=sum)
 
-     ##   colnames(agg.old)[3:6] <- c("N_france","N_europe","NSTI_france","NSTI_europe")
-   ##     agg.old$cti_france <- agg.old$NSTI_france / agg.old$N_france
+     ##   colnames(agg.old)[3:6] <- c("N_france","N_europe","Nsti","NSTI_europe")
+   ##     agg.old$cti_france <- agg.old$Nsti / agg.old$N_france
    ##     agg.old$cti_europe <- agg.old$NSTI_europe / agg.old$N_europe
 
    ##     dcti.old <- agg.old[,c("ROUTE","ANNEE","cti_france","cti_europe")]
@@ -1275,19 +1275,19 @@ cti_europe <- function(con=NULL,user=NULL,mp=NULL,query=TRUE,carre = TRUE,method
 
 
        d.old <- merge(d.old,d.sti,by="ESPECE",all.x=TRUE)
-        d.old$nsti_france <- ifelse(is.na(d.old$sti_france),0,d.old$abundance * d.old$sti_france)
+        d.old$nsti <- ifelse(is.na(d.old$sti),0,d.old$abundance * d.old$sti)
         d.old$nsti_europe <- ifelse(is.na(d.old$sti_europe),0,d.old$abundance * d.old$sti_europe)
 
-        d.old$n_france <- d.old$abundance*as.numeric(!is.na(d.old$sti_france))
+        d.old$n_france <- d.old$abundance*as.numeric(!is.na(d.old$sti))
         d.old$n_europe <- d.old$abundance*as.numeric(!is.na(d.old$sti_europe))
 
 
 
 
-        agg.old <- aggregate(cbind(d.old$n_france,d.old$n_europe,d.old$nsti_france,d.old$nsti_europe)~ carre +annee ,data=d.old,FUN=sum)
+        agg.old <- aggregate(cbind(d.old$n_france,d.old$n_europe,d.old$nsti,d.old$nsti_europe)~ carre +annee ,data=d.old,FUN=sum)
 
-        colnames(agg.old)[3:6] <- c("N_france","N_europe","NSTI_france","NSTI_europe")
-        agg.old$cti_france <- agg.old$NSTI_france / agg.old$N_france
+        colnames(agg.old)[3:6] <- c("N_france","N_europe","Nsti","NSTI_europe")
+        agg.old$cti_france <- agg.old$Nsti / agg.old$N_france
         agg.old$cti_europe <- agg.old$NSTI_europe / agg.old$N_europe
 
         dcti.old <- agg.old[,c("carre","annee","cti_europe")]
@@ -2381,7 +2381,7 @@ write.csv(d.sti1,"output/theSTIs.csv",row.names=FALSE)
 
     d.sti2 <- read.csv("output/theSTIs.csv",encoding="UTF-8")
 
-    d.sti <- d.sti[,c("pk_species","sti_france","sti_europe")]
+    d.sti <- d.sti[,c("pk_species","sti","sti_europe")]
     colnames(d.sti)[2:3] <- c("sti_devictor","sti_lehikoinen")
     d.sti <- subset(d.sti,!(is.na(sti_devictor)))
 
@@ -2425,31 +2425,31 @@ winterCTI <- function(mp) {
 
 
 
-    con=NULL;user="romain"
+ ##   con=NULL;user="romain"
 
         if(is.null(con)) con <- openDB.PSQL(user,mp)
 
 
         d.sti <- dbReadTable(con,"species_indicateur_fonctionnel")
-        d.sti <- d.sti[,c("pk_species","sti_france","sti_europe")]
+        d.sti <- d.sti[,c("pk_species","sti","sti_europe")]
         colnames(d.sti)[1] <- "ESPECE"
 
 
 
        ddcarre <- merge(ddcarre,d.sti,by="ESPECE",all.x=TRUE)
-        ddcarre$nsti_france <- ifelse(is.na(ddcarre$sti_france),0,ddcarre$abundance * ddcarre$sti_france)
+        ddcarre$nsti <- ifelse(is.na(ddcarre$sti),0,ddcarre$abundance * ddcarre$sti)
         ddcarre$nsti_europe <- ifelse(is.na(ddcarre$sti_europe),0,ddcarre$abundance * ddcarre$sti_europe)
 
-        ddcarre$n_france <- ddcarre$abundance*as.numeric(!is.na(ddcarre$sti_france))
+        ddcarre$n_france <- ddcarre$abundance*as.numeric(!is.na(ddcarre$sti))
         ddcarre$n_europe <- ddcarre$abundance*as.numeric(!is.na(ddcarre$sti_europe))
 
 
 
 
-        agg.winter <- aggregate(cbind(ddcarre$n_france,ddcarre$n_europe,ddcarre$nsti_france,ddcarre$nsti_europe)~ carre +annee ,data=ddcarre,FUN=sum)
+        agg.winter <- aggregate(cbind(ddcarre$n_france,ddcarre$n_europe,ddcarre$nsti,ddcarre$nsti_europe)~ carre +annee ,data=ddcarre,FUN=sum)
 
-        colnames(agg.winter)[3:6] <- c("N_france","N_europe","NSTI_france","NSTI_europe")
-        agg.winter$cti_france <- agg.winter$NSTI_france / agg.winter$N_france
+        colnames(agg.winter)[3:6] <- c("N_france","N_europe","Nsti","NSTI_europe")
+        agg.winter$cti_france <- agg.winter$Nsti / agg.winter$N_france
         agg.winter$cti_europe <- agg.winter$NSTI_europe / agg.winter$N_europe
 
         dcti.winter <- agg.winter[,c("carre","annee","cti_europe")]

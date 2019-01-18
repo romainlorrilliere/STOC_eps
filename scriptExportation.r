@@ -387,7 +387,7 @@ ca.id_carre, year;",sep="")
 
 
 
-makeTablePoint <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,savePostgres=FALSE,output=FALSE,sp=NULL,champSp = "code_sp",nomChampSp="espece",
+makeTablePoint <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,savePostgres=FALSE,output=TRUE,sp=NULL,champSp = "code_sp",nomChampSp="espece",
                            spExcluPassage1=c("MOTFLA","SAXRUB","ANTPRA","OENOEN","PHYTRO"),# (Prince et al. 2013 Env. Sc. and Pol.) + "OENOEN","PHYTRO" avis d'expert F. Jiguet
                            seuilAbondance=.99,
                            champsHabitat=TRUE,champsCoordGrid=TRUE,altitude_min=NULL,altitude_max=NULL,
@@ -1261,7 +1261,7 @@ WHERE
 
     d <- dbGetQuery(con, query)
 
-  
+
     fileOut <- paste("export/data_FrenchBBS_VigiePlume_",id_output,"_",firstYear,"_",lastYear,".csv",sep="")
     write.csv2(d,fileOut,row.names=FALSE)
     cat(" --> ",fileOut,"\n")

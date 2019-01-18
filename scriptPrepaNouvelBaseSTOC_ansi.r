@@ -2556,7 +2556,7 @@ make_table_functionnal_indicator <- function() {
     dim(dinc)
     dbl <- read.csv("DB_import/tablesGeneriques/espece_indicateur_fonctionel_birdalb.csv",encoding="UTF-8",sep=";")
     dim(dbl)
-    dsti <- read.csv("DB_import/tablesGeneriques/OLD_CTI_sti.csv",sep=";")
+    dsti <- read.csv("DB_import/tablesGeneriques/OLD_CTI_sti.csv",sep=";",dec=",")
     dim(dsti)
     dstri <- read.table("DB_import/tablesGeneriques/STrI.txt",sep="\t",header=TRUE)
     dim(dstri)
@@ -2575,7 +2575,7 @@ make_table_functionnal_indicator <- function() {
     print(colnames(dprevHiv))
 
     print(colnames(dinc))
-    dstieu <- dinc[,c(1,9:13,16:18)]
+    dstieu <- dinc[,c(1,6:10,13:15)]
     print(colnames(dstieu))
 
    print(colnames(dssi))

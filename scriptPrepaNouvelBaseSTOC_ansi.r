@@ -80,7 +80,7 @@ prepaData <- function(dateExportVP="2018-12-14",nomFileVP="export_stoc14122018.t
                       dateConstruction=NULL,postgresql_import=TRUE,nomDBpostgresql=NULL,
                       postgresql_createAll=TRUE,postgresUser="postgres",
                       postgresPassword="postgres",
-                      postGIS_initiation=FALSE,import_shape=FALSE,repertoire=NULL,
+                      postGIS_initiation=TRUE,import_shape=FALSE,repertoire=NULL,
                       postgresql_abondanceSeuil=TRUE,seuilAbondance = .99,
                       historiqueCarre=TRUE,
                       pointCarreAnnee=TRUE,importPointCarreAnnee=TRUE,fileTemp=FALSE)
@@ -1618,6 +1618,9 @@ createDB_postgres <- function(dateConstruction,nomDBpostgresql=NULL,postgresUser
 
 ########  linux <- Sys.info()[1]=="Linux"
 
+    
+    if(postgresql_createAll)  maketableGenerique(repertoire,nomDBpostgresql,postgresUser, fileTemp)
+    
     cat("\n  Importation des tables des données STOC-eps et creation des index\n   ----------------------------------\n")
     cat("     1- point\n")
     cat("     2- carre\n")
@@ -1660,9 +1663,6 @@ createDB_postgres <- function(dateConstruction,nomDBpostgresql=NULL,postgresUser
     myshell(cmd_import)
 
     if(postgresql_abondanceSeuil) makeAbondanceTrunc(seuilAbondance,repertoire,nomDBpostgresql,postgresUser,postgresPassword,fileTemp)
-
-    if(postgresql_createAll)  maketableGenerique(repertoire,nomDBpostgresql,postgresUser, fileTemp)
-
 
     if(postGIS_initiation) {
         cat("\n  Creation des champs postGIS\n   ----------------------\n")

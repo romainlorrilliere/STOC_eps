@@ -69,8 +69,8 @@ myshell <- function(mycmd,myinvisible=TRUE) {
 
 
 
-prepaData <- function(dateExportVP="2018-12-14",nomFileVP="export_stoc14122018.txt",
-                      nomFileVP_ONF="export_stoc_ONF_14122018.txt",
+prepaData <- function(dateExportVP="2019-01-10",nomFileVP="export_stoc_10012019.txt",
+                      nomFileVP_ONF="export_stoc_ONF_10012019.txt",
                       dateExportFNat="2017-01-04", importACCESS=FALSE,
                       nomFileFNat="FNat_plat_2017-01-04.csv",nomDBFNat="Base FNat2000.MDB",
                       importationDataBrut=TRUE,
@@ -199,7 +199,7 @@ prepaData <- function(dateExportVP="2018-12-14",nomFileVP="export_stoc14122018.t
 
       #  dFNat$etude[dFNat$id_carre == "761436"] <- "STOC_ONF"
 
-        dCarreONF <- read.csv("Data/siteONF.csv")
+        dCarreONF <- read.csv("data/siteONF.csv",encoding="UTF-8")
         dCarreONF <- dCarreONF[,c(1,2,5)]
         dCarreONF$nouveau_lieudit <- sprintf("%06d",dCarreONF$nouveau_lieudit)
         colnames(dCarreONF) <- c("lieudit","dept","id_carre")
@@ -539,7 +539,7 @@ vp2point <- function(d,dateExport,output=FALSE) {
 vp2carre <- function(d,dateExport,output=FALSE) {
     ## d <- dVP; dateExport = dateExportVP; output=FALSE
 
-    dcarrenat <- read.csv("DB_import/tablesGeneriques/carrenat.csv")
+    dcarrenat <- read.csv("DB_import/tablesGeneriques/carrenat.csv",encoding="UTF-8")
     dcarrenat$pk_carre <- sprintf("%06d",    dcarrenat$pk_carre)
 
 
@@ -1031,7 +1031,7 @@ FNat2point <- function(d,dateExport,output=TRUE) {
 FNat2carre <- function(d,dateExport,output=FALSE) {
     library(rgdal)
     ## d = dFNat;dateExport=dateExportFNat;output=FALSE
-    dcarrenat <- read.csv("DB_import/tablesGeneriques/carrenat.csv")
+    dcarrenat <- read.csv("DB_import/tablesGeneriques/carrenat.csv",encoding="UTF-8")
     dcarrenat$pk_carre <- sprintf("%06d",    dcarrenat$pk_carre)
 
 
@@ -1618,9 +1618,9 @@ createDB_postgres <- function(dateConstruction,nomDBpostgresql=NULL,postgresUser
 
 ########  linux <- Sys.info()[1]=="Linux"
 
-    
+
     if(postgresql_createAll)  maketableGenerique(repertoire,nomDBpostgresql,postgresUser, fileTemp)
-    
+
     cat("\n  Importation des tables des données STOC-eps et creation des index\n   ----------------------------------\n")
     cat("     1- point\n")
     cat("     2- carre\n")

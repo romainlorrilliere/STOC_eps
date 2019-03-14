@@ -12,22 +12,34 @@ library(data.table)
 library(rgdal)
 library(lubridate)
 library(RPostgreSQL)
-library(doBy)
+#library(doBy)
 library(reshape2)
+require(dplyr)
 
 if("STOC_eps" %in% dir()) setwd("STOC_eps/")
 if(!("export" %in% dir())) setwd("/home/romain/git/STOC_eps")
 
-openDB.PSQL <- function(user=NULL,mp=NULL,nomDB=NULL){
+  openDB.PSQL <- function(user=NULL,pw=NULL,DBname=NULL){
+    ## --- initializing parameters for debugging ----
+                                        #DBname=NULL;
+                                        #user="romain" # windows
+                                        #user = NULL # linux
+                                        #  pw=NULL
+    ## ---
 
     library(RPostgreSQL)
     drv <- dbDriver("PostgreSQL")
-    if(is.null(nomDB)) nomDB <- "stoc_eps"
 
-    if(is.null(user)) {
-        con <- dbConnect(drv, dbname=nomDB)
-    } else {
-        con <- dbConnect(drv, dbname=nomDB,user=user, password=mp)
+    if(is.null(DBname)) {
+        DBname <- "stoc_eps"
+    }
+
+    cat("\n",DBname,user,ifelse(is.null(pw),"","****"),"\n")
+                                         # about when I use windows a have to define the user
+      if(is.null(user)) {
+         con <- dbConnect(drv, dbname=DBname)
+      } else {
+          con <- dbConnect(drv, dbname=DBname,user=user, password=pw)
     }
 
     return(con)
@@ -43,6 +55,10 @@ clean.PSQL <- function(nomDB=NULL) {
 
 
 
+  Encoding_utf8 <- function(x) {
+            Encoding(x) <- "UTF-8"
+            return(x)
+        }
 
 
 getCode_sp <- function(con,champSp,sp) {
@@ -261,6 +277,7 @@ oc.id_carre, annee,code_sp;",sep="")
 
     d <- dbGetQuery(con, queryObs)
 
+    d <- d %>% mutate_if(is.character, Encoding_utf8)
 
 
 
@@ -317,6 +334,8 @@ ca.id_carre, year;",sep="")
 
         dToutCarreAn <- dbGetQuery(con, queryCarreAn)
 
+        dToutCarreAn <- dToutCarreAn %>% mutate_if(is.character, Encoding_utf8)
+
         dCarreAbs <- subset(dToutCarreAn,!(id_carre_annee %in% dd$id_carre_annee))
 
         if(nrow(dCarreAbs)>0) {
@@ -342,7 +361,7 @@ ca.id_carre, year;",sep="")
     }
 
     if (formatTrend){
-                                        #  browser()
+##                 browser()                       #  browser()
         d <- subset(d,select=c("carre","annee","code_sp","abondance"))
         colnames(d)[3:4] <- c(nomChampSp,"abond")
     }

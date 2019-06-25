@@ -232,7 +232,7 @@ ifelse(!is.null(selectTypeHabitat),queryTypeHab," ")," ", sep="")
     queryObs <- paste("
 select oc.id_carre as carre, oc.annee, (oc.annee::varchar(4)||oc.id_carre::varchar(100))::varchar(100) as id_carre_annee, c.etude,
 qualite_inventaire_stoc, commune,insee,departement,
-code_sp, e.scientific_name, e.french_name, e.english_name as nom_anglais, e.euring,e.taxref,
+code_sp, e.scientific_name, e.french_name, e.english_name, e.euring,e.taxref,
 abond_brut as abondance_brut, abond  as abondance,
 altitude, longitude_grid_wgs84,latitude_grid_wgs84, ",
 ifelse(champsHabitat," foret_p, ouvert_p, agri_p, urbain_p,
@@ -283,8 +283,9 @@ oc.id_carre, annee,code_sp;",sep="")
 
     if(addAbscence) {
         cat("\n Ajout des absences: \n")
-        ##browser()
+
         colSp <- c("code_sp","euring","taxref",colnames(d)[grep("name",colnames(d))])
+        colSp <- setdiff(colSp,"data_base_name")
         colCarreAn<- setdiff(colnames(d),c(colSp,"abondance_brut","abondance","qualite_inventaire_stoc"))
         colAbond <- c("code_sp","id_carre_annee","abondance_brut","abondance","qualite_inventaire_stoc")
 
@@ -309,8 +310,8 @@ oc.id_carre, annee,code_sp;",sep="")
         dd <- dd[,colnames(d)]
 
 
-        queryCarreAn <- paste("select ca.id_carre as square, ca.annee as year, pk_carre_annee as id_carre_annee, etude as study,
- c.commune,c.insee,c.departement as district,
+        queryCarreAn <- paste("select ca.id_carre as carre, ca.annee, pk_carre_annee as id_carre_annee, etude,
+ c.commune,c.insee,c.departement,qualite_inventaire_stoc,
 c.altitude, longitude_grid_wgs84 ,latitude_grid_wgs84, ",
 ifelse(champsHabitat," foret_p as forest_p, ouvert_p as open_p, agri_p as farmland_p, urbain_p as urban_p,
 foret_ps as forest_ps, ouvert_ps as open_ps, agri_ps as farmland_ps, urbain_ps as urban_ps,
@@ -326,7 +327,7 @@ where
 ca.id_carre = c.pk_carre and  c.altitude <= ",altitude_max," and  c.altitude >= ",altitude_min,ifelse(is.null(departement),"",paste(" and departement in ",depList," "))," and
  ca.qualite_inventaire_stoc > 0 and ca.annee >= ",firstYear,"  and ca.annee <= ",lastYear," and c.etude in ('STOC_EPS'",ifelse(onf,", 'STOC_ONF'",""),")
 order by
-ca.id_carre, year;",sep="")
+ca.id_carre, annee;",sep="")
 
 
                                         # browser()
@@ -345,9 +346,9 @@ ca.id_carre, year;",sep="")
             dCarreAbs2 <- as.data.frame(lapply(dCarreAbs, rep,nbSp))
             dspAbs <- as.data.frame(lapply(dsp, rep,each= nbCarreAbs))
             dCarreAbs <- cbind(dCarreAbs2,dspAbs)
-            dCarreAbs$abundance <- 0
-            dCarreAbs$abundance_raw <- 0
-
+            dCarreAbs$abondance <- 0
+            dCarreAbs$abondance_brut <- 0
+#browser()
             dCarreAbs <- dCarreAbs[,colnames(d)]
 
             d <- rbind(dd,dCarreAbs)

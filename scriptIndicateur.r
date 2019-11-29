@@ -76,7 +76,7 @@ csi_national <- function(con=NULL,query=FALSE,carre = TRUE,
                           champSp = "code_sp", sp=NULL,champsHabitat=FALSE,
                           anglais=TRUE,seuilSignif=0.05,
                           couleur="#4444c3",
-                          titreY="Index de spÃ©cialistation des CommunautÃ©s",titreX="AnnÃ©es",titre="CSI",
+                          titreY="Index de spécialistation des Communautés",titreX="Années",titre="CSI",
                           savePostgres=FALSE,output=FALSE,
                           operateur=c("Lorrilliere Romain","lorrilliere@mnhn.fr"), encodingSave="ISO-8859-1",fileName="dataCSI",id="France"){
 
@@ -89,7 +89,7 @@ csi_national <- function(con=NULL,query=FALSE,carre = TRUE,
 #                          champSp = "code_sp"; sp=NULL;champsHabitat=FALSE;
 #                          anglais=TRUE;seuilSignif=0.05;
 #                          couleur="#4444c3";
-#                          titreY="Index de spÃ©cialistation des CommunautÃ©s";titreX="AnnÃ©es";titre="CSI";
+#                          titreY="Index de spécialistation des Communautés";titreX="Années";titre="CSI";
 #                          savePostgres=FALSE;output=FALSE;
 #                          operateur=c("Lorrilliere Romain","lorrilliere@mnhn.fr"); encodingSave="ISO-8859-1";fileName="dataCSI";id="France"
 
@@ -609,7 +609,7 @@ cti_national <- function(con=NULL,query=FALSE,carre = TRUE,methode = "lmer",
                           champSp = "code_sp", sp=NULL,champsHabitat=FALSE,
                           anglais=TRUE,seuilSignif=0.05,
                           couleur="#4444c3",
-                          titreY="Index Thermique des CommunautÃ©s",titreX="AnnÃ©es",titre="CTI",
+                          titreY="Index Thermique des Communautés",titreX="Années",titre="CTI",
                           savePostgres=FALSE,output=FALSE,
                           operateur=c("Lorrilliere Romain","lorrilliere@mnhn.fr"), encodingSave="ISO-8859-1",fileName="dataCTI",id="France"){
 
@@ -1923,7 +1923,7 @@ ctri_national <- function(con=NULL,query=FALSE,carre = TRUE,
                           champSp = "code_sp", sp=NULL,champsHabitat=FALSE,
                           anglais=TRUE,seuilSignif=0.05,
                           couleur="#4444c3",
-                          titreY="Index Trophique des CommunautÃ©s",titreX="AnnÃ©es",titre="RÃ©gime alimentaire des oiseaux",
+                          titreY="Index Trophique des Communautés",titreX="Années",titre="Régime alimentaire des oiseaux",
                           savePostgres=FALSE,output=FALSE,
                           operateur=c("Lorrilliere Romain","lorrilliere@mnhn.fr"), encodingSave="ISO-8859-1",fileName="dataCTrI"){
     if(carre){
@@ -2403,20 +2403,20 @@ winterCTI <- function(mp) {
 
         d <- read.delim("DB_import/export_shoc_04072018_155413.txt",header=TRUE,encoding="UTF-8",stringsAsFactors=FALSE)
 
-        dd <- subset(d,d$Distance.de.contact %in% c("LESS25","LESS100")& N..Passage > 1,select=c("Code.inventaire","N..Carré.EPS","Date","N..Passage","EXPORT_STOC_TEXT_EPS_POINT","Espèce","Nombre","EPS.P.Milieu"))
+        dd <- subset(d,d$Distance.de.contact %in% c("LESS25","LESS100")& N..Passage > 1,select=c("Code.inventaire","N..CarréPS","Date","N..Passage","EXPORT_STOC_TEXT_EPS_POINT","Esp","Nombre","EPS.P.Milieu"))
 
-        dd$Espèce[dd$Espèce==""] <- "OTHERS"
-        dd$Espèce <- substr(dd$Espèce,1,6)
+        dd$Esp[dd$Esp==""] <- "OTHERS"
+        dd$Esp <- substr(dd$Esp,1,6)
 
         dd$annee <- as.numeric(substr(dd$Date,7,10))
 
-        ddinv <- aggregate(Nombre~Code.inventaire+N..Carré.EPS+Date+N..Passage+EXPORT_STOC_TEXT_EPS_POINT+Espèce+EPS.P.Milieu,dd,sum)
+        ddinv <- aggregate(Nombre~Code.inventaire+N..CarrPS+Date+N..Passage+EXPORT_STOC_TEXT_EPS_POINT+Esp+EPS.P.Milieu,dd,sum)
 
         ddinv$an <- as.numeric(substr(ddinv$Date,7,10))
 
 
-        ddan <- aggregate(Nombre~N..Carré.EPS+EXPORT_STOC_TEXT_EPS_POINT+Espèce+an,ddinv,max)
-        ddcarre <- aggregate(Nombre~N..Carré.EPS+Espèce+an,ddan,sum)
+        ddan <- aggregate(Nombre~N..CarrPS+EXPORT_STOC_TEXT_EPS_POINT+Esp+an,ddinv,max)
+        ddcarre <- aggregate(Nombre~N..CarrPS+Esp+an,ddan,sum)
 
         colnames(ddcarre) <- c("carre","ESPECE","annee","abundance")
 

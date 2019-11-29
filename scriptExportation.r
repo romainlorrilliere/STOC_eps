@@ -12,22 +12,34 @@ library(data.table)
 library(rgdal)
 library(lubridate)
 library(RPostgreSQL)
-library(doBy)
+#library(doBy)
 library(reshape2)
+require(dplyr)
 
 if("STOC_eps" %in% dir()) setwd("STOC_eps/")
 if(!("export" %in% dir())) setwd("/home/romain/git/STOC_eps")
 
-openDB.PSQL <- function(user=NULL,mp=NULL,nomDB=NULL){
+  openDB.PSQL <- function(user=NULL,pw=NULL,DBname=NULL){
+    ## --- initializing parameters for debugging ----
+                                        #DBname=NULL;
+                                        #user="romain" # windows
+                                        #user = NULL # linux
+                                        #  pw=NULL
+    ## ---
 
     library(RPostgreSQL)
     drv <- dbDriver("PostgreSQL")
-    if(is.null(nomDB)) nomDB <- "stoc_eps"
 
-    if(is.null(user)) {
-        con <- dbConnect(drv, dbname=nomDB)
-    } else {
-        con <- dbConnect(drv, dbname=nomDB,user=user, password=mp)
+    if(is.null(DBname)) {
+        DBname <- "stoc_eps"
+    }
+
+    cat("\n",DBname,user,ifelse(is.null(pw),"","****"),"\n")
+                                         # about when I use windows a have to define the user
+      if(is.null(user)) {
+         con <- dbConnect(drv, dbname=DBname)
+      } else {
+          con <- dbConnect(drv, dbname=DBname,user=user, password=pw)
     }
 
     return(con)
@@ -43,12 +55,16 @@ clean.PSQL <- function(nomDB=NULL) {
 
 
 
+  Encoding_utf8 <- function(x) {
+            Encoding(x) <- "UTF-8"
+            return(x)
+        }
 
 
 getCode_sp <- function(con,champSp,sp) {
     if(is.null(con)) con <- openDB.PSQL()
     querySp <- paste(" select ",champSp,", pk_species as code_sp, french_name from species where ",champSp," in  ",paste("('",paste(sp,collapse="' , '"),"')",";",sep=""),sep="")
-    cat("\nRequete recupÃ©ration des code_sp:\n\n",querySp,"\n\n")
+    cat("\nRequete recupération des code_sp:\n\n",querySp,"\n\n")
 
     dsp <- dbGetQuery(con, querySp)
 
@@ -216,7 +232,7 @@ ifelse(!is.null(selectTypeHabitat),queryTypeHab," ")," ", sep="")
     queryObs <- paste("
 select oc.id_carre as carre, oc.annee, (oc.annee::varchar(4)||oc.id_carre::varchar(100))::varchar(100) as id_carre_annee, c.etude,
 qualite_inventaire_stoc, commune,insee,departement,
-code_sp, e.scientific_name, e.french_name, e.english_name as nom_anglais, e.euring,e.taxref,
+code_sp, e.scientific_name, e.french_name, e.english_name, e.euring,e.taxref,
 abond_brut as abondance_brut, abond  as abondance,
 altitude, longitude_grid_wgs84,latitude_grid_wgs84, ",
 ifelse(champsHabitat," foret_p, ouvert_p, agri_p, urbain_p,
@@ -261,13 +277,15 @@ oc.id_carre, annee,code_sp;",sep="")
 
     d <- dbGetQuery(con, queryObs)
 
+    d <- d %>% mutate_if(is.character, Encoding_utf8)
 
 
 
     if(addAbscence) {
         cat("\n Ajout des absences: \n")
-        ##browser()
+
         colSp <- c("code_sp","euring","taxref",colnames(d)[grep("name",colnames(d))])
+        colSp <- setdiff(colSp,"data_base_name")
         colCarreAn<- setdiff(colnames(d),c(colSp,"abondance_brut","abondance","qualite_inventaire_stoc"))
         colAbond <- c("code_sp","id_carre_annee","abondance_brut","abondance","qualite_inventaire_stoc")
 
@@ -292,8 +310,8 @@ oc.id_carre, annee,code_sp;",sep="")
         dd <- dd[,colnames(d)]
 
 
-        queryCarreAn <- paste("select ca.id_carre as square, ca.annee as year, pk_carre_annee as id_carre_annee, etude as study,
- c.commune,c.insee,c.departement as district,
+        queryCarreAn <- paste("select ca.id_carre as carre, ca.annee, pk_carre_annee as id_carre_annee, etude,
+ c.commune,c.insee,c.departement,qualite_inventaire_stoc,
 c.altitude, longitude_grid_wgs84 ,latitude_grid_wgs84, ",
 ifelse(champsHabitat," foret_p as forest_p, ouvert_p as open_p, agri_p as farmland_p, urbain_p as urban_p,
 foret_ps as forest_ps, ouvert_ps as open_ps, agri_ps as farmland_ps, urbain_ps as urban_ps,
@@ -309,13 +327,15 @@ where
 ca.id_carre = c.pk_carre and  c.altitude <= ",altitude_max," and  c.altitude >= ",altitude_min,ifelse(is.null(departement),"",paste(" and departement in ",depList," "))," and
  ca.qualite_inventaire_stoc > 0 and ca.annee >= ",firstYear,"  and ca.annee <= ",lastYear," and c.etude in ('STOC_EPS'",ifelse(onf,", 'STOC_ONF'",""),")
 order by
-ca.id_carre, year;",sep="")
+ca.id_carre, annee;",sep="")
 
 
                                         # browser()
         cat("\nRequete inventaire: Recherche de tous les inventaires\n\n",queryCarreAn,"\n\n")
 
         dToutCarreAn <- dbGetQuery(con, queryCarreAn)
+
+        dToutCarreAn <- dToutCarreAn %>% mutate_if(is.character, Encoding_utf8)
 
         dCarreAbs <- subset(dToutCarreAn,!(id_carre_annee %in% dd$id_carre_annee))
 
@@ -326,9 +346,9 @@ ca.id_carre, year;",sep="")
             dCarreAbs2 <- as.data.frame(lapply(dCarreAbs, rep,nbSp))
             dspAbs <- as.data.frame(lapply(dsp, rep,each= nbCarreAbs))
             dCarreAbs <- cbind(dCarreAbs2,dspAbs)
-            dCarreAbs$abundance <- 0
-            dCarreAbs$abundance_raw <- 0
-
+            dCarreAbs$abondance <- 0
+            dCarreAbs$abondance_brut <- 0
+#browser()
             dCarreAbs <- dCarreAbs[,colnames(d)]
 
             d <- rbind(dd,dCarreAbs)
@@ -342,7 +362,7 @@ ca.id_carre, year;",sep="")
     }
 
     if (formatTrend){
-                                        #  browser()
+##                 browser()                       #  browser()
         d <- subset(d,select=c("carre","annee","code_sp","abondance"))
         colnames(d)[3:4] <- c(nomChampSp,"abond")
     }
@@ -1141,7 +1161,7 @@ WHERE
   o.id_inventaire = i.pk_inventaire AND   o.id_point = p.pk_point AND  o.id_point = pa.id_point AND  o.annee = pa.annee AND  o.id_carre = ca.id_carre AND  o.annee = ca.annee AND  o.id_carre = c.pk_carre AND  o.espece = s.pk_species AND  o.id_inventaire = h.pk_habitat AND  ",selectQuery,";",sep="")
         if(test) paste(query," LIMIT 100;") else paste(query,";")
 
-        cat("\n QUERY donnÃ©es BRUT:\n--------------\n\n",query,"\n")
+        cat("\n QUERY données BRUT:\n--------------\n\n",query,"\n")
 
                                         # browser()
 
@@ -1228,18 +1248,18 @@ ifelse(is.null(insee),"",paste(" and p.insee in ",inseeList," ")),sep="")
      query <- paste(" SELECT
   o.id_inventaire as code_inventaire,  i.etude as Etude,
   p.site as Site, FALSE as Pays,
-  p.departement as Département, p.insee as INSEE,
-  p.commune as Commune, ('CARRE N°'||o.id_carre::varchar) as \"N°..Carré.EPS\",
+  p.departement as D�partement, p.insee as INSEE,
+  p.commune as Commune, ('CARRE N�'||o.id_carre::varchar) as \"N�..Carr�.EPS\",
   o.date as Date,i.heure_debut as Heure,
-  i.heure_fin as \"Heure.fin\",  i.passage_stoc as \"N°..Passage\",
+  i.heure_fin as \"Heure.fin\",  i.passage_stoc as \"N�..Passage\",
   i.observateur as Observateur,  i.email as Email,
-  ('Point N°'||o.num_point::varchar) as EXPORT_STOC_TEXT_EPS, p.altitude as Altitude,
-  '0'::varchar(1) as Classe, o.espece as Espèce,
+  ('Point N�'||o.num_point::varchar) as EXPORT_STOC_TEXT_EPS, p.altitude as Altitude,
+  '0'::varchar(1) as Classe, o.espece as Esp�ce,
   o.abondance as Nombre,o.distance_contact as \"Distance.de.contact\",
   p.longitude_wgs84 as Longitude, p.latitude_wgs84 as Latitude,
-  '2' as \"Type.de.coodonnées\", 'WGS84' as \"Type.de.coordonnées.lambert\",
+  '2' as \"Type.de.coodonn�es\", 'WGS84' as \"Type.de.coordonn�es.lambert\",
   i.nuage as \"EPS.Nuage\",  i.pluie as \"EPS.Pluie\",
-  i.vent as \"EPS.Vent\",  i.visibilite as \"EPS.Visibilité\",
+  i.vent as \"EPS.Vent\",  i.visibilite as \"EPS.Visibilit�\",
   i.neige as \"EPS.Neige\", 'NA' as \"EPS.Transport\",
   h.p_milieu as \"EPS.P.Milieu\",  h.p_type as \"EPS.P.Type\",
   h.p_cat1 as \"EPS.P.Cat1\", h.p_cat2 as \"EPS.P.Cat2\",
@@ -1423,7 +1443,7 @@ order by i.id_carre, i.annee;")
 
         gg <- ggplot(subset(ggAnnee,variable != "NonAjour"),aes(x=annee,y=value,colour=variable))+geom_line(size=1.5)+geom_point(size=2)
         gg <- gg + scale_colour_manual(values=c("nbCarre" = "#0d259f","Nouveaux"="#0d9f1b","Arrete" = "#9f0d0d" ),
-                                       labels=c("nbCarre" = "CarrÃ©s actif","Nouveaux"="Nouveaux carrÃ©s","Arrete" = "CarrÃ©s arrÃªtÃ©s"),name="" )
+                                       labels=c("nbCarre" = "Carrés actif","Nouveaux"="Nouveaux carrés","Arrete" = "Carrés arrêtés"),name="" )
         gg <- gg + labs(title="",x="",y="")
         ggsave("Output/carreSTOC.png",gg)
 
@@ -1450,7 +1470,7 @@ order by i.id_carre, i.annee;")
 
 
         gg <- ggplot(ggAge,aes(age,id_carre))+ geom_col() + facet_wrap(~annee)
-        gg <- gg + labs(title="Pyramide des ages des stations STOC EPS",x="Age",y="Nombre de carrÃ© STOC actifs")
+        gg <- gg + labs(title="Pyramide des ages des stations STOC EPS",x="Age",y="Nombre de carré STOC actifs")
 
         ggsave("Output/carreSTOC_pyramideAge.png",gg)
 

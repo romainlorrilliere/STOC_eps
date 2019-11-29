@@ -25,18 +25,20 @@ library(lme4)
 library(arm)
 library(ggplot2)
 library(speedglm)
+require(dplyr)
+
 source("scriptExportation_ansi.r")
 
 
 ### fonction principale qui permet de lancer l'analyse
 ## listSp: specification d'une liste d'espece pour ne pas analyser toutes les especes du jeu de donnees
-## id_session: specification d'un id Ã  la session de calcul
-## annees: vecteur de la premiere et derniere annees si toutes les annees presentes dans le jeu de donnees ne doivent pas Ãªtre prises en compte
-## estimateAnnuel: calculer les variations d'abondances des espÃ¨ces
+## id_session: specification d'un id � la session de calcul
+## annees: vecteur de la premiere et derniere annees si toutes les annees presentes dans le jeu de donnees ne doivent pas �tre prises en compte
+## estimateAnnuel: calculer les variations d'abondances des esp�ces
 ## ICfigureGroupeSp:  afficher les intervalles de confiances sur la figure pas groupes de specialisations
 ## figure:  creer les figures
 ## concatFile:  concatener les fichiers presents dans le dossier donnees et les analyser independamment
-## description:  avoir un graphique simple sans les deux panels de description des donnÃ©es brutes
+## description:  avoir un graphique simple sans les deux panels de description des donn�es brutes
 ## tendance sur graphique: afficher la tendance en texte sur les graphiques
 ## tendanceGroupSpe: calculer les indicateurs groupes de specialisations
 
@@ -50,7 +52,7 @@ makeTrend <- function(id="France",fileData="dataSTOCallSp_France_trend_2001_2017
                       ic = TRUE,carre = TRUE,
                       seuilSignif=0.05,output=FALSE,
                       operateur=c("Lorrilliere Romain","lorrilliere@mnhn.fr"),
-                      ICfigureGroupeSp=TRUE, figure=FALSE,description=TRUE,tendanceSurFigure=TRUE,tendanceGroupSpe = FALSE,
+                      ICfigureGroupeSp=TRUE, figure=FALSE,description=TRUE,tendanceSurFigure=TRUE,tendanceGroupSpe = TRUE,
                       ecritureStepByStep=FALSE,
                       groupeNom = c("generaliste","milieux batis","milieux forestiers","milieux agricoles"),
                       groupeCouleur = c("black","firebrick3","chartreuse4","orange")) {
@@ -68,29 +70,25 @@ makeTrend <- function(id="France",fileData="dataSTOCallSp_France_trend_2001_2017
 
 
     cat("\n")
-    start <- Sys.time() ## heure de demarage est utilisÃ©e comme identifiant par defaut
+    start <- Sys.time() ## heure de demarage est utilis�e comme identifiant par defaut
     id <- ifelse(is.null(id),paste("Trend",format(start, "%Y%m%d-%HH%M"),sep="_"),id)
     cat(format(start, "%d-%m-%Y %HH%M"),"\n")
     cat("\n")
 
-cat("rr")
     ## creation d'un dossier pour y mettre les resultats
     dir.create(paste("Output/",id,sep=""))
     dir.create(paste("Output/",id,"/Incertain/",sep=""))
-cat("aa")
+
     ## importation des donnees
     if(import != "clean") {
-        cat("bb")
         if(import=="query") {
-            cat("tt")
             data <- makeTableCarre(con=NULL,user=user,mp=mp, savePostgres=FALSE, output=TRUE, sp=sp, champSp=champSp,
                                    spExcluPassage1=spExcluPassage1  ,seuilAbondance=seuilAbondance,
                                    champsHabitat=FALSE, altitude_min=altitude_min,altitude_max=altitude_max,
                                    firstYear=firstYear, lastYear=lastYear,
-                                   departement=departement,formatTrend = TRUE,isEnglish=FALSE,addAbscence=FALSE,
+                                   departement=departement,formatTrend = TRUE,isEnglish=FALSE,addAbscence=TRUE,
                                    id_output=fileData,encodingSave="utf-8")
 
-            cat("uu")
 
              if(is.null(fileData)) {
                       if(is.null(sp))
@@ -126,19 +124,22 @@ order by espece;",sep="")
 
         cat("\n QUERY  espece :\n--------------\n\n",querySp,"\n")
 
-        con <- openDB.PSQL()
+    if(is.null(con)) con <- openDB.PSQL(user,mp,NULL)
         tabsp <- dbGetQuery(con, querySp)
+           tabsp <- tabsp %>% mutate_if(is.character, Encoding_utf8)
+
         write.csv2(tabsp,paste("Output/",id,"/tabSpecies.csv",sep=""),row.names=FALSE)
 
         cat("\n --> DONE !\n")
         dbDisconnect(con)
         ## si sous echantillonage
 
-        ## netoyage des espÃ¨ces trop peu abondantes
+        ## netoyage des esp�ces trop peu abondantes
 
         data <- filtreAnalyse(data,tabsp)
+
         fname <- paste("Output/",id,"/",fileData,"_",id,"_clean.csv",sep="")
-      ###  browser()
+
         write.csv2(data,fname,row.names=FALSE)
     } else {
         fname <- paste("Output/",id,"/",fileData,"_",id,"clean.csv",sep="")
@@ -152,7 +153,6 @@ order by espece;",sep="")
 
     if(!is.null(spExclude)) {
 
-                                        # browser()
         data <- subset(data,!(espece %in% spExclude))
         tabsp <- subset(tabsp, !(espece %in% spExclude))
 
@@ -178,16 +178,10 @@ order by espece;",sep="")
 
 ## mise en colonne des especes
 makeTableAnalyse <- function(data) {
-    tab <- reshape(data
-                  ,v.names="nombre"
-                  ,idvar=c("carre","annee")
-                  ,timevar="espece"
-                  ,direction="wide")
+
+    library(dplyr)
+    tab <- data %>% dcast(carre + annee  ~ espece )
     tab[is.na(tab)] <- 0
-                                        #  filename <- "touverUnNom"
-                                        #  chemin <- paste(rep,filename,sep="/")
-                                        #  write.table(tab, chemin)
-    colnames(tab) <- sub("nombre.","",colnames(tab))
 
     return(tab)
 }
@@ -195,8 +189,8 @@ makeTableAnalyse <- function(data) {
 
 ## filtre les especes trop rare pour avoir confiance dans les analyse
 ## y0is0 premiere annee sans presence
-## gsInf0 > 3 plus de 3 annees consÃ©cutives sans presence
-## gsSup0 < 3 plus de 3 annees consÃ©cutuve avec des presence
+## gsInf0 > 3 plus de 3 annees cons�cutives sans presence
+## gsSup0 < 3 plus de 3 annees cons�cutuve avec des presence
 filtreEspeceRare <- function(tab) {
 ### analyse occurrences
     cat <- NULL
@@ -232,8 +226,10 @@ filtreEspeceRare <- function(tab) {
 
 ## netoie le jeux de donnees des especes jamais observee
 filtreAnalyse <- function(tab,tabsp) {
+
     tab <- makeTableAnalyse(tab)
-    ## cas d'une seule especes (problÃ¨me de format)
+
+    ## cas d'une seule especes (probl�me de format)
     ## tabSum sommes de abondance par espece
     if(ncol(tab)==3) {
 	tabSum <- sum(tab[,3])
@@ -245,9 +241,9 @@ filtreAnalyse <- function(tab,tabsp) {
     colNull <- names(which(tabSum==0))
     ## colconserve especec au moins presente 1 fois
     colConserve <- names(which(tabSum>0))
-    ## Affichage des espÃ¨ces rejetees
+    ## Affichage des esp�ces rejetees
     if(length(colNull)>0){
-        cat("\n",length(colNull)," EspÃ¨ces enlevÃ©es de l'analyse car abondance toujours Ã©gale a 0\n\n",sep="")
+        cat("\n",length(colNull)," Esp�ces enlev�es de l'analyse car abondance toujours �gale a 0\n\n",sep="")
         tabNull <- data.frame(Code_espece = colNull, nom_espece = tabsp[colNull,"nom"])
         print(tabNull)
         cat("\n\n",sep="")
@@ -258,12 +254,12 @@ filtreAnalyse <- function(tab,tabsp) {
     tab <- lfiltre$tab
     ## colConserve espece conservees
     colConserve <- lfiltre$colConserve
-    ## colsupr espece trop rare et donc supprimÃ© de l'analyse
+    ## colsupr espece trop rare et donc supprim� de l'analyse
     colSupr <- lfiltre$colSupr
 
     ## affichage des especes retirer de l'analyse
     if(length(colSupr)>0){
-        cat("\n",length(colSupr)," EspÃ¨ces enlevÃ©es de l' analyse car espÃ¨ces trop rares\n\n",sep="")
+        cat("\n",length(colSupr)," Esp�ces enlev�es de l' analyse car esp�ces trop rares\n\n",sep="")
         tabSupr <- subset(tabsp,espece %in% colSupr ,select=c("espece","nom"))
         tabSupr <- tabSupr[order(tabSupr$espece),]
         print(tabSupr)
@@ -271,10 +267,9 @@ filtreAnalyse <- function(tab,tabsp) {
 
     }
     if(length(colConserve)==0) {
-        mess <- "Aucun espÃ¨ce elligible dans le jeu de donnÃ©es pour le calcul de variation d'abondance"
+        mess <- "Aucun esp�ce elligible dans le jeu de donn�es pour le calcul de variation d'abondance"
         stop(mess)
     }
-                                        #browser()
     tab <- melt(tab, id.vars=c("carre", "annee"))
     colnames(tab)[3:4] <- c("espece","abond")
     tab$annee <- as.numeric(as.character(tab$annee))
@@ -303,8 +298,8 @@ affectCatEBCC <- function(trend,pVal,ICinf,ICsup){
     catEBCC <- ifelse(pVal>0.05,
                ifelse(ICinf < 0.95 | ICsup > 1.05,"Incertain","Stable"),
                ifelse(trend<1,
-               ifelse(ICsup<0.95,"Fort dÃ©clin","DÃ©clin modÃ©rÃ©"),
-               ifelse(ICinf>1.05,"Forte augmentation","Augmentation modÃ©rÃ©e")))
+               ifelse(ICsup<0.95,"Fort d�clin","D�clin mod�r�"),
+               ifelse(ICinf>1.05,"Forte augmentation","Augmentation mod�r�e")))
     return(catEBCC)
 }
 
@@ -321,7 +316,6 @@ main.glm <- function(id,donneesAll,assessIC= TRUE,listSp=NULL,tabsp,annees=NULL,
                                         #donneAll = data;listSp=NULL;annees=NULL;echantillon=1;methodeEchantillon=NULL;
                                         #figure=TRUE;description=TRUE;tendanceSurFigure=TRUE;tendanceGroupSpe = FALSE;
                                         #seuilOccu=14;seuilAbond=NA;ecritureStepByStep=FALSE
-                                        # browser()
     require(arm)
     require(ggplot2)
 
@@ -362,11 +356,10 @@ main.glm <- function(id,donneesAll,assessIC= TRUE,listSp=NULL,tabsp,annees=NULL,
     listSp <- spOrdre$espece
     i <- 0
     nbSp <- length(listSp)
-                                        #	browser()
     ## analyse par espece
-### browser()
-    ## affichage des especes conservÃ©es pour l'analyse
-    cat("\n",nbSp," EspÃ¨ces conservÃ©es pour l'analyse\n\n",sep="")
+
+    ## affichage des especes conserv�es pour l'analyse
+    cat("\n",nbSp," Esp�ces conserv�es pour l'analyse\n\n",sep="")
     rownames(tabsp) <- tabsp$espece
     tabCons <- data.frame(Code_espece = listSp, nom_espece = tabsp[as.character(listSp),"nom"])
     print(tabCons)
@@ -381,10 +374,9 @@ main.glm <- function(id,donneesAll,assessIC= TRUE,listSp=NULL,tabsp,annees=NULL,
 
 
 
-##browser()
 
     for (sp in listSp) {
-###        if(sp=="PHYCOL")            browser()
+###        if(sp=="PHYCOL")
 
         i <- i + 1
         ## d data pour l'espece en court
@@ -393,9 +385,9 @@ main.glm <- function(id,donneesAll,assessIC= TRUE,listSp=NULL,tabsp,annees=NULL,
         nomSp <- as.character(tabsp[sp,"nom"])
         cat("\n(",i,"/",nbSp,") ",sp," | ", nomSp,"\n",sep="")
         flush.console()
-#### shortlist espece fait partie des especes indiactrice reconnue Ã  l'echelle national
+#### shortlist espece fait partie des especes indiactrice reconnue � l'echelle national
 ### shortlist <- tabsp[sp,"shortlist"]
-        ## indic espÃ¨ce utilisÃ© pour le calcul des indicateurs par groupe de specialisation
+        ## indic esp�ce utilis� pour le calcul des indicateurs par groupe de specialisation
         indic <- tabsp[sp,"indicateur"]
 
         ## Occurrence
@@ -454,7 +446,7 @@ main.glm <- function(id,donneesAll,assessIC= TRUE,listSp=NULL,tabsp,annees=NULL,
                            catPoint=ifelse(pval<seuilSignif,"significatif",NA),pval,
                            courbe=vpan[1],
                            panel=vpan[1])
-        ## netoyage des intervalle de confiance superieur trÃ¨s trÃ¨s grande
+        ## netoyage des intervalle de confiance superieur tr�s tr�s grande
         if(assessIC) {
         tab1$UL <- ifelse( nb_carre_presence==0,NA,tab1$UL)
         tab1$UL <-  ifelse(tab1$UL == Inf, NA,tab1$UL)
@@ -463,7 +455,7 @@ main.glm <- function(id,donneesAll,assessIC= TRUE,listSp=NULL,tabsp,annees=NULL,
         tab1$val <-  ifelse(tab1$val > 1.000000e+20,1.000000e+20,tab1$val)
         }
         ## indice de surdispersion
-       ## browser()
+
         if(assessIC) dispAn <- glm1$deviance/glm1$null.deviance else dispAn <- glm1$deviance/glm1$nulldev
 
 
@@ -477,7 +469,6 @@ main.glm <- function(id,donneesAll,assessIC= TRUE,listSp=NULL,tabsp,annees=NULL,
 
         ## GLM tendance generale sur la periode
         formule <- as.formula(paste("abond~ as.factor(carre) + annee",sep=""))
-          #  browser()
 
 
          if(assessIC) {
@@ -533,7 +524,7 @@ main.glm <- function(id,donneesAll,assessIC= TRUE,listSp=NULL,tabsp,annees=NULL,
 
 
         ## classement en categorie incertain
-       # browser()
+
         if(assessIC) {
         if(dispTrend > 2 | dispAn > 2 | median( nb_carre_presence)<seuilOccu) catIncert <- "Incertain" else catIncert <-"bon"
         vecLib <-  NULL
@@ -557,7 +548,7 @@ main.glm <- function(id,donneesAll,assessIC= TRUE,listSp=NULL,tabsp,annees=NULL,
         catEBCC <- NA
         if(assessIC)  catEBCC <- affectCatEBCC(trend = as.vector(trend),pVal = pval,ICinf=as.vector(LL),ICsup=as.vector(UL)) else catEBCC <- NA
         ## table complete de resultats
-     #   browser()
+
         tabTrend <- data.frame(
             id,code_espece=sp,nom_espece = nomSp,indicateur = indic,
             nombre_annees = pasdetemps,premiere_annee = firstY,derniere_annee = lastY,
@@ -646,20 +637,20 @@ repChoix <- function(vecChoix) {
                                         # fonction pour fixer un oublie de la premiere version du script
 completeSortieDescription <- function(id,listSp,taban) {
 
-    cat("Les donnees de description n'ont pas Ã©tÃ© enregistrer dans votre fichier de rÃ©sultats\n")
-    cat("Les descripteurs doivent Ãªtre recalculer et necessite le tableau de donner\n")
-    cat("A la fin de cette procedure le fichier de sortie variationsAnnuellesEspece_... sera mis Ã  jour\n")
+    cat("Les donnees de description n'ont pas �t� enregistrer dans votre fichier de r�sultats\n")
+    cat("Les descripteurs doivent �tre recalculer et necessite le tableau de donner\n")
+    cat("A la fin de cette procedure le fichier de sortie variationsAnnuellesEspece_... sera mis � jour\n")
 
     listeFichier <- dir("Donnees/")
     if(length(listeFichier) > 1 ) {
 	cat("Il y a plusieur fichiers dans le dossier 'Donnees'\n")
 	cat(listeFichier)
-	cat("Sont ils Ã  concatÃ©ner ? oui ou non\n")
+	cat("Sont ils � concat�ner ? oui ou non\n")
 	reponse <- ouiOuNon()
 	if(reponse == "OUI") {
             donneesAll <-  read.data()
 	} else {
-            cat("Quel est le fichier Ã  traiter\n")
+            cat("Quel est le fichier � traiter\n")
             cat("Notez le nom du fichier sans son extension\n")
 
             nomfichier <- repChoix(vecChoix)
@@ -667,18 +658,18 @@ completeSortieDescription <- function(id,listSp,taban) {
 	}
     } else {
 	if(length(listeFichier) == 1) {
-            cat("Le fichier de donnÃ©es suivant est il le bon ? \n")
+            cat("Le fichier de donn�es suivant est il le bon ? \n")
             cat(listeFichier)
             cat("\n")
             reponse <- ouiOuNon()
             if(reponse == "OUI") {
                 donneesAll <-  read.data()
             } else {
-                mess <- "Veuillez mettre vos donnÃ©es dans le dossier 'Donnees'\n"
+                mess <- "Veuillez mettre vos donn�es dans le dossier 'Donnees'\n"
                 stop(mess)
             }
 	} else {
-            mess <- "Veuillez mettre vos donnÃ©es dans le dossier 'Donnees'\n"
+            mess <- "Veuillez mettre vos donn�es dans le dossier 'Donnees'\n"
             stop(mess)
 	}
     }
@@ -733,7 +724,7 @@ ggplot.espece <- function(dgg,tab1t,id,serie=NULL,sp,valide,nomSp=NULL,descripti
     figname<- paste("Output/",id,"/",ifelse(valide=="Incertain","Incertain/",""),
                     sp,"_",id,serie, ".png",
                     sep = "")
-    ## coordonnÃ©e des ligne horizontal de seuil pour les abondances et les occurences
+    ## coordonn�e des ligne horizontal de seuil pour les abondances et les occurences
     hline.data1 <- data.frame(z = c(1), panel = c(vpan[1]),couleur = "variation abondance",type="variation abondance")
     hline.data2 <- data.frame(z = c(0,seuilOccu), panel = c(vpan[2],vpan[2]),couleur = "seuil",type="seuil")
     hline.data3 <- data.frame(z = 0, panel = vpan[3] ,couleur = "seuil",type="seuil")
@@ -771,7 +762,7 @@ ggplot.espece <- function(dgg,tab1t,id,serie=NULL,sp,valide,nomSp=NULL,descripti
             theme(legend.position="none",
                   panel.grid.minor=element_blank(),
                   panel.grid.major.y=element_blank())  +
-            ylab("") + xlab("AnnÃ©e")+ ggtitle(titre) +
+            ylab("") + xlab("Ann�e")+ ggtitle(titre) +
             scale_colour_manual(values=col, name = "" ,
                                 breaks = names(col))+
             scale_x_continuous(breaks=min(dgg$annee):max(dgg$annee))
@@ -793,7 +784,7 @@ ggplot.espece <- function(dgg,tab1t,id,serie=NULL,sp,valide,nomSp=NULL,descripti
             theme(legend.position="none",
                   panel.grid.minor=element_blank(),
                   panel.grid.major.y=element_blank())  +
-            ylab("") + xlab("AnnÃ©e")+ ggtitle(titre) +
+            ylab("") + xlab("Ann�e")+ ggtitle(titre) +
             scale_colour_manual(values=col, name = "" ,
                                 breaks = names(col))+
             scale_x_continuous(breaks=min(dgg$annee):max(dgg$annee))
@@ -814,15 +805,14 @@ ggplot.espece <- function(dgg,tab1t,id,serie=NULL,sp,valide,nomSp=NULL,descripti
 geometriqueWeighted <- function(x,w=1) exp(sum(w*log(x))/sum(w))
 
 
-## Analyse par groupe de specialisation Ã  partir des resulats de variation d'abondance par especes
+## Analyse par groupe de specialisation � partir des resulats de variation d'abondance par especes
 ## id identifiant de la session
 ## ICfigureGroupeSp affichage des intervalles de confiances sur la figure
 ## correctionAbondanceNull correction des abondance NULL
 analyseGroupe <- function(id=NA,tabsp,ICfigureGroupeSp=TRUE,powerWeight=2,
                           correctionAbondanceNull = 0.000001,
-                          groupeNom = c("generaliste","milieux batis","milieux forestiers","milieux agricoles"),
+                          groupeNom = c("generaliste","milieux bâtis","milieux forestiers","milieux agricoles"),
                           groupeCouleur = c("black","firebrick3","chartreuse4","orange")) {
-
 
     nameFile <- paste("Output/",id,"/variationsAnnuellesEspece_",id,".csv",sep="" )
     nameFileTrend <- paste("Output/",id,"/tendanceGlobalEspece_",id,".csv",sep="" )
@@ -832,9 +822,10 @@ analyseGroupe <- function(id=NA,tabsp,ICfigureGroupeSp=TRUE,powerWeight=2,
     donneesTrend <- read.csv2(nameFileTrend)
     donneesTrend <- subset(donneesTrend, select = c(code_espece,valide,mediane_occurrence))
     ## table de reference espece
-    tabsp <- subset(tabsp, select= c(sp,nom,indicateur, specialisation))
+    tabsp <- subset(tabsp, select= c(espece,nom,indicateur, specialisation))
     donnees <- merge(donnees,donneesTrend,by="code_espece")
-    donnees <- merge(donnees,tabsp,by.x="code_espece",by.y="sp")
+    donnees <- merge(donnees,tabsp,by.x="code_espece",by.y="espece")
+    donnees <- subset(donnees,specialisation %in% groupeNom)
     ## table de correspondance de biais en fonction des medianes des occuerences
     tBiais <- read.csv("Librairie/biais.csv")
     nameFileSpe <-  paste("Output/",id,"/variationsAnnuellesGroupes_",id,
@@ -846,9 +837,9 @@ analyseGroupe <- function(id=NA,tabsp,ICfigureGroupeSp=TRUE,powerWeight=2,
 
     ## recherche d'un maximum
     ff <- function(x,y) max(which(y<=x))
-    ## poids du Ã  l'incertitude
+    ## poids du � l'incertitude
     IncertW <- ifelse(donnees$valide=="Incertain",tBiais$biais[sapply(as.vector(donnees$mediane_occurrence),ff,y=tBiais$occurrenceMed)],1)
-    ## poids du Ã  la qualitÃ© de l'estimation
+    ## poids du � la qualit� de l'estimation
                                         #   erreur_stW <- 1/((donnees$erreur_st+1)^powerWeight)
                                         #	erreur_stW <- ifelse( is.na(donnees$IC_superieur),0,erreur_stW)
     erreur_stW <- ifelse(is.na(donnees$IC_superieur),0,1)
@@ -868,12 +859,12 @@ analyseGroupe <- function(id=NA,tabsp,ICfigureGroupeSp=TRUE,powerWeight=2,
                       IC_superieur= ifelse(is.na(donnees$IC_superieur),10000,donnees$IC_superieur),
                       valide = donnees$valide, mediane_occurrence = donnees$mediane_occurrence)
 
-    nomFileResum <- paste("Resultats/",id,"/donneesGroupes_",id,
+    nomFileResum <- paste("output/",id,"/donneesGroupes_",id,
                           ".csv",sep="" )
     write.csv2(ddd,nomFileResum,row.names=FALSE)
     cat(" <--",nomFileResum,"\n")
 
-    ## calcul des moyennes pondÃ©rÃ© par groupe par an et pour les estimates et les IC
+    ## calcul des moyennes pond�r� par groupe par an et pour les estimates et les IC
     for(j in 5:7) dd[,j] <- ifelse(dd[,j]==0,correctionAbondanceNull,dd[,j])
     ag <- apply(dd[,5:7], 2,
                 function(x) {
@@ -890,14 +881,15 @@ analyseGroupe <- function(id=NA,tabsp,ICfigureGroupeSp=TRUE,powerWeight=2,
     ## calcul nombre d'espece "bonne" pour le calcul
     bon <- tapply(dbon$nom,dbon$specialisation,FUN=function(X)length(unique(X)) )
     bon <- ifelse(is.na(bon),0,bon)
-    tbon <- data.frame(groupe=names(bon),bon)
+tbon <- data.frame(groupe=names(bon),bon)
+if(nrow(tbon)==0)tbon <- data.frame(groupe=unique(tabsp$specialisation)[-1],bon=0)
     ## calcul nombre d'especes "incertaines" pour le calcul
     Incert <- tapply(dIncert$nom,dIncert$specialisation,FUN=function(X)length(unique(X)) )
     Incert <- ifelse(is.na(Incert),0,Incert)
     tIncert <- data.frame(groupe=names(Incert),Incertain=Incert)
+if(nrow(tIncert)==0)tIncert <- data.frame(groupe=unique(tabsp$specialisation)[-1],Incertain=0)
 
     tIncert <- merge(tIncert,tbon,by="groupe")
-
     ## table de resultat
     da <- merge(unique(dd[,1:3]),ag,by="grAn")[,-1]
     colnames(da) <- c("annee","groupe","abondance_relative","IC_inferieur","IC_superieur")
@@ -913,16 +905,16 @@ analyseGroupe <- function(id=NA,tabsp,ICfigureGroupeSp=TRUE,powerWeight=2,
     yearsrange <- c(min(da$annee),max(da$annee))
 
     ## figure par ggplot2
-    titre <- paste("Variation de l'indicateur groupe de spÃ©cialisation",sep="")
+    titre <- paste("Variation de l'indicateur groupe de sp�cialisation",sep="")
 
     vecCouleur <- setNames(groupeCouleur,groupeNom)
-                                        #browser()
+
     p <- ggplot(data = da, mapping = aes(x = annee, y = abondance_relative, colour=groupe,fill=groupe))
     p <- p + geom_hline(aes(yintercept = 1), colour="white", alpha=1,size=1.2)
     if(ICfigureGroupeSp)
         p <- p + geom_ribbon(mapping=aes(ymin=IC_inferieur,ymax=IC_superieur),linetype=2,alpha=.1,size=0.1)
     p <- p + geom_line(size=1.5)
-    p <- p +  ylab("") + xlab("AnnÃ©e")+ ggtitle(titre)
+    p <- p +  ylab("") + xlab("Ann�e")+ ggtitle(titre)
     if(!is.null(groupeNom)) p <- p + scale_colour_manual(values=vecCouleur, name = "" )+
                                 scale_x_continuous(breaks=unique(da$annee))
     if(!is.null(groupeNom)) p <- p +  scale_fill_manual(values=vecCouleur, name="")
@@ -950,7 +942,7 @@ analyseGroupe <- function(id=NA,tabsp,ICfigureGroupeSp=TRUE,powerWeight=2,
     datasum <- merge(datasum,tIncert,by="groupe")
     datasum <- data.frame(id,datasum)
                                         #datasum$cat_tendance_EBCC <- affectCatEBCC(trend,pVal,ICinf,ICsup
-    namefilesum <- paste("Resultats/",id,"/tendancesGlobalesGroupes_",id,
+    namefilesum <- paste("output/",id,"/tendancesGlobalesGroupes_",id,
                          ".csv",sep="" )
     write.csv2(datasum,file=namefilesum,row.names=FALSE,quote=FALSE)
     cat(" <--",namefilesum,"\n")
@@ -981,10 +973,10 @@ figure.espece <- function(id,serie=NULL,listSp=NULL,description=TRUE,tendanceSur
     vpan <- c("Variation abondance")
     if(description) vpan <- c(vpan,"Occurrences","Abondances brutes")
 
-    ## import des fichiers de rÃ©sultats
-    filesaveAn <-  paste("Resultats/",id,"/variationsAnnuellesEspece_",id,".csv",
+    ## import des fichiers de r�sultats
+    filesaveAn <-  paste("output/",id,"/variationsAnnuellesEspece_",id,".csv",
                          sep = "")
-    filesaveTrend <-  paste("Resultats/",id,"/tendanceGlobalEspece_",id,".csv",
+    filesaveTrend <-  paste("output/",id,"/tendanceGlobalEspece_",id,".csv",
                             sep = "")
     taban <- read.csv2(filesaveAn)
     tabtrend <- read.csv2(filesaveTrend)
@@ -1009,7 +1001,9 @@ figure.espece <- function(id,serie=NULL,listSp=NULL,description=TRUE,tendanceSur
 
     i <- 0
     nbSp <- length(listSp)
-                                        #browser()
+
+
+
     ## analyse par espece
     for (sp in listSp) {
         i <- i + 1
@@ -1034,7 +1028,7 @@ figure.espece <- function(id,serie=NULL,listSp=NULL,description=TRUE,tendanceSur
                            catPoint=ifelse(tabanSp$significatif,"significatif",NA),pval = tabanSp$p_val,
                            courbe=vpan[1],
                            panel=vpan[1])
-        ## netoyage des intervalle de confiance superieur trÃ¨s trÃ¨s grande
+        ## netoyage des intervalle de confiance superieur tr�s tr�s grande
                                         #   tab1$UL <- ifelse( nb_carre_presence==0,NA,tab1$UL)
         tab1$UL <-  ifelse(tab1$UL == Inf, NA,tab1$UL)
         tab1$UL <-  ifelse(tab1$UL > 1.000000e+20, NA,tab1$UL)
@@ -1057,12 +1051,12 @@ figure.espece <- function(id,serie=NULL,listSp=NULL,description=TRUE,tendanceSur
 }
 
 
-##' Recherche des especes deja traiter quand le modele doit Ãªtre relancÃ©
+##' Recherche des especes deja traiter quand le modele doit �tre relanc�
 ##'
 ##' .. content for \details{} ..
 ##' @title findSp2Exclude
 ##' @param rep CHAR id du batch a checker
-##' @return CHAR[] vecteur des espÃ¨ces Ã  exclure
+##' @return CHAR[] vecteur des esp�ces � exclure
 ##' @author Romain Lorrilliere
 findSp2Exclude <- function(id="test44_FRANCE_2017") {
                                         # id <- "test44_FRANCE_2017"
@@ -1081,7 +1075,7 @@ findSp2Exclude <- function(id="test44_FRANCE_2017") {
 testParall <- function() {
 machin<-1:500000
 cores=detectCores()
-cl <- makeCluster(cores[1]-1) #not to overload your computer (dÃ©fini le nombre de cÅurs Ã  utiliser)
+cl <- makeCluster(cores[1]-1) #not to overload your computer (d�fini le nombre de c�urs � utiliser)
 registerDoParallel(cl)
 ptm<-proc.time()
 truc2<-c()

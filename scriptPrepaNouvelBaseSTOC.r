@@ -106,7 +106,7 @@ prepaData <- function(dateExportVP="2019-01-10",nomFileVP="export_stoc_10012019.
 
 
 
-   dateExportVP="2017-11-14";nomFileVP="export_stoc_14112017.txt";nomFileVP_ONF="export_stoc-onf_14112017.txt";
+##   dateExportVP="2019-12-03";nomFileVP="export_stoc_25112019.txt";nomFileVP_ONF="export_stoc_onf_03122019.txt";
 ##   dateExportFNat="2017-01-04"; importACCESS=FALSE;
 ##   nomFileFNat="FNat_plat_2017-01-04.csv";nomDBFNat="Base FNat2000.MDB";importationDataBrut=TRUE;
 ##   constructionPoint=TRUE;constructionCarre=TRUE;constructionInventaire=TRUE;
@@ -115,6 +115,7 @@ prepaData <- function(dateExportVP="2019-01-10",nomFileVP="export_stoc_10012019.
 ##   postgresql_createAll=TRUE;postgresUser="romain";
 ##   postGIS_initiation=TRUE;import_shape=FALSE;repertoire=NULL;postgresql_abondanceSeuil=TRUE;historiqueCarre=TRUE;
 ##   pointCarreAnnee=TRUE;importPointCarreAnnee=TRUE;fileTemp=FALSE
+##
 
 
     start <- Sys.time() ## heure de demarage est utiliser comme identifiant par defaut
@@ -2472,9 +2473,8 @@ import_shape <- function(vecShape=c("pra_93","L93_10x10_TerreMer"),vecNameTable=
 
 
                                         # require(ggplot2)
-vecShape=c("pra_93","L93_10x10_TerreMer");vecNameTable=c("pra","maille_atlas");vecEPSG = NULL
-
-    repertoire=NULL;savePostgres=TRUE;nomDBpostgresql=NULL;postgresUser="romain"; fileTemp=FALSE;
+## vecShape=c("pra_93","L93_10x10_TerreMer");vecNameTable=c("pra","maille_atlas");vecEPSG = NULL
+##    repertoire=NULL;savePostgres=TRUE;nomDBpostgresql=NULL;postgresUser="romain"; fileTemp=FALSE;
 
 
     cat("\n  Importation des shapes files \n   ------------------------------------\n")
@@ -2627,5 +2627,28 @@ make_table_functionnal_indicator <- function() {
     print(head(ddd))
 
     write.csv(dd,"DB_import/tablesGeneriques/espece_indicateur_fonctionel_BL.csv",fileEncoding="UTF-8",row.names=FALSE,quote=TRUE,na="")
+
+}
+
+
+
+
+
+explore_VP <- function(nomFileVP="export_stoc_25112019.txt") {
+    library(data.table)
+
+nomFileVP="export_stoc_25112019.txt"
+  nomFileVP=paste("data/",nomFileVP,sep="")
+
+  dVP <- fread(nomFileVP,encoding="UTF-8")
+
+colnames(dVP)[8] <- "carre"
+dVP$year <- as.numeric(substr(dVP$Date,7,10))
+
+    dc <- unique(dVP[,c("carre","year")])
+    dc$id_carre <- substr(dc$carre,9,nchar(dc$carre))
+
+    dc_y <- aggregate(id_carre ~year,dc,length)
+
 
 }

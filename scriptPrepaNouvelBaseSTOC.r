@@ -6,16 +6,10 @@
 ###################################################################################################################
 
 
-### mon compte windows romain crex
-### mon compte windows admin postgres crexCREX44!
-### mon compte linux romain
-
-
-
 
 ### Beta 1.0
 
-### Selection dans la base FNat seulement des carrÃ© STOC EPS
+### Selection dans la base FNat seulement des carré STOC EPS
 
 
 ### requete dans base access FNat (seulement sous windows et sous R 32bit)
@@ -55,27 +49,40 @@ library(animation)
 
 if("STOC_eps" %in% dir()) setwd("STOC_eps")
 
+if(!("scriptPrepaNouvelBaseSTOC.r" %in% dir())) stop("ERREUR !!! \n Changer le repertoire de travail \n STOC_eps/\n\n")
 
-openDB.PSQL <- function(nomDB=NULL){
 
-    library(RPostgreSQL)
-    if(is.null(nomDB)) nomDB <- "stoc_eps"
 
-    drv <- dbDriver("PostgreSQL")
-    con <- dbConnect(drv, dbname="stoc_eps")
-    return(con)
+myshell <- function(mycmd,myinvisible=TRUE) {
+    is.windows <- Sys.info()["sysname"] == "Windows"
+
+    cat("System command: ",mycmd,"\n",paste="")
+    if(is.windows){
+        cat("     - OS: Windows \n")
+        shell(cmd=mycmd,invisible=myinvisible)
+    }else{
+        cat("     - OS: Linux alike \n")
+        system2(mycmd)
+    }
 }
 
 
 
-prepaData <- function(dateExportVP="2018-02-14",nomFileVP="export_stoc_14022018.txt",nomFileVP_ONF="export_stoc_ONF_14022018.txt",
+
+prepaData <- function(dateExportVP="2019-01-10",nomFileVP="export_stoc_10012019.txt",
+                      nomFileVP_ONF="export_stoc_ONF_10012019.txt",
                       dateExportFNat="2017-01-04", importACCESS=FALSE,
-                      nomFileFNat="FNat_plat_2017-01-04.csv",nomDBFNat="Base FNat2000.MDB",importationDataBrut=FALSE,
-                      constructionPoint=FALSE,constructionCarre=FALSE,constructionInventaire=FALSE,
-                      constructionObservation = FALSE, constructionHabitat = FALSE,
-                      dateConstruction=NULL,postgresql_import=FALSE,nomDBpostgresql=NULL,
-                      postgresql_createAll=FALSE,postgresUser="romain",
-                      postGIS_initiation=FALSE,import_shape=FALSE,repertoire=NULL,postgresql_abondanceSeuil=FALSE,seuilAbondance = .99,historiqueCarre=TRUE,
+                      nomFileFNat="FNat_plat_2017-01-04.csv",nomDBFNat="Base FNat2000.MDB",
+                      importationDataBrut=TRUE,
+                      constructionPoint=TRUE,constructionCarre=TRUE,
+                      constructionInventaire=TRUE,
+                      constructionObservation = TRUE, constructionHabitat = TRUE,
+                      dateConstruction=NULL,postgresql_import=TRUE,nomDBpostgresql=NULL,
+                      postgresql_createAll=TRUE,postgresUser="postgres",
+                      postgresPassword="postgres",
+                      postGIS_initiation=TRUE,import_shape=FALSE,repertoire=NULL,
+                      postgresql_abondanceSeuil=TRUE,seuilAbondance = .99,
+                      historiqueCarre=TRUE,
                       pointCarreAnnee=TRUE,importPointCarreAnnee=TRUE,fileTemp=FALSE)
 {
     library(RODBC)
@@ -99,7 +106,7 @@ prepaData <- function(dateExportVP="2018-02-14",nomFileVP="export_stoc_14022018.
 
 
 
-##   dateExportVP="2017-11-14";nomFileVP="export_stoc_14112017.txt";nomFileVP_ONF="export_stoc-onf_14112017.txt";
+##   dateExportVP="2019-12-03";nomFileVP="export_stoc_25112019.txt";nomFileVP_ONF="export_stoc_onf_03122019.txt";
 ##   dateExportFNat="2017-01-04"; importACCESS=FALSE;
 ##   nomFileFNat="FNat_plat_2017-01-04.csv";nomDBFNat="Base FNat2000.MDB";importationDataBrut=TRUE;
 ##   constructionPoint=TRUE;constructionCarre=TRUE;constructionInventaire=TRUE;
@@ -108,6 +115,7 @@ prepaData <- function(dateExportVP="2018-02-14",nomFileVP="export_stoc_14022018.
 ##   postgresql_createAll=TRUE;postgresUser="romain";
 ##   postGIS_initiation=TRUE;import_shape=FALSE;repertoire=NULL;postgresql_abondanceSeuil=TRUE;historiqueCarre=TRUE;
 ##   pointCarreAnnee=TRUE;importPointCarreAnnee=TRUE;fileTemp=FALSE
+##
 
 
     start <- Sys.time() ## heure de demarage est utiliser comme identifiant par defaut
@@ -116,11 +124,11 @@ prepaData <- function(dateExportVP="2018-02-14",nomFileVP="export_stoc_14022018.
 
     cat("\n     # Debut du process:",format(start, "%Y-%m-%d %H:%M\n"))
 
-    nomFileVP=paste("Data/",nomFileVP,sep="")
-    nomFileVPonf=paste("Data/",nomFileVP_ONF,sep="")
+    nomFileVP=paste("data/",nomFileVP,sep="")
+    nomFileVPonf=paste("data/",nomFileVP_ONF,sep="")
 
-    nomDBFNat=paste("Data/",nomDBFNat,sep="")
-    nomFileFNat=paste("Data/",nomFileFNat,sep="")
+    nomDBFNat=paste("data/",nomDBFNat,sep="")
+    nomFileFNat=paste("data/",nomFileFNat,sep="")
 
 
     cat("\n\n 1) Importation\n----------------------\n")
@@ -129,10 +137,12 @@ prepaData <- function(dateExportVP="2018-02-14",nomFileVP="export_stoc_14022018.
         cat("\n - VigiePlume\n <-- Fichier a plat:",nomFileVP,"\n")
         flush.console()
         dVP <- read.csv(nomFileVP,h=TRUE,stringsAsFactors=FALSE,fileEncoding="utf-8",sep="\t")
-        cat("\n    !!! suppression des ligne issue d'une etude LPO ahiqutaine hors echantillonage STOC-EPS 'PRANAT','Frolet'\n")
 
 
-        ligneExclu <- union(grep("NAT",dVP$N..CarrÃ©.EPS),grep("Frolet",dVP$N..CarrÃ©.EPS))
+        cat("\n    !!! suppression des lignes  issue d'une etude LPO ahiqutaine hors echantillonage STOC-EPS 'PRANAT','Frolet'\n")
+
+
+        ligneExclu <- union(grep("NAT",dVP$N..Carré.EPS),grep("Frolet",dVP$N..Carré.EPS))
         cat(length(ligneExclu)," lignes exclues\n\n")
         ligneConserv <- setdiff(1:nrow(dVP),ligneExclu)
         dVP <- dVP[ligneConserv,]
@@ -141,13 +151,27 @@ prepaData <- function(dateExportVP="2018-02-14",nomFileVP="export_stoc_14022018.
         dVPonf <- read.csv(nomFileVPonf,h=TRUE,stringsAsFactors=FALSE,fileEncoding="utf-8",sep="\t")
         dVP <- rbind(dVP,dVPonf)
 
-        dVP <-subset(dVP,!is.na(Nombre) & !is.na(EspÃ¨ce) & EspÃ¨ce != "")
+       cat("\n    !!! suppression des lignes pour les quelles le numéros du point n'est pas saisie\n")
+
+        dVP.sansPoint <- subset(dVP,EXPORT_STOC_TEXT_EPS_POINT=="")
+
+        if(nrow(dVP.sansPoint) > 0) {
+            cat("\   il y a ",nrow(dVP.sansPoint)," observation dans les données vigiplume qui n'ont pas de numéros de point\n")
+            fileCSV <- "OutputImport/_erreur_abscence_numeros_point.csv"
+            cat("  -->",fileCSV,"\n")
+            write.csv(dVP.sansPoint,fileCSV,row.names=FALSE)
+            dVP <- subset(dVP,EXPORT_STOC_TEXT_EPS_POINT != "")
+        }
+
+
+
+        dVP <-subset(dVP,!is.na(Nombre) & !is.na(Espèce) & Espèce != "")
         dVP$INSEE <-sprintf("%05d", dVP$INSEE)
-        dVP$DÃ©partement <- sprintf("%02d", dVP$DÃ©partement)
+        dVP$Département <- sprintf("%02d", dVP$Département)
 
         cat("\n - FNat\n")
         if(importACCESS) {
-            cat(" <-- Base de donnÃ©es ACCESS:",nomDBFNat,"\n")
+            cat(" <-- Base de données ACCESS:",nomDBFNat,"\n")
             cat(" !! ATTENTION cette fonctionne uniquement sous windows avec une version 32bit de R (.../bin/i386/Rgui.exe)\n")
             cat(" Cette importation peut prendre prendre plusieurs minutes,\nmerci de patienter...\n")
             flush.console()
@@ -156,7 +180,7 @@ prepaData <- function(dateExportVP="2018-02-14",nomFileVP="export_stoc_14022018.
             flush.console()
 
         } else {
-            cat(" <-- Fichier Ã  plat:",nomFileFNat,"\n")
+            cat(" <-- Fichier à plat:",nomFileFNat,"\n")
             cat(" Cette importation peut prendre un peu de temps,\nmerci de patienter .... \n")
             flush.console()
             dFNat <- read.csv(nomFileFNat,fileEncoding="iso-8859-1",stringsAsFactors=FALSE)
@@ -176,7 +200,7 @@ prepaData <- function(dateExportVP="2018-02-14",nomFileVP="export_stoc_14022018.
 
       #  dFNat$etude[dFNat$id_carre == "761436"] <- "STOC_ONF"
 
-        dCarreONF <- read.csv("Data/siteONF.csv")
+        dCarreONF <- read.csv("data/siteONF.csv",encoding="UTF-8")
         dCarreONF <- dCarreONF[,c(1,2,5)]
         dCarreONF$nouveau_lieudit <- sprintf("%06d",dCarreONF$nouveau_lieudit)
         colnames(dCarreONF) <- c("lieudit","dept","id_carre")
@@ -184,7 +208,7 @@ prepaData <- function(dateExportVP="2018-02-14",nomFileVP="export_stoc_14022018.
         ddFNat <- merge(dFNat,dCarreONF,by=c("lieudit","dept"),all=TRUE)
         ## pour un bug incomprehenssible dans le merge
         ddFNat[grep("Messarges",ddFNat$lieudit),"id_carre"] <- "030523"
-        ddFNat[grep("TronÃ§ais",ddFNat$lieudit),"id_carre"] <- "030143"
+        ddFNat[grep("Tronçais",ddFNat$lieudit),"id_carre"] <- "030143"
         ddFNat <- subset(ddFNat,!is.na(unique_citation))
         dFNat <- ddFNat
         dFNat$id_carre <- ifelse(is.na(dFNat$id_carre),paste(dFNat$dept,substring(dFNat$lieudit,13,nchar(dFNat$lieudit)),sep=""),dFNat$id_carre)
@@ -213,7 +237,7 @@ prepaData <- function(dateExportVP="2018-02-14",nomFileVP="export_stoc_14022018.
 
         file <- paste("DB_import/point_",dateConstruction,".csv",sep="")
         cat("\n  -->",file,"\n")
-        write.table(dd.point,file,row.names=FALSE,na = "",quote=TRUE, sep=";",dec=".")
+        write.table(dd.point,file,row.names=FALSE,na = "",quote=TRUE, sep=";",dec=".",fileEncoding ="UTF-8")
 
     } else { cat(" ---> SKIP\n") }
 
@@ -238,7 +262,7 @@ prepaData <- function(dateExportVP="2018-02-14",nomFileVP="export_stoc_14022018.
 
         file <- paste("DB_import/carre_",dateConstruction,".csv",sep="")
         cat("\n  -->",file,"\n")
-        write.table(dd.carre,file,row.names=FALSE,na = "",quote=TRUE, sep=";",dec=".")
+        write.table(dd.carre,file,row.names=FALSE,na = "",quote=TRUE, sep=";",dec=".",fileEncoding ="UTF-8")
 
     } else { cat(" ---> SKIP\n") }
 
@@ -263,7 +287,7 @@ prepaData <- function(dateExportVP="2018-02-14",nomFileVP="export_stoc_14022018.
 
         file <- paste("DB_import/inventaire_",dateConstruction,".csv",sep="")
         cat("\n  -->",file,"\n")
-        write.table(dd.inv,file,row.names=FALSE,na = "",quote=TRUE, sep=";",dec=".")
+        write.table(dd.inv,file,row.names=FALSE,na = "",quote=TRUE, sep=";",dec=".",fileEncoding ="UTF-8")
 
     } else { cat(" ---> SKIP\n") }
 
@@ -293,7 +317,7 @@ prepaData <- function(dateExportVP="2018-02-14",nomFileVP="export_stoc_14022018.
 
         file <- paste("DB_import/observation_",dateConstruction,".csv",sep="")
         cat("\n  -->",file,"\n")
-        write.table(dd.obs,file,row.names=FALSE,na = "",quote=TRUE, sep=";",dec=".")
+        write.table(dd.obs,file,row.names=FALSE,na = "",quote=TRUE, sep=";",dec=".",fileEncoding ="UTF-8")
     } else { cat(" ---> SKIP\n") }
 
 
@@ -317,7 +341,7 @@ prepaData <- function(dateExportVP="2018-02-14",nomFileVP="export_stoc_14022018.
 
         file <- paste("DB_import/habitat_",dateConstruction,".csv",sep="")
         cat("\n  -->",file,"\n")
-        write.table(dd.hab,file,row.names=FALSE,na = "",quote=TRUE, sep=";",dec=".")
+        write.table(dd.hab,file,row.names=FALSE,na = "",quote=TRUE, sep=";",dec=".",fileEncoding ="UTF-8")
     } else { cat(" ---> SKIP\n") }
 
 
@@ -326,7 +350,7 @@ prepaData <- function(dateExportVP="2018-02-14",nomFileVP="export_stoc_14022018.
 
     if(postgresql_import) {
         cat("\n - Creation de la base de donnees PostGreSQL :\n")
-        createDB_postgres(dateConstruction,nomDBpostgresql,postgresUser,postgresql_createAll,postGIS_initiation,postgresql_abondanceSeuil,seuilAbondance,repertoire,fileTemp)
+        createDB_postgres(dateConstruction,nomDBpostgresql,postgresUser,postgresPassword,postgresql_createAll,postGIS_initiation,postgresql_abondanceSeuil,seuilAbondance,repertoire,fileTemp)
         cat("\n    -> OK\n")
     } else { cat(" ---> SKIP\n") }
 
@@ -334,7 +358,7 @@ prepaData <- function(dateExportVP="2018-02-14",nomFileVP="export_stoc_14022018.
     cat("\n\n 9) Point et Carrees Annee\n----------------------\n")
     flush.console()
     if(pointCarreAnnee) {
-        point_carre_annee(dateConstruction=dateConstruction,version=version,con=openDB.PSQL(),importation=importPointCarreAnnee,repertoire=repertoire,nomDBpostgresql=nomDBpostgresql,postgresUser="romain")
+        point_carre_annee(dateConstruction=dateConstruction,version=version,con=NULL,importation=importPointCarreAnnee,repertoire=repertoire,nomDBpostgresql=nomDBpostgresql,postgresUser=postgresUser,postgresPassword=postgresPassword)
     } else { cat(" ---> SKIP\n") }
 
 
@@ -342,7 +366,7 @@ prepaData <- function(dateExportVP="2018-02-14",nomFileVP="export_stoc_14022018.
     cat("\n\n 10) Historic des Carrees\n----------------------\n")
     flush.console()
     if(historiqueCarre & postgresql_import) {
-        historicCarre()
+        historicCarre(nomDBpostgresql=nomDBpostgresql,postgresUser=postgresUser,postgresPassword=postgresPassword)
     } else { cat(" ---> SKIP\n") }
 
 
@@ -398,27 +422,27 @@ import_FNat <- function(file="Base FNat2000.MDB",fichierAPlat="FNat_plat_2017-01
     library(reshape)
     library(data.table)
 
-    cat("\nConnexion Ã  la base de donnÃ©es ACCESS\n")
+    cat("\nConnexion à la base de données ACCESS\n")
     flush.console()
     con <- odbcConnectAccess(file)
 
-    cat("\nRequete principale\nC'est l'heure d'un petit cafÃ© :-o\n")
+    cat("\nRequete principale\nC'est l'heure d'un petit café :-o\n")
     flush.console()
-    query <- "SELECT TCCitations.Unique_Inventaire, TCCitations.Unique_Citation,TCInventaires.NumObs, TCInventaires.Etude, TCInventaires.Unique_LocalitÃ©, TCInventaires.section_cadastrale, TCInventaires.Lieudit, TCInventaires.Pays, TCInventaires.Dept, TCInventaires.INSEE, TCInventaires.DateObs, TCInventaires.Heure, TCInventaires.DurÃ©e, TCInventaires.NbrEchantillon, TOObservateurs.Nom, TOObservateurs.EMail, TLCoord.Altitude, TCCitations.Classe, TCCitations.EspÃ¨ce, TCCitations.NbrInd, TPDistance_Contact.LibellÃ©, TLCoord.Longitude_Lambert_93, TLCoord.Latitude_Lambert_93
-FROM TLCoord INNER JOIN (TPDistance_Contact INNER JOIN (TOObservateurs INNER JOIN (TCInventaires INNER JOIN TCCitations ON TCInventaires.Unique_Inventaire = TCCitations.Unique_Inventaire) ON (TOObservateurs.Observateur = TCInventaires.Observateur) AND (TOObservateurs.Organisme = TCInventaires.Organisme)) ON TPDistance_Contact.Code = TCCitations.Distance_Contact) ON TLCoord.Unique_LocalitÃ© = TCInventaires.Unique_LocalitÃ©;"
+    query <- "SELECT TCCitations.Unique_Inventaire, TCCitations.Unique_Citation,TCInventaires.NumObs, TCInventaires.Etude, TCInventaires.Unique_Localité, TCInventaires.section_cadastrale, TCInventaires.Lieudit, TCInventaires.Pays, TCInventaires.Dept, TCInventaires.INSEE, TCInventaires.DateObs, TCInventaires.Heure, TCInventaires.Durée, TCInventaires.NbrEchantillon, TOObservateurs.Nom, TOObservateurs.EMail, TLCoord.Altitude, TCCitations.Classe, TCCitations.Espèce, TCCitations.NbrInd, TPDistance_Contact.Libellé, TLCoord.Longitude_Lambert_93, TLCoord.Latitude_Lambert_93
+FROM TLCoord INNER JOIN (TPDistance_Contact INNER JOIN (TOObservateurs INNER JOIN (TCInventaires INNER JOIN TCCitations ON TCInventaires.Unique_Inventaire = TCCitations.Unique_Inventaire) ON (TOObservateurs.Observateur = TCInventaires.Observateur) AND (TOObservateurs.Organisme = TCInventaires.Organisme)) ON TPDistance_Contact.Code = TCCitations.Distance_Contact) ON TLCoord.Unique_Localité = TCInventaires.Unique_Localité;"
     d1 <- sqlQuery(con,query)
 
-    cat("\nRequete mÃ©tÃ©o\n")
+    cat("\nRequete météo\n")
     flush.console()
-    query <- "SELECT TCMÃ©tÃ©o.Unique_Inventaire, TCMÃ©tÃ©o.Code, TCMÃ©tÃ©o.Valeur_DiscrÃ¨te
-FROM TCMÃ©tÃ©o;"
+    query <- "SELECT TCMétéo.Unique_Inventaire, TCMétéo.Code, TCMétéo.Valeur_Discrète
+FROM TCMétéo;"
 
     d_meteo <- sqlQuery(con,query)
     d_meteo <- cast(d_meteo,Unique_Inventaire~Code)[,1:5]
 
-    cat("\nRequetes habitats\n il va encore falloir Ãªtre un peu patient :-/")
+    cat("\nRequetes habitats\n il va encore falloir être un peu patient :-/")
     flush.console()
-    query <- "SELECT TLDescEPS.Unique_LocalitÃ©, TLDescEPS.DateEPS, TLDescEPS.Milieu, TLDescEPS.Type_Milieu, TLDescEPS.CatÃ©gorie_1, TLDescEPS.CatÃ©gorie_2, TLDescEPS.Sous_CatÃ©gorie_1, TLDescEPS.Sous_CatÃ©gorie_2
+    query <- "SELECT TLDescEPS.Unique_Localité, TLDescEPS.DateEPS, TLDescEPS.Milieu, TLDescEPS.Type_Milieu, TLDescEPS.Catégorie_1, TLDescEPS.Catégorie_2, TLDescEPS.Sous_Catégorie_1, TLDescEPS.Sous_Catégorie_2
 FROM TLDescEPS
 WHERE (((TLDescEPS.Habitat)='P'));"
     d_habP <- sqlQuery(con,query)
@@ -426,14 +450,14 @@ WHERE (((TLDescEPS.Habitat)='P'));"
 
 
 
-    query <- "SELECT TLDescEPS.Unique_LocalitÃ©, TLDescEPS.DateEPS, TLDescEPS.Milieu, TLDescEPS.Type_Milieu, TLDescEPS.CatÃ©gorie_1, TLDescEPS.CatÃ©gorie_2, TLDescEPS.Sous_CatÃ©gorie_1, TLDescEPS.Sous_CatÃ©gorie_2
+    query <- "SELECT TLDescEPS.Unique_Localité, TLDescEPS.DateEPS, TLDescEPS.Milieu, TLDescEPS.Type_Milieu, TLDescEPS.Catégorie_1, TLDescEPS.Catégorie_2, TLDescEPS.Sous_Catégorie_1, TLDescEPS.Sous_Catégorie_2
 FROM TLDescEPS
 WHERE (((TLDescEPS.Habitat)='S'));"
     d_habS <- sqlQuery(con,query)
     colnames(d_habS)[3:ncol(d_habS)]<- paste("hab_s_",colnames(d_habS)[3:ncol(d_habS)],sep="")
 
-    d_hab <- merge(d_habP,d_habS,by=c("Unique_LocalitÃ©","DateEPS"),all=TRUE)
-    d_hab <- d_hab[order(d_hab$Unique_LocalitÃ©,d_hab$DateEPS),]
+    d_hab <- merge(d_habP,d_habS,by=c("Unique_Localité","DateEPS"),all=TRUE)
+    d_hab <- d_hab[order(d_hab$Unique_Localité,d_hab$DateEPS),]
 
 
 
@@ -447,20 +471,20 @@ WHERE (((TLDescEPS.Habitat)='S'));"
     t3 <- data.table(d3,id="Unique_Citation")
     t_meteo <- data.table(d_meteo, id="Unique_Inventaire")
     t_hab <- data.table(d_hab)
-    t_hab$id_hab <- paste(t_hab$Unique_LocalitÃ©,t_hab$DateEPS,sep="_")
-    t3$id_hab <- paste(t3$Unique_LocalitÃ©,t3$DateObs,sep="_")
+    t_hab$id_hab <- paste(t_hab$Unique_Localité,t_hab$DateEPS,sep="_")
+    t3$id_hab <- paste(t3$Unique_Localité,t3$DateObs,sep="_")
     tt <- merge(t3, t_meteo,by="Unique_Inventaire",all.x = TRUE, all.y=FALSE, allow.cartesian=TRUE)
 
     tt <- merge(tt, t_hab, ,by="id_hab",all.x = TRUE, all.y=FALSE, allow.cartesian=TRUE)
 
 
-    tt <- subset(tt, select=c("Unique_Inventaire","Unique_Citation","NumObs","Etude","Unique_LocalitÃ©.x","section_cadastrale","Lieudit","Pays","Dept","INSEE","DateObs","Heure","DurÃ©e","NbrEchantillon","Nom","EMail","Altitude","Classe","EspÃ¨ce","NbrInd","LibellÃ©","Longitude_Lambert_93","Latitude_Lambert_93","EPS-Nuage","EPS-Pluie","EPS-Vent","EPS-VisibilitÃ©","hab_p_Milieu","hab_p_Type_Milieu","hab_p_CatÃ©gorie_1","hab_p_CatÃ©gorie_2","hab_p_Sous_CatÃ©gorie_1","hab_p_Sous_CatÃ©gorie_2","hab_s_Milieu","hab_s_Type_Milieu","hab_s_CatÃ©gorie_1","hab_s_CatÃ©gorie_2","hab_s_Sous_CatÃ©gorie_1","hab_s_Sous_CatÃ©gorie_2"))
+    tt <- subset(tt, select=c("Unique_Inventaire","Unique_Citation","NumObs","Etude","Unique_Localité.x","section_cadastrale","Lieudit","Pays","Dept","INSEE","DateObs","Heure","Durée","NbrEchantillon","Nom","EMail","Altitude","Classe","Espèce","NbrInd","Libellé","Longitude_Lambert_93","Latitude_Lambert_93","EPS-Nuage","EPS-Pluie","EPS-Vent","EPS-Visibilité","hab_p_Milieu","hab_p_Type_Milieu","hab_p_Catégorie_1","hab_p_Catégorie_2","hab_p_Sous_Catégorie_1","hab_p_Sous_Catégorie_2","hab_s_Milieu","hab_s_Type_Milieu","hab_s_Catégorie_1","hab_s_Catégorie_2","hab_s_Sous_Catégorie_1","hab_s_Sous_Catégorie_2"))
 
     colnames(tt) <- c("unique_inventaire","unique_citation","numobs","etude","unique_localite","section_cadastrale","lieudit","pays","dept","insee","dateobs","heure","duree","nbr_echantillon","nom","email","altitude","classe","espece","nbr_ind","classe_dist","longitude_lambert_93","latitude_lambert_93","nuage","pluie","vent","visibilite","hab_p_milieu","hab_p_type_milieu","hab_p_cat_1","hab_p_cat_2","hab_p_sous_cat_1","hab_p_sous_cat_2","hab_s_milieu","hab_s_type_milieu","hab_s_cat_1","hab_s_cat_2","hab_s_sous_cat_1","hab_s_sous_cat_2"
                       )
 
 
-    cat("\nEcriture du fichier:", fichierAPlat,"\n Tu peux aller boire un second cafÃ©\n")
+    cat("\nEcriture du fichier:", fichierAPlat,"\n Tu peux aller boire un second café\n")
     write.csv(tt,fichierAPlat,row.names=FALSE)
 
     cat("Exportation OK !!\n")
@@ -482,13 +506,13 @@ WHERE (((TLDescEPS.Habitat)='S'));"
 
 
 vp2point <- function(d,dateExport,output=FALSE) {
-#browser()
-    dd <- data.frame(pk_point=paste(substring(d$N..CarrÃ©.EPS,9),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)),sep=""),
-                     id_carre = substring(d$N..CarrÃ©.EPS,9,nchar(d$N..CarrÃ©.EPS)),
+
+    dd <- data.frame(pk_point=paste(substring(d$N..Carré.EPS,9),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)),sep=""),
+                     id_carre = substring(d$N..Carré.EPS,9,nchar(d$N..Carré.EPS)),
                      commune = d$Commune,
                      site = d$Site,
                      insee = d$INSEE,
-                     departement = d$DÃ©partement,
+                     departement = d$Département,
                      nom_point = d$EXPORT_STOC_TEXT_EPS_POINT,
                      num_point = as.numeric(substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1,nchar(d$EXPORT_STOC_TEXT_EPS_POINT))),
                      altitude = d$Altitude,
@@ -516,17 +540,17 @@ vp2point <- function(d,dateExport,output=FALSE) {
 vp2carre <- function(d,dateExport,output=FALSE) {
     ## d <- dVP; dateExport = dateExportVP; output=FALSE
 
-    dcarrenat <- read.csv("DB_import/tablesGeneriques/carrenat.csv")
+    dcarrenat <- read.csv("DB_import/tablesGeneriques/carrenat.csv",encoding="UTF-8")
     dcarrenat$pk_carre <- sprintf("%06d",    dcarrenat$pk_carre)
 
 
-    dd <-  data.frame(pk_carre = substring(d$N..CarrÃ©.EPS,9,nchar(d$N..CarrÃ©.EPS)),
+    dd <-  data.frame(pk_carre = substring(d$N..Carré.EPS,9,nchar(d$N..Carré.EPS)),
                       commune = d$Commune,# Commune majoritaire
                       site  = d$Site, # site majoritaire
                       etude = d$Etude,
                       insee = d$INSEE,# Commune majoritaire
-                      departement = d$DÃ©partement, # Departement majoritaire
-                      nom_carre = d$N..CarrÃ©.EPS,
+                      departement = d$Département, # Departement majoritaire
+                      nom_carre = d$N..Carré.EPS,
                       nom_carre_fnat = NA,
                       altitude = d$Altitude,
                       latitude_wgs84 = d$Latitude,#moyenne des points
@@ -561,11 +585,11 @@ vp2carre <- function(d,dateExport,output=FALSE) {
 }
 
 vp2inventaire <- function(d,dateExport,version = "V.1",output=FALSE) {
-    dd <- unique(data.frame(pk_inventaire = paste(format(as.Date(d$Date,format="%d.%m.%Y"),"%Y%m%d"),substring(d$N..CarrÃ©.EPS,9),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1),sep=""),
+    dd <- unique(data.frame(pk_inventaire = paste(format(as.Date(d$Date,format="%d.%m.%Y"),"%Y%m%d"),substring(d$N..Carré.EPS,9),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1),sep=""),
                             unique_inventaire_fnat=NA,
                             etude = d$Etude,
-                            id_point = paste(substring(d$N..CarrÃ©.EPS,9),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1),sep=""),
-                            id_carre =  substring(d$N..CarrÃ©.EPS,9,nchar(d$N..CarrÃ©.EPS)),
+                            id_point = paste(substring(d$N..Carré.EPS,9),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1),sep=""),
+                            id_carre =  substring(d$N..Carré.EPS,9,nchar(d$N..Carré.EPS)),
                             num_point = as.numeric(substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1,nchar(d$EXPORT_STOC_TEXT_EPS_POINT))),
                             date = as.character(as.Date(d$Date,format="%d.%m.%Y")),
                             jour_julien = as.numeric(as.character(format(as.Date(d$Date,format="%d.%m.%Y"),"%j"))),
@@ -581,7 +605,7 @@ vp2inventaire <- function(d,dateExport,version = "V.1",output=FALSE) {
                             nuage = d$EPS.Nuage,
                             pluie = d$EPS.Pluie,
                             vent = d$EPS.Vent,
-                            visibilite = d$EPS.VisibilitÃ©,
+                            visibilite = d$EPS.Visibilité,
                             neige = d$EPS.Neige,
                             db = "vigieplume",date_export=dateExport,altitude=d$Altitude,version=version))
 
@@ -597,11 +621,11 @@ vp2inventaire <- function(d,dateExport,version = "V.1",output=FALSE) {
 
         dd_unique <- subset(dd,pk_inventaire %in% aa_unique)
 
-        ddbrut <- data.frame(pk_inventaire = paste(format(as.Date(d$Date,format="%d.%m.%Y"),"%Y%m%d"),substring(d$N..CarrÃ©.EPS,9),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1),sep=""),
+        ddbrut <- data.frame(pk_inventaire = paste(format(as.Date(d$Date,format="%d.%m.%Y"),"%Y%m%d"),substring(d$N..Carré.EPS,9),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1),sep=""),
                              unique_inventaire_fnat=NA,
                              etude = d$Etude,
-                             id_point = paste(substring(d$N..CarrÃ©.EPS,9),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1),sep=""),
-                             id_carre =  substring(d$N..CarrÃ©.EPS,9,nchar(d$N..CarrÃ©.EPS)),
+                             id_point = paste(substring(d$N..Carré.EPS,9),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1),sep=""),
+                             id_carre =  substring(d$N..Carré.EPS,9,nchar(d$N..Carré.EPS)),
                              num_point = as.numeric(substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1,nchar(d$EXPORT_STOC_TEXT_EPS_POINT))),
                              date = as.character(as.Date(d$Date,format="%d.%m.%Y")),
                              jour_julien = as.numeric(as.character(format(as.Date(d$Date,format="%d.%m.%Y"),"%j"))),
@@ -617,7 +641,7 @@ vp2inventaire <- function(d,dateExport,version = "V.1",output=FALSE) {
                              nuage = d$EPS.Nuage,
                              pluie = d$EPS.Pluie,
                              vent = d$EPS.Vent,
-                             visibilite = d$EPS.VisibilitÃ©,
+                             visibilite = d$EPS.Visibilité,
                              neige = d$EPS.Neige,
                              db = "vigieplume",date_export=dateExport,altitude=d$Altitude,version=version)
 
@@ -760,22 +784,22 @@ vp2inventaire <- function(d,dateExport,version = "V.1",output=FALSE) {
 
 
 vp2observation <- function(d,dateExport,output=FALSE) {
-    dd <- data.frame(pk_observation= paste(format(as.Date(d$Date,format="%d.%m.%Y"),"%Y%m%d"),substring(d$N..CarrÃ©.EPS,9),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1),sep=""),
+    dd <- data.frame(pk_observation= paste(format(as.Date(d$Date,format="%d.%m.%Y"),"%Y%m%d"),substring(d$N..Carré.EPS,9),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1),sep=""),
                      id_fnat_unique_citation = NA,
-                     id_inventaire =paste(format(as.Date(d$Date,format="%d.%m.%Y"),"%Y%m%d"),substring(d$N..CarrÃ©.EPS,9),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1),sep=""),
-                     id_point = paste(substring(d$N..CarrÃ©.EPS,9,nchar(d$N..CarrÃ©.EPS)),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)),sep=""),
-                     id_carre =  substring(d$N..CarrÃ©.EPS,9,nchar(d$N..CarrÃ©.EPS)),
+                     id_inventaire =paste(format(as.Date(d$Date,format="%d.%m.%Y"),"%Y%m%d"),substring(d$N..Carré.EPS,9),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1),sep=""),
+                     id_point = paste(substring(d$N..Carré.EPS,9,nchar(d$N..Carré.EPS)),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)),sep=""),
+                     id_carre =  substring(d$N..Carré.EPS,9,nchar(d$N..Carré.EPS)),
                      num_point = as.numeric(substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1,nchar(d$EXPORT_STOC_TEXT_EPS_POINT))),
                      passage = d$N..Passage,
                      date = as.character(as.Date(d$Date,format="%d.%m.%Y")),
                      annee=as.numeric(substring(d$Date,7,10)),
                      classe=d$Classe,
-                     espece = toupper(d$EspÃ¨ce),
-                     code_sp = substring(toupper(d$EspÃ¨ce),1,6),
+                     espece = toupper(d$Espèce),
+                     code_sp = substring(toupper(d$Espèce),1,6),
                      abondance = as.numeric(as.character(d$Nombre)),
                      distance_contact=d$Distance.de.contact,
                      db = "vigieplume",date_export=dateExport,
-                     id_data=paste(substring(d$Date,7,10),d$N..Passage,substring(d$N..CarrÃ©.EPS,9,nchar(d$N..CarrÃ©.EPS)),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)),substring(d$EspÃ¨ce,1,6),d$Distance.de.contact,sep="")
+                     id_data=paste(format(as.Date(d$Date,format="%d.%m.%Y"),"%Y%m%d"),"-",substring(d$N..Carré.EPS,9,nchar(d$N..Carré.EPS)),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)),substring(d$Espèce,1,6),"-",d$Distance.de.contact,sep="")
                      )
 
     dd <- dd[order(dd$id_inventaire,dd$espece,dd$distance_contact),]
@@ -786,20 +810,18 @@ vp2observation <- function(d,dateExport,output=FALSE) {
     doublon <- names(contDoublon)[contDoublon>1]
     if(length(doublon)>0) {
         tDoublon <- subset(dd,id_data %in% doublon)
+        tDoublon <- tDoublon[order(tDoublon$id_data),]
         file <- paste("OutputImport/_doublonInventaireVigiePlume_",dateExport,".csv",sep="")
         cat("  \n !!! Doublon saisies \n c est a dire plusieurs lignes pour un inventaire une espece et une distance\n Ceci concerne ", nrow(tDoublon)," lignes\n")
-        cat("  Toutes lignes sont prÃ©sentÃ© dans le fichier: \n  --> ",file,"\n")
+        cat("  Toutes lignes sont présenté dans le fichier: \n  --> ",file,"\n")
         write.csv(tDoublon[,-ncol(tDoublon)],file,row.names=FALSE)
 
         cat(" \n Pour chaque doublon nous conservons la valeur maximum\n")
 
+## browser()
 
-
-        tAbMax <- aggregate(subset(tDoublon,select=c("abondance")),list(id_data=tDoublon$id_data),max)
-        tAbMax$conservee <- TRUE
-
-        tDoublon <- merge(tDoublon,tAbMax,by=c("id_data","abondance"),all=TRUE)
-        tDoublon$conservee[is.na(tDoublon$conservee)] <- FALSE
+        tDoublon <- tDoublon[order(tDoublon$id_data, -tDoublon$abondance),]
+        tDoublon$conservee <- !duplicated(tDoublon$id_data)
 
         dataExclues <- subset(tDoublon,!conservee)
         dataEclues <-subset(dataExclues,select=c("pk_observation","id_fnat_unique_citation","id_inventaire","id_point","id_carre","num_point","passage","date","annee","classe","espece","code_sp","distance_contact","abondance","db","date_export"))
@@ -824,8 +846,8 @@ vp2observation <- function(d,dateExport,output=FALSE) {
 vp2habitat <- function(d,dateExport,output=FALSE) {
 
     dd <- unique(data.frame(pk_habitat=paste(format(as.Date(d$Date,format="%d.%m.%Y"),"%Y%m%d"),
-                                             substring(d$N..CarrÃ©.EPS,9,nchar(d$N..CarrÃ©.EPS)),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)),sep=""),
-                            id_point = paste(substring(d$N..CarrÃ©.EPS,9,nchar(d$N..CarrÃ©.EPS)),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)),sep=""),
+                                             substring(d$N..Carré.EPS,9,nchar(d$N..Carré.EPS)),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)),sep=""),
+                            id_point = paste(substring(d$N..Carré.EPS,9,nchar(d$N..Carré.EPS)),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)),sep=""),
                             passage = d$N..Passage,
                             date = as.character(as.Date(d$Date,format="%d.%m.%Y")),
                             annee=as.numeric(substring(d$Date,7,10)),
@@ -850,8 +872,8 @@ vp2habitat <- function(d,dateExport,output=FALSE) {
         dd_unique <- subset(dd,pk_habitat %in% aa_unique)
 
         ddbrut <- data.frame(pk_habitat=paste(format(as.Date(d$Date,format="%d.%m.%Y"),"%Y%m%d"),
-                                              substring(d$N..CarrÃ©.EPS,9,nchar(d$N..CarrÃ©.EPS)),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)),sep=""),
-                             id_point = paste(substring(d$N..CarrÃ©.EPS,9,nchar(d$N..CarrÃ©.EPS)),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)),sep=""),
+                                              substring(d$N..Carré.EPS,9,nchar(d$N..Carré.EPS)),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)),sep=""),
+                             id_point = paste(substring(d$N..Carré.EPS,9,nchar(d$N..Carré.EPS)),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)),sep=""),
                              passage = d$N..Passage,
                              date = as.character(as.Date(d$Date,format="%d.%m.%Y")),
                              annee=as.numeric(substring(d$Date,7,10)),
@@ -1010,7 +1032,7 @@ FNat2point <- function(d,dateExport,output=TRUE) {
 FNat2carre <- function(d,dateExport,output=FALSE) {
     library(rgdal)
     ## d = dFNat;dateExport=dateExportFNat;output=FALSE
-    dcarrenat <- read.csv("DB_import/tablesGeneriques/carrenat.csv")
+    dcarrenat <- read.csv("DB_import/tablesGeneriques/carrenat.csv",encoding="UTF-8")
     dcarrenat$pk_carre <- sprintf("%06d",    dcarrenat$pk_carre)
 
 
@@ -1020,7 +1042,7 @@ FNat2carre <- function(d,dateExport,output=FALSE) {
     dcoord_WGS84 <- spTransform(dcoord, CRS("+init=epsg:4326"))
 
     dd <- data.frame(pk_carre =d$id_carre,
-                     nom_carre = paste("CarrÃ© EPS NÂ°",d$id_carre,sep=""),
+                     nom_carre = paste("Carré EPS N°",d$id_carre,sep=""),
                      nom_carre_fnat = d$lieudit,
                      etude = d$etude,
                      commune = "",
@@ -1324,7 +1346,7 @@ FNat2observation <- function(d,dateExport,output=FALSE) {
                      )
 
 
-    dd$distance_contact <- recodeVar(dd$distance_contact , c("25-100m","En vol","< 25m","> 100m","Non indiquÃ©e",""), c("LESS100", "TRANSIT","LESS25","MORE100","U","U"))
+    dd$distance_contact <- recodeVar(dd$distance_contact , c("25-100m","En vol","< 25m","> 100m","Non indiquée",""), c("LESS100", "TRANSIT","LESS25","MORE100","U","U"))
 
     dd <- dd[order(dd$id_inventaire,dd$espece,dd$distance_contact),]
     iFirst_id_inventaire <- setNames(match(unique(dd$id_inventaire),dd$id_inventaire),unique(dd$id_inventaire))
@@ -1340,18 +1362,15 @@ FNat2observation <- function(d,dateExport,output=FALSE) {
         tDoublon <- subset(dd,id_data %in% doublon)
         file <- paste("OutputImport/_doublonInventaireFNat_",dateExport,".csv",sep="")
         cat("  \n !!! Doublon saisies \n c est a dire plusieurs lignes pour un inventaire une espece et une distance\n Ceci concerne ", nrow(tDoublon)," lignes\n")
-        cat("  Toutes lignes sont prÃ©sentÃ© dans le fichier: \n  --> ",file,"\n")
+        cat("  Toutes lignes sont présenté dans le fichier: \n  --> ",file,"\n")
         write.csv(tDoublon[,-ncol(tDoublon)],file,row.names=FALSE)
 
         cat(" \n Pour chaque doublon nous conservons la valeur maximum\n")
 
+## browser()
 
-
-        tAbMax <- aggregate(subset(tDoublon,select=c("abondance")),list(id_data=tDoublon$id_data),max)
-        tAbMax$conservee <- TRUE
-
-        tDoublon <- merge(tDoublon,tAbMax,by=c("id_data","abondance"),all=TRUE)
-        tDoublon$conservee[is.na(tDoublon$conservee)] <- FALSE
+        tDoublon <- tDoublon[order(tDoublon$id_data, -tDoublon$abondance),]
+        tDoublon$conservee <- !duplicated(tDoublon$id_data)
 
         dataExclues <- subset(tDoublon,!conservee)
         dataEclues <-subset(dataExclues,select=c("pk_observation","id_fnat_unique_citation","id_inventaire","id_point","id_carre","num_point","passage","date","annee","classe","espece","code_sp","distance_contact","abondance","db","date_export"))
@@ -1550,7 +1569,7 @@ union.inventaire <- function(ddFNat.inv,ddVP.inv,dateConstruction) {
     dd.inv$etude[dd.inv$id_carre %in% unique(subset(dd.inv,etude == "STOC_ONF")$id_carre)] <- "STOC_ONF"
     if(nrow(dd.invDoublon)>0) {
         file <- paste("OutputImport/_doublonInventaireExclu_",dateConstruction,".csv",sep="")
-        cat("\n !!! ",nrow(dd.invDoublon) ," inventaires saisies dans les deux bases de donnÃ©es (FNat et VigiePlume) \n Les donnees de FNat sont exclu et les donnees de VigiePlume conservees\n Retrouvees les donnees exclu dans le fichier:\n --> ",file,"\n")
+        cat("\n !!! ",nrow(dd.invDoublon) ," inventaires saisies dans les deux bases de données (FNat et VigiePlume) \n Les donnees de FNat sont exclu et les donnees de VigiePlume conservees\n Retrouvees les donnees exclu dans le fichier:\n --> ",file,"\n")
         write.csv(dd.invDoublon,file,row.names=FALSE)
 
     }
@@ -1567,7 +1586,7 @@ union.observation <- function(ddFNat.obs,ddVP.obs,dateConstruction) {
     dd.obsDoublon <-subset(ddFNat.obs,(id_data %in% unique(ddVP.obs$id_data)))
     if(nrow(dd.obsDoublon)>0) {
         file <- paste("OutputImport/_doublonObsExclu_",dateConstruction,".csv",sep="")
-        cat("\n !!! ",nrow(dd.obsDoublon) ," observation saisies dans les deux bases de donnÃ©es (FNat et VigiePlume) \n Les donnees de FNat sont exclu et les donnees de VigiePlume conservees\n Retrouvees les donnees exclu dans le fichier:\n --> ",file,"\n")
+        cat("\n !!! ",nrow(dd.obsDoublon) ," observation saisies dans les deux bases de données (FNat et VigiePlume) \n Les donnees de FNat sont exclu et les donnees de VigiePlume conservees\n Retrouvees les donnees exclu dans le fichier:\n --> ",file,"\n")
         write.csv(dd.obsDoublon,file,row.names=FALSE)
 
     }
@@ -1581,7 +1600,7 @@ union.habitat <- function(ddFNat.hab,ddVP.hab,dateConstruction) {
     dd.habDoublon <- subset(ddFNat.hab,(pk_habitat %in% unique(ddVP.hab$pk_habitat)))
     if(nrow(dd.habDoublon)>0) {
         file <- paste("OutputImport/_doublonHabitatExclu_",dateConstruction,".csv",sep="")
-        cat("\n !!! ",nrow(dd.habDoublon) ," habitats saisies dans les deux bases de donnÃ©es (FNat et VigiePlume) \n Les donnees de FNat sont exclu et les donnees de VigiePlume conservees\n Retrouvees les donnees exclu dans le fichier:\n --> ",file,"\n")
+        cat("\n !!! ",nrow(dd.habDoublon) ," habitats saisies dans les deux bases de données (FNat et VigiePlume) \n Les donnees de FNat sont exclu et les donnees de VigiePlume conservees\n Retrouvees les donnees exclu dans le fichier:\n --> ",file,"\n")
         write.csv(dd.habDoublon,file,row.names=FALSE)
 
     }
@@ -1592,7 +1611,7 @@ union.habitat <- function(ddFNat.hab,ddVP.hab,dateConstruction) {
 ##########################################################################################
 
 
-createDB_postgres <- function(dateConstruction,nomDBpostgresql=NULL,postgresUser="romain",postgresql_createAll = TRUE,postGIS_initiation=TRUE,postgresql_abondanceSeuil=TRUE,seuilAbondance = .99,repertoire=NULL,fileTemp=FALSE) {
+createDB_postgres <- function(dateConstruction,nomDBpostgresql=NULL,postgresUser="romain",postgresPassword=NULL,postgresql_createAll = TRUE,postGIS_initiation=TRUE,postgresql_abondanceSeuil=TRUE,seuilAbondance = .99,repertoire=NULL,fileTemp=FALSE) {
 
     if(is.null(dateConstruction)) dateConstruction = format(start, "%Y-%m-%d")
     if(is.null(repertoire)) repertoire <- paste(getwd(),"/",sep="")
@@ -1600,14 +1619,17 @@ createDB_postgres <- function(dateConstruction,nomDBpostgresql=NULL,postgresUser
 
 ########  linux <- Sys.info()[1]=="Linux"
 
-    cat("\n  Importation des tables des donnÃ©es STOC-eps et creation des index\n   ----------------------------------\n")
+
+    if(postgresql_createAll)  maketableGenerique(repertoire,nomDBpostgresql,postgresUser, fileTemp)
+
+    cat("\n  Importation des tables des données STOC-eps et creation des index\n   ----------------------------------\n")
     cat("     1- point\n")
     cat("     2- carre\n")
     cat("     3- inventaire\n")
     cat("     4- observation\n")
     cat("     5- habitat\n")
-    commande <- paste("psql -U ",postgresUser," ",nomDBpostgresql," -f ",repertoire,"sql/postgres_createTableBBS.sql",sep="")
-    shell(commande)
+    commande <- paste("psql -U ",postgresUser," ",nomDBpostgresql," < ",repertoire,"sql/postgres_createTableBBS.sql",sep="")
+    myshell(commande)
 
     ## importation data
     cat(" \\copy point FROM ",repertoire,
@@ -1631,17 +1653,17 @@ createDB_postgres <- function(dateConstruction,nomDBpostgresql=NULL,postgresUser
         " with (format csv, header, delimiter ';')\n",sep="",
         file=paste(repertoire,"sql/_sqlR_importationData.sql",sep=""),append=TRUE)
 
-    commande <- paste("psql -U ",postgresUser," ",nomDBpostgresql," -f ",repertoire,"sql/_sqlR_importationData.sql",sep="")
-    shell(commande)
+
+    cmd_import <- paste("psql -U ",postgresUser," ",nomDBpostgresql," < ",repertoire,"sql/_sqlR_importationData.sql",sep="")
+   # commande <- paste("psql -U ",postgresUser," ",nomDBpostgresql," -f ",repertoire,"sql/_sqlR_importationData.sql",sep="")
+    myshell(cmd_import)
 
 
-    commande <- paste("psql -U ",postgresUser," ",nomDBpostgresql," -f ",repertoire,"sql/postgres_createIndexBBS.sql",sep="")
-    shell(commande)
+       cmd_import <- paste("psql -U ",postgresUser," ",nomDBpostgresql," < ",repertoire,"sql/postgres_createIndexBBS.sql",sep="")
+   # commande <- paste("psql -U ",postgresUser," ",nomDBpostgresql," -f ",repertoire,"sql/postgres_createIndexBBS.sql",sep="")
+    myshell(cmd_import)
 
-    if(postgresql_abondanceSeuil) makeAbondanceTrunc(seuilAbondance,repertoire,nomDBpostgresql,postgresUser,fileTemp)
-
-    if(postgresql_createAll)  maketableGenerique(repertoire,nomDBpostgresql,postgresUser, fileTemp)
-
+    if(postgresql_abondanceSeuil) makeAbondanceTrunc(seuilAbondance,repertoire,nomDBpostgresql,postgresUser,postgresPassword,fileTemp)
 
     if(postGIS_initiation) {
         cat("\n  Creation des champs postGIS\n   ----------------------\n")
@@ -1650,8 +1672,8 @@ createDB_postgres <- function(dateConstruction,nomDBpostgresql=NULL,postgresUser
         cat("     3- carre.points_geom93\n")
 
 
-        commande <- paste("psql -U ",postgresUser," ",nomDBpostgresql," -f ",repertoire,"sql/postgis_initialImport.sql",sep="")
-        shell(commande)
+        commande <- paste("psql -U ",postgresUser," ",nomDBpostgresql," < ",repertoire,"sql/postgis_initialImport.sql",sep="")
+        myshell(commande)
     }
 
     if(postgresql_createAll & postGIS_initiation){
@@ -1659,19 +1681,38 @@ createDB_postgres <- function(dateConstruction,nomDBpostgresql=NULL,postgresUser
         cat("     1- carrenat.geom93\n")
 
 
-        commande <- paste("psql -U ",postgresUser," ",nomDBpostgresql," -f ",repertoire,"sql/postgis_tableGenerique.sql",sep="")
-        shell(commande)
+        commande <- paste("psql -U ",postgresUser," ",nomDBpostgresql," < ",repertoire,"sql/postgis_tableGenerique.sql",sep="")
+        myshell(commande)
     }
 
 }
 
-openDB.PSQL <- function(nomDB=NULL){
+
+
+
+  openDB.PSQL <- function(user=NULL,pw=NULL,DBname=NULL){
+    ## --- initializing parameters for debugging ----
+                                        #DBname=NULL;
+                                        #user="romain" # windows
+                                        #user = NULL # linux
+                                        #  pw=NULL
+    ## ---
 
     library(RPostgreSQL)
-    if(is.null(nomDB)) nomDB <- "stoc_eps"
-
     drv <- dbDriver("PostgreSQL")
-    con <- dbConnect(drv, dbname="stoc_eps")
+
+    if(is.null(DBname)) {
+        DBname <- "stoc_eps"
+    }
+
+    cat(DBname,user,ifelse(is.null(pw),"","****"),"\n")
+                                         # about when I use windows a have to define the user
+      if(is.null(user)) {
+         con <- dbConnect(drv, dbname=DBname)
+      } else {
+          con <- dbConnect(drv, dbname=DBname,user=user, password=pw)
+    }
+
     return(con)
 }
 
@@ -1689,8 +1730,8 @@ maketableGenerique <- function(repertoire=NULL,nomDBpostgresql=NULL,postgresUser
     if(is.null(repertoire)) repertoire <- paste(getwd(),"/",sep="")
     if(is.null(nomDBpostgresql)) nomDBpostgresql <- "stoc_eps"
 
-    commande <- paste("psql -U ",postgresUser," ",nomDBpostgresql," -f ",repertoire,"sql/postgres_createTableGenerique.sql",sep="")
-    shell(commande)
+    commande <- paste("psql -U ",postgresUser," ",nomDBpostgresql," < ",repertoire,"sql/postgres_createTableGenerique.sql",sep="")
+    myshell(commande)
 
     cat(" \\copy carrenat FROM ",repertoire,
         "DB_import/tablesGeneriques/carrenat.csv",
@@ -1714,25 +1755,25 @@ maketableGenerique <- function(repertoire=NULL,nomDBpostgresql=NULL,postgresUser
 
 
     commande <- paste("psql -U ",postgresUser," ",nomDBpostgresql," < ",repertoire,"sql/_sqlR_importationDataTableGenerique.sql",sep="")
-   cat("System command: ",commande,"\n",paste="")
-
-    shell(commande)
+    myshell(commande)
 
 
-    commande <- paste("psql -U ",postgresUser," ",nomDBpostgresql," -f ",repertoire,"sql/postgres_createIndexGenerique.sql",sep="")
-    shell(commande)
+    commande <- paste("psql -U ",postgresUser," ",nomDBpostgresql," < ",repertoire,"sql/postgres_createIndexGenerique.sql",sep="")
+    myshell(commande)
 
     if (!fileTemp){
         cat("REMOVE FILE TEMP\n")
-        commande <- paste("rm  ",repertoire,"sql/_sqlR_importationDataTableGenerique.sql",sep="")
-        shell(commande)
+        rmfile <- paste(repertoire,"sql/_sqlR_importationDataTableGenerique.sql",sep="")
+        file.remove(rmfile)
+        #commande <- paste("rm  ",repertoire,"sql/_sqlR_importationDataTableGenerique.sql",sep="")
+        #myshell(commande)
     }
 
 
 }
 
 
-makeAbondanceTrunc <- function( seuilAbondance = .99,repertoire=NULL,nomDBpostgresql=NULL,postgresUser="romain", fileTemp=TRUE,graphe=TRUE) {
+makeAbondanceTrunc <- function( seuilAbondance = .99,repertoire=NULL,nomDBpostgresql=NULL,postgresUser="romain",postgresPassword=NULL, fileTemp=TRUE,graphe=TRUE) {
 
     require(ggplot2)
                                         # repertoire=NULL;savePostgres=TRUE;nomDBpostgresql=NULL;postgresUser="romain"; fileTemp=TRUE; seuilAbondance = .99
@@ -1747,7 +1788,7 @@ makeAbondanceTrunc <- function( seuilAbondance = .99,repertoire=NULL,nomDBpostgr
     if(is.null(repertoire)) repertoire <- paste(getwd(),"/",sep="")
     if(is.null(nomDBpostgresql)) nomDBpostgresql <- "stoc_eps"
 
-    con <- openDB.PSQL(nomDBpostgresql)
+    con <- openDB.PSQL(user=postgresUser,pw=postgresPassword,DBname=nomDBpostgresql)
 
     query <- "
 select o.id_inventaire,o.id_carre,o.id_point,o.date, code_sp,abondance,distance_contact
@@ -1802,8 +1843,9 @@ CREATE TABLE espece_abondance_point_seuil
 
 
     cat("\n -- RUN SQL --\n")
-    commande <- paste("psql -U ",postgresUser," ",nomDBpostgresql," -f ",repertoire,"sql/_sqlR_espece_abondance_point_seuil.sql",sep="")
-    shell(commande)
+
+    commande <- paste("psql -U ",postgresUser," ",nomDBpostgresql," < ",repertoire,"sql/_sqlR_espece_abondance_point_seuil.sql",sep="")
+    myshell(commande)
 
 
     if(graphe){
@@ -1881,7 +1923,7 @@ CREATE TABLE espece_abondance_point_seuil
         if (!fileTemp){
             cat("REMOVE FILE TEMP\n")
             commande <- paste("rm  ",repertoire,"sql/_sqlR_espece_abondance_point_seuil.sql",sep="")
-            shell(commande)
+            myshell(commande)
         }
     }
 
@@ -1893,7 +1935,7 @@ CREATE TABLE espece_abondance_point_seuil
 
 
 
-point_carre_annee <- function(dateConstruction=NULL,version="V.1",con=NULL,importation=TRUE,repertoire=NULL,nomDBpostgresql=NULL,postgresUser="romain") {
+point_carre_annee <- function(dateConstruction=NULL,version="V.1",con=NULL,importation=TRUE,repertoire=NULL,nomDBpostgresql=NULL,postgresUser="romain",postgresPassword=NULL) {
 
    # dateConstruction=NULL;version="V.1";con=NULL;importation=TRUE;repertoire=NULL;nomDBpostgresql=NULL;postgresUser="romain"
     start <- Sys.time()
@@ -1907,12 +1949,10 @@ point_carre_annee <- function(dateConstruction=NULL,version="V.1",con=NULL,impor
 
     cat("     1- construction table point_annee\n")
 
+  #  browser()
 
-
-
-
-        if(is.null(con)) con <- openDB.PSQL()
-        query <-paste("select i.annee::varchar(4)||i.id_point as pk_point_annee, i.id_point,i.annee,i.date,passage_stoc,info_passage,nombre_de_passage,h.p_milieu,h.s_milieu
+    if(is.null(con))  con <- openDB.PSQL(user=postgresUser,pw=postgresPassword,DBname=nomDBpostgresql)
+    query <-paste("select i.annee::varchar(4)||i.id_point as pk_point_annee, i.id_point,i.annee,i.date,passage_stoc,info_passage,nombre_de_passage,h.p_milieu,h.s_milieu
 from inventaire as i
 left join habitat as h on i.pk_inventaire = h.pk_habitat
 order by id_point, annee;")
@@ -2065,7 +2105,7 @@ group by pk_point_annee;"
     ggdid <- subset(ggdid,annee > 2000)
     tminmax <- c(min(ggdid$annee),max(ggdid$annee)-1)
 
-        vecLegend <- c(A="ForÃªts",B="Buissons",C="Pelouses, landes et marais",D="Milieux agricoles",E="Milieux urbains",F="Milieux aquatiques",G="Rochers",X="Non renseignÃ©")
+        vecLegend <- c(A="Forêts",B="Buissons",C="Pelouses, landes et marais",D="Milieux agricoles",E="Milieux urbains",F="Milieux aquatiques",G="Rochers",X="Non renseigné")
         vecCouleur <- c(A="#276325",B="#44b441",C="#69e566",D="#f0db30",E="#c0122a",F="#58afe1",G="#878f93",X="#000000")
 
         gg <- ggplot(ggdid,aes(x = annee, y = pk_point_annee,fill = p_milieu)) +
@@ -2131,7 +2171,7 @@ group by pk_point_annee;"
 
         did$date_export <- dateExport
         did$version <- version
-        write.table(did,paste("DB_import/point_annee.csv",sep=""),row.names=FALSE,na = "",quote=TRUE, sep=";",dec=".")
+        write.table(did,paste("DB_import/point_annee.csv",sep=""),row.names=FALSE,na = "",quote=TRUE, sep=";",dec=".",fileEncoding="UTF-8")
 
 
         ## table carre
@@ -2186,7 +2226,7 @@ group by pk_point_annee;"
         gg <- gg + scale_x_continuous(limits=tminmax)
         gg <- gg + scale_colour_manual(values=vecCouleur,labels=vecLegend,name="Habitat")
         gg <- gg + scale_linetype_manual(values=vecLine,labels=vecLineLegend,name="")
-        gg <- gg + labs(title="Nombre de carrÃ©s STOC-EPS par grand type d'habitat",subtitle="au moins 5 points de l'habitat",x="",y="")
+        gg <- gg + labs(title="Nombre de carrés STOC-EPS par grand type d'habitat",subtitle="au moins 5 points de l'habitat",x="",y="")
         ggsave("OutputImport/habitatNbCarre.png",gg)
 
 
@@ -2198,15 +2238,29 @@ group by pk_point_annee;"
         dcarre$date_export <- dateExport
         dcarre$version <- version
 
-        write.table(dcarre,paste("DB_import/carre_annee.csv",sep=""),row.names=FALSE,na = "",quote=TRUE, sep=";",dec=".")
+        write.table(dcarre,paste("DB_import/carre_annee.csv",sep=""),row.names=FALSE,na = "",quote=TRUE, sep=";",dec=".",fileEncoding="UTF-8")
 
 
         if(importation) {
             cat("     3- Importation des tables\n")
 
             cat("\n -- RUN SQL --\n")
-            commande <- paste("psql -U ",postgresUser," ",nomDBpostgresql," -f ",repertoire,"sql/postgres_point_carre_annee.sql",sep="")
-            shell(commande)
+            commande <- paste("psql -U ",postgresUser," ",nomDBpostgresql," < ",repertoire,"sql/postgres_point_carre_annee.sql",sep="")
+            myshell(commande)
+
+
+
+            cat(" \\copy point_annee FROM ",repertoire,
+                "DB_import/point_annee.csv",
+                " with (format csv, header, delimiter ';')\n",sep="",
+                file=paste(repertoire,"sql/_sqlR_importationData_point_carre_annee.sql",sep=""),append=FALSE)
+            cat(" \\copy carre_annee FROM ",repertoire,
+                "DB_import/carre_annee.csv",
+                " with (format csv, header, delimiter ';')\n",sep="",
+                file=paste(repertoire,"sql/_sqlR_importationData_point_carre_annee.sql",sep=""),append=TRUE)
+
+      commande <- paste("psql -U ",postgresUser," ",nomDBpostgresql," < ",repertoire,"sql/_sqlR_importationData_point_carre_annee.sql",sep="")
+            myshell(commande)
 
 
         }
@@ -2220,159 +2274,195 @@ group by pk_point_annee;"
 ###############################################################################################
 
 
-    historicCarre  <- function(con=NULL,anneeMax=NULL) {
+historicCarre  <- function(con=NULL,nomDBpostgresql="stoc_eps",postgresUser="romain",postgresPassword=NULL,anneeMax=NULL) {
 
-                              ##  con=NULL;anneeMax=2017 ##
+    ##  con=NULL;anneeMax=2017 ##
 
-        require(ggplot2)
-        require(reshape2)
-        require(maps)
-        require(maptools)
-        require(animation)
+    require(ggplot2)
+    require(reshape2)
+    require(maps)
+    require(maptools)
+    require(animation)
 
-        if(is.null(con)) con <- openDB.PSQL()
-
-        if(is.null(anneeMax)) anneeTxt <- NULL else anneeTxt <- anneeMax
-        if(is.null(anneeMax)) anneeMax = 9999
-
-        query <-paste("select id_carre, annee from carre_annee where annee <= ",anneeMax," and annee > 2000 and qualite_inventaire_stoc > 0 group by id_carre, annee order by id_carre, annee;")
-
-      #  browser()
-        d <- dbGetQuery(con, query)
-        d$PA <- 1
-
-        dan <- aggregate(PA ~ annee, d, sum)
-
-        dd <- cast(d,id_carre~annee,mean)
-        rnames <- dd$id_carre
-        cnames <- colnames(dd)[-1]
-        dd <- as.matrix(dd[,-1])
-        rownames(dd) <- rnames
-        colnames(dd) <- cnames
-        dd[is.nan(dd)] <- 0
+    if(is.null(con))     con <- openDB.PSQL(user=postgresUser,pw=postgresPassword,DBname=nomDBpostgresql)
 
 
 
-        nb_carre_diff <- nrow(dd)
+    if(is.null(anneeMax)) anneeTxt <- NULL else anneeTxt <- anneeMax
+    if(is.null(anneeMax)) anneeMax = 9999
 
-        colnames(dan)[2] <- "nbCarre"
-        dan$Nouveaux <- NA
-        dan$NonRealise <- NA
-        dan$Arrete <- NA
-        dan$Nouveaux[1] <- sum(dd[,1])
-        dan$NonRealise[1] <- 0
-        dan$Arrete[1] <- 0
-        dan$Arrete[ncol(dd)] <- NA
+    ##        query <-paste("select  from carre_annee where annee <= ",anneeMax," and annee > 2000 and qualite_inventaire_stoc > 0 group by id_carre, annee order by id_carre, annee;")
 
-        for(j in 2:ncol(dd)) {
-            if(j==2)
-                dan$Nouveaux[j] <- sum(dd[dd[,j]==1 & dd[,j-1]==0,j]) else dan$Nouveaux[j] <- sum(dd[dd[,j]==1 & rowSums(dd[,1:j-1])==0,j])
-        }
+                                        #  browser()
+
+    query <-paste("select  * from carre_annee where annee <= ",anneeMax," and annee > 2000 and qualite_inventaire_stoc > 0;")
+
+    cat("Query:\n",query,"\n")
+
+    d <- dbGetQuery(con, query)
+    d$PA <- 1
+
+    dan <- aggregate(PA ~ annee, d, sum)
+
+    dd <- cast(d,id_carre~annee,mean)
+    rnames <- dd$id_carre
+    cnames <- colnames(dd)[-1]
+    dd <- as.matrix(dd[,-1])
+    rownames(dd) <- rnames
+    colnames(dd) <- cnames
+    dd[is.nan(dd)] <- 0
+
+
+
+    nb_carre_diff <- nrow(dd)
+
+    colnames(dan)[2] <- "nbCarre"
+    dan$Nouveaux <- NA
+    dan$NonRealise <- NA
+    dan$Arrete <- NA
+    dan$Nouveaux[1] <- sum(dd[,1])
+    dan$NonRealise[1] <- 0
+    dan$Arrete[1] <- 0
+    dan$Arrete[ncol(dd)] <- NA
+
+    for(j in 2:ncol(dd)) {
+        if(j==2)
+            dan$Nouveaux[j] <- sum(dd[dd[,j]==1 & dd[,j-1]==0,j]) else dan$Nouveaux[j] <- sum(dd[dd[,j]==1 & rowSums(dd[,1:j-1])==0,j])
+    }
                                         #-as.numeric(rowSums(dd[dd[,j]==1 & dd[,j-1]==0,1:j-1])>0)))
 
 
-        for(j in 2:ncol(dd))
-            if(j<ncol(dd))
-                dan$NonRealise[j] <- sum(dd[dd[,j]==0 & rowSums(dd[,j:ncol(dd)])>0 & dd[,j-1]==1,(j-1)])  else  dan$NonRealise[j] <- sum(dd[(dd[,j]==0 & dd[,j-1]==1),j-1])
+    for(j in 2:ncol(dd))
+        if(j<ncol(dd))
+            dan$NonRealise[j] <- sum(dd[dd[,j]==0 & rowSums(dd[,j:ncol(dd)])>0 & dd[,j-1]==1,(j-1)])  else  dan$NonRealise[j] <- sum(dd[(dd[,j]==0 & dd[,j-1]==1),j-1])
 
-        for(j in 2:(ncol(dd)-1))
-            dan$Arrete[j] <- sum(dd[rowSums(dd[,j:ncol(dd)])==0 & dd[,j-1]==1,(j-1)])
+    for(j in 2:(ncol(dd)-1))
+        dan$Arrete[j] <- sum(dd[rowSums(dd[,j:ncol(dd)])==0 & dd[,j-1]==1,(j-1)])
 
-        write.csv2(dan,paste("OutputImport/carreSTOCactif_",anneeTxt,".csv",sep=""))
+    fileCSV <- paste("OutputImport/carreSTOCactif_",anneeTxt,".csv",sep="")
+    cat( "\n  CSV --> ", fileCSV,"\n")
+    write.csv2(dan,fileCSV)
 
-        ggAnnee <- melt(dan,"annee")
+    ggAnnee <- melt(dan,"annee")
 
-        gg <- ggplot(ggAnnee,aes(x=annee,y=value,colour=variable))+geom_line(size=1.1)+geom_point(size=1.3)
-        gg <- gg + scale_colour_manual(values=c("nbCarre" = "#0d259f","Nouveaux"="#0d9f1b","Arrete" = "#9f0d0d" ,"NonRealise" = "#ff9d00"),
-                                       labels=c("nbCarre" = "CarrÃ©s actif","Nouveaux"="Nouveaux carrÃ©s","Arrete" = "CarrÃ©s arrÃªtÃ©s","NonRealise" = "CarrÃ©s non rÃ©alisÃ©s"),name="" )
-        gg <- gg + labs(title="",x="",y="")
-        ggsave(paste("OutputImport/carreSTOC_",anneeTxt,".png",sep=""),gg)
+    gg <- ggplot(ggAnnee,aes(x=annee,y=value,colour=variable))+geom_line(size=1.1)+geom_point(size=1.3)
+    gg <- gg + scale_colour_manual(values=c("nbCarre" = "#0d259f","Nouveaux"="#0d9f1b","Arrete" = "#9f0d0d" ,"NonRealise" = "#ff9d00"),
+                                   labels=c("nbCarre" = "Carrés actif","Nouveaux"="Nouveaux carrés","Arrete" = "Carrés arrêtés","NonRealise" = "Carrés non réalisés"),name="" )
+    gg <- gg + labs(title="",x="",y="")
 
-
-
-        birth <- apply(dd,1,FUN = function(x) min(which(x==1)))
-        dage <- dd
-        for(i in 1:nrow(dd)) {
-            cc <- names(birth[i])
-            b <- birth[i]
-            dage[cc,b:ncol(dage)] <- 1:(ncol(dage)-b+1)
-        }
-
-        dage <- dage*dd
-        dage <- as.data.frame(as.matrix(dage))
-        dage2 <- data.frame(id_carre=row.names(dage),dage)
-
-        dage2 <- melt(dage2,"id_carre")
-        colnames(dage2) <- c("id_carre","annee","age")
-        dage2$annee <- as.numeric(substring(as.character(dage2$annee),2,5))
-
-        dage2 <- subset(dage2,age>0)
-        ggAge <- aggregate(id_carre~annee+age,dage2,length)
+    filePNG <- paste("OutputImport/carreSTOC_",anneeTxt,".png",sep="")
+    cat( "\n  PNG --> ", filePNG,"\n")
+    ggsave(filePNG,gg)
 
 
-        gg <- ggplot(ggAge,aes(age,id_carre))+ geom_col() + facet_wrap(~annee)
-        gg <- gg + labs(title="Pyramide des ages des stations STOC EPS",x="Age",y="Nombre de carrÃ© STOC actifs")
 
-        ggsave(paste("OutputImport/carreSTOC_pyramideAge_",anneeTxt,".png",sep=""),gg)
+    birth <- apply(dd,1,FUN = function(x) min(which(x==1)))
+    dage <- dd
+    for(i in 1:nrow(dd)) {
+        cc <- names(birth[i])
+        b <- birth[i]
+        dage[cc,b:ncol(dage)] <- 1:(ncol(dage)-b+1)
+    }
 
-        write.csv2(dan,paste("OutputImport/carreSTOCage_",anneeTxt,".csv",sep=""))
+    dage <- dage*dd
+    dage <- as.data.frame(as.matrix(dage))
+    dage2 <- data.frame(id_carre=row.names(dage),dage)
+
+    dage2 <- melt(dage2,"id_carre")
+    colnames(dage2) <- c("id_carre","annee","age")
+    dage2$annee <- as.numeric(substring(as.character(dage2$annee),2,5))
+
+    dage2 <- subset(dage2,age>0)
+    ggAge <- aggregate(id_carre~annee+age,dage2,length)
 
 
-        query <-paste("select id_carre, longitude_grid_wgs84, latitude_grid_wgs84
+    gg <- ggplot(ggAge,aes(age,id_carre))+ geom_col() + facet_wrap(~annee)
+    gg <- gg + labs(title="Pyramide des ages des stations STOC EPS",x="Age",y="Nombre de carré STOC actifs")
+
+    filePNG <- paste("OutputImport/carreSTOC_pyramideAge_",anneeTxt,".png",sep="")
+    cat( "\n  PNG --> ", filePNG,"\n")
+    ggsave(filePNG,gg)
+
+
+
+    fileCSV <- paste("OutputImport/carreSTOCage_",anneeTxt,".csv",sep="")
+    cat( "\n  CSV --> ", fileCSV,"\n")
+    write.csv2(dan,fileCSV)
+
+
+
+    query <-paste("select id_carre, longitude_grid_wgs84, latitude_grid_wgs84
 from carre_annee as i, carre as c
 where i.id_carre = c.pk_carre and annee <= 9999 and annee > 2000 and qualite_inventaire_stoc > 0
 group by id_carre, longitude_grid_wgs84, latitude_grid_wgs84
 order by id_carre;")
 
+    cat("Query:\n",query,"\n")
                                         # browser()
-        dcoord <- dbGetQuery(con, query)
-        write.csv2(dcoord,paste("OutputImport/coord_carreSTOC_",anneeTxt,".csv",sep=""))
+    dcoord <- dbGetQuery(con, query)
 
-        france <- map_data("france")
-
-        gg <- ggplot(dcoord,aes(longitude_grid_wgs84,latitude_grid_wgs84))+
-            geom_polygon( data=france, aes(x=long, y=lat, group = group),colour="gray", fill="white",size=0.3 )+
-            geom_point(size=.8,alpha=.8,colour="black")
-        gg <- gg + theme(axis.ticks = element_blank(), axis.text = element_blank()) + labs(title="Localisation des carrÃ© STOC-EPS suivis au moins 1 annÃ©e depuis 2001",x="",y="")
-        gg <- gg + coord_fixed(ratio=1.2)
-        ggsave(paste("OutputImport/carreSTOC_map_simple_",anneeTxt,".png",sep=""),gg)
+    fileCSV <- paste("OutputImport/coord_carreSTOC_",anneeTxt,".csv",sep="")
+    cat( "\n  CSV --> ", fileCSV,"\n")
+    write.csv2(dcoord,fileCSV)
 
 
-        dage2 <- merge(dage2,dcoord,by="id_carre")
-        dage2$creation <- dage2$annee-dage2$age + 1
 
-        ageMax <- max(dage2$age)
-       # dage2 <- subset(dage2,annee<=2016)
+    france <- map_data("france")
 
-        gg <- ggplot(dage2,aes(longitude_grid_wgs84,latitude_grid_wgs84,colour=creation))+
-            geom_polygon( data=france, aes(x=long, y=lat, group = group),colour="gray", fill="white",size=0.3 )+
-            geom_point(size=.8,alpha=.8,colour="black")+ geom_point(size=0.6,alpha=.8) + facet_wrap(~annee)
-        gg <- gg + scale_colour_gradientn(colours=c("#4d004b","#8c6bb1","#bfd3e6"),name="Date de\ncrÃ©ation")
-        gg <- gg + theme(axis.ticks = element_blank(), axis.text = element_blank()) + labs(title="Localisation et age des suivis STOC-EPS",x="",y="")
-        gg <- gg + coord_fixed(ratio=1.2)
-        ggsave(paste("OutputImport/carreSTOC_map_age_",anneeTxt,".png",sep=""),gg,height = 10.5,width = 13)
+    gg <- ggplot(dcoord,aes(longitude_grid_wgs84,latitude_grid_wgs84))+
+        geom_polygon( data=france, aes(x=long, y=lat, group = group),colour="gray", fill="white",size=0.3 )+
+        geom_point(size=.8,alpha=.8,colour="black")
+    gg <- gg + theme(axis.ticks = element_blank(), axis.text = element_blank()) + labs(title="Localisation des carré STOC-EPS suivis au moins 1 année depuis 2001",x="",y="")
+    gg <- gg + coord_fixed(ratio=1.2)
 
-        saveGIF({
-            for(a in sort(unique(dage2$annee))) {
-                dage2a <- subset(dage2,annee==a)
-                gg <- ggplot(dage2a,aes(longitude_grid_wgs84,latitude_grid_wgs84,colour=creation))+
-                    geom_polygon( data=france, aes(x=long, y=lat, group = group),colour="gray", fill="white",size=0.3 )+
-                    geom_point(size=1.5,alpha=.8,colour="black")+geom_point(size=1.3,alpha=.8) + facet_wrap(~annee)
-                gg <- gg + scale_colour_gradientn(colours=c("#4d004b","#8c6bb1","#bfd3e6"),name="Date de\ncrÃ©ation",limits=c(min(dage2$annee),max(dage2$annee)))
-                gg <- gg + coord_fixed(ratio=1.2)
-                gg <- gg + theme(axis.ticks = element_blank(), axis.text = element_blank()) + labs(title="Localisation et age des suivis STOC-EPS",x="",y="")
-                print(gg)
-                ani.pause()
-            }
-        },
-        interval = 1.3,
-        movie.name = paste("OutputImport/carreSTOC_mapGIF_",anneeTxt,".gif",sep=""),ani.width = 500, ani.height = 500)
+    filePNG <- paste("OutputImport/carreSTOC_map_simple_",anneeTxt,".png",sep="")
+    cat( "\n  PNG --> ", filePNG,"\n")
+    ggsave(filePNG,gg)
 
 
 
 
+    dage2 <- merge(dage2,dcoord,by="id_carre")
+    dage2$creation <- dage2$annee-dage2$age + 1
 
-    }
+    ageMax <- max(dage2$age)
+                                        # dage2 <- subset(dage2,annee<=2016)
+
+    gg <- ggplot(dage2,aes(longitude_grid_wgs84,latitude_grid_wgs84,colour=creation))+
+        geom_polygon( data=france, aes(x=long, y=lat, group = group),colour="gray", fill="white",size=0.3 )+
+        geom_point(size=.8,alpha=.8,colour="black")+ geom_point(size=0.6,alpha=.8) + facet_wrap(~annee)
+    gg <- gg + scale_colour_gradientn(colours=c("#4d004b","#8c6bb1","#bfd3e6"),name="Date de\ncréation")
+    gg <- gg + theme(axis.ticks = element_blank(), axis.text = element_blank()) + labs(title="Localisation et age des suivis STOC-EPS",x="",y="")
+    gg <- gg + coord_fixed(ratio=1.2)
+
+    fileGIF <- paste("OutputImport/carreSTOC_mapGIF_",anneeTxt,".gif",sep="")
+    cat( "\n  GIF --> ", fileGIF,"\n")
+    ggsave(fileGIF,gg,height = 10.5,width = 13)
+
+
+
+
+    saveGIF({
+        for(a in sort(unique(dage2$annee))) {
+            dage2a <- subset(dage2,annee==a)
+            gg <- ggplot(dage2a,aes(longitude_grid_wgs84,latitude_grid_wgs84,colour=creation))+
+                geom_polygon( data=france, aes(x=long, y=lat, group = group),colour="gray", fill="white",size=0.3 )+
+                geom_point(size=1.5,alpha=.8,colour="black")+geom_point(size=1.3,alpha=.8) + facet_wrap(~annee)
+            gg <- gg + scale_colour_gradientn(colours=c("#4d004b","#8c6bb1","#bfd3e6"),name="Date de\ncréation",limits=c(min(dage2$annee),max(dage2$annee)))
+            gg <- gg + coord_fixed(ratio=1.2)
+            gg <- gg + theme(axis.ticks = element_blank(), axis.text = element_blank()) + labs(title="Localisation et age des suivis STOC-EPS",x="",y="")
+            print(gg)
+            ani.pause()
+        }
+    },
+    interval = 1.3,
+    movie.name = fileGIF,ani.width = 500, ani.height = 500)
+
+
+
+
+
+}
 
 
 
@@ -2381,68 +2471,184 @@ import_shape <- function(vecShape=c("pra_93","L93_10x10_TerreMer"),vecNameTable=
                          repertoire=NULL,nomDBpostgresql=NULL,postgresUser="romain",
                          fileTemp=TRUE,savePostgres=TRUE) {
 
-   
-                                        # require(ggplot2)
-vecShape=c("pra_93","L93_10x10_TerreMer");vecNameTable=c("pra","maille_atlas");vecEPSG = NULL
 
-    repertoire=NULL;savePostgres=TRUE;nomDBpostgresql=NULL;postgresUser="romain"; fileTemp=FALSE;
+                                        # require(ggplot2)
+## vecShape=c("pra_93","L93_10x10_TerreMer");vecNameTable=c("pra","maille_atlas");vecEPSG = NULL
+##    repertoire=NULL;savePostgres=TRUE;nomDBpostgresql=NULL;postgresUser="romain"; fileTemp=FALSE;
 
 
     cat("\n  Importation des shapes files \n   ------------------------------------\n")
 cat(vecShape)
-    
+
 
     if(is.null(repertoire)) repertoire <- paste(getwd(),"/",sep="")
     if(is.null(nomDBpostgresql)) nomDBpostgresql <- "stoc_eps"
 
-    
-    
+
+
     for (i in length(vecShape)) {
-        
+
         sh <- vecShape[i]
         epsg <- vecEPSG[i]
         if(is.null(epsg)) epsg <- 2154 #Lambert 93
-        
+
         fsh <- fsql <- paste("DB_import/tableGeneriques/",sh,"/",sh,sep="")
         fsql <- paste("DB_import/tableGeneriques/",sh,"/",sh,".sql",sep="")
 
         cmd <- paste("shp2pgsql -I -s ",epsg,"  ",fsh," >  ",fsql," \n",sep="")
         cat(cmd,"\n")
-        system(cmd)
+        myshell(cmd)
 
         name_table <- tail(readLines(fsql, n=4),1)
         name_table <- gsub("CREATE TABLE \"","",name_table)
         name_table <- gsub("\" (gid serial,","",name_table,fixed=TRUE)
- 
-        
+
+
         query <- paste("DROP TABLE IF EXISTS ",name_table,";")
         cat("drop query:", query,"\n")
         dbSendQuery(con, query)
-          
-        
-        cmd <- paste("psql -U ",postgresUser," -d ",nomDBpostgresql," -f ",fsql,sep="")
-        cat(cmd,"\n")
-        shell(cmd,invisible=TRUE)
 
+### HERE !!!
 
-
+            cmd <- paste("psql -U ",postgresUser," -d ",nomDBpostgresql," < ",fsql,sep="")
+        ## \copy species_list_indicator FROM c:/git/BirdLab/generic_data/espece_list_indicateur.csv with (format csv, header, delimiter ',')
+        myshell(cmd,invisible=TRUE)
 
         name_table <-  vecNameTable[i]
         if(!(is.na(name_table))) {
 
         }
-        
-    
-        
-
     }
 
+    cat("\n\n --- Importation SQL ---\n\n")
+    cat("\n\n - file: ",fsql,"\n")
 
-         cat("\n\n --- Importation SQL ---\n\n")
-             cat("\n\n - file: ",fsql,"\n")
-        
-
-commande <- paste("psql -U ",postgresUser," ",nomDBpostgresql," -f ",repertoire,"sql/postgres_createTableGenerique.sql",sep="")
+    commande <- paste("psql -U ",postgresUser," ",nomDBpostgresql," < ",repertoire,"sql/postgres_createTableGenerique.sql",sep="")
     shell(commande)
+
+}
+
+findDataInVP <- function(d=NULL,nomFile="export_stoc_10012019.txt",id_carre=NULL,num_point=NULL,date=NULL,annee=NULL,espece=NULL,distance_contact=NULL) {
+    library(lubridate)
+    if(is.null(d)) {
+        nomFileVP <- paste("data/",nomFile,sep="")
+        d <-  read.csv(nomFileVP,h=TRUE,stringsAsFactors=FALSE,fileEncoding="utf-8",sep="\t")
+    }
+
+  #  browser()
+    if(!is.null(id_carre)) d <- subset(d,N..Carré.EPS %in% paste("CARRE N°",id_carre,sep=""))
+    if(!is.null(num_point))  d <- subset(d, EXPORT_STOC_TEXT_EPS_POINT %in% paste("Point N°",sprintf("%02d",num_point),sep=""))
+    if(!is.null(date))  d <- subset(data,Date== format(as.Date(date),"%d.%m.%Y"))
+    if(!is.null(annee)) d <- subset(d,year(as.Date(Date,"%d.%m.%Y"))%in% annee)
+    if(!is.null(espece)) d <- subset(d,Espèce %in% espece)
+    if(!is.null(distance_contact)) d <- subset(d, Distance.de.contact %in% distance_contact)
+
+    return(d)
+}
+
+
+
+
+
+make_table_functionnal_indicator <- function() {
+
+    dinc <- read.csv("DB_import/tablesGeneriques/espece_indicateur_fonctionel.csv",encoding="UTF-8")
+    dim(dinc)
+    dbl <- read.csv("DB_import/tablesGeneriques/espece_indicateur_fonctionel_birdalb.csv",encoding="UTF-8",sep=";")
+    dim(dbl)
+    dsti <- read.csv("DB_import/tablesGeneriques/OLD_CTI_sti.csv",sep=";",dec=",")
+    dim(dsti)
+    dstri <- read.table("DB_import/tablesGeneriques/STrI.txt",sep="\t",header=TRUE)
+    dim(dstri)
+    dssi <- read.table("DB_import/tablesGeneriques/SSI.txt",sep="\t",header=TRUE)
+    dim(dssi)
+    dssiold <- read.csv2("DB_import/tablesGeneriques/SSInew100m_2007.csv")
+    dim(dssiold)
+
+    lescolonnes <- colnames(dbl)[1:15]
+    print(lescolonnes)
+
+    touteslescolonnes <- colnames(dbl)
+    print(touteslescolonnes)
+
+    dprevHiv <- dbl[,c(1,16:ncol(dbl))]
+    print(colnames(dprevHiv))
+
+    print(colnames(dinc))
+    dstieu <- dinc[,c(1,6:10,13:15)]
+    print(colnames(dstieu))
+
+   print(colnames(dssi))
+    colnames(dssi) <- c("pk_species","ssi")
+
+    print(colnames(dssiold))
+    head(dssiold)
+    dssiold <- dssiold[,c(1,3,4)]
+    print(colnames(dssiold))
+    colnames(dssiold) <- c("pk_species","ssi_old","ssi_2007")
+
+
+    print(colnames(dsti))
+    head(dsti)
+    dsti <- dsti[,c(1,5)]
+    print(colnames(dsti))
+    colnames(dsti) <- c("pk_species","sti")
+
+    print(colnames(dstri))
+    head(dstri)
+    colnames(dstri) <- c("pk_species","stri")
+    dstri$exp_stri <- round(exp(dstri$stri),2)
+    head(dstri)
+
+
+    dim(dstieu)
+    dd <- merge(dstieu,dssi,by="pk_species",all=TRUE)
+    dim(dd)
+    dd <- merge(dd,dssiold,by="pk_species",all=TRUE)
+    dim(dd)
+    dd <- merge(dd,dsti,by="pk_species",all=TRUE)
+    dim(dd)
+    dd <- merge(dd,dstri,by="pk_species",all=TRUE)
+    dim(dd)
+
+    print(head(dd))
+
+    dd <- dd[,lescolonnes]
+    dim(dd)
+    print(head(dd))
+
+    write.csv(dd,"DB_import/tablesGeneriques/espece_indicateur_fonctionel.csv",fileEncoding="UTF-8",row.names=FALSE,quote=TRUE,na="")
+
+
+    ddd <- merge(dd,dprevHiv,by="pk_species",all=TRUE)
+    dim(ddd)
+    print(head(ddd))
+    ddd <- ddd[,touteslescolonnes]
+    print(head(ddd))
+
+    write.csv(dd,"DB_import/tablesGeneriques/espece_indicateur_fonctionel_BL.csv",fileEncoding="UTF-8",row.names=FALSE,quote=TRUE,na="")
+
+}
+
+
+
+
+
+explore_VP <- function(nomFileVP="export_stoc_25112019.txt") {
+    library(data.table)
+
+nomFileVP="export_stoc_25112019.txt"
+  nomFileVP=paste("data/",nomFileVP,sep="")
+
+  dVP <- fread(nomFileVP,encoding="UTF-8")
+
+colnames(dVP)[8] <- "carre"
+dVP$year <- as.numeric(substr(dVP$Date,7,10))
+
+    dc <- unique(dVP[,c("carre","year")])
+    dc$id_carre <- substr(dc$carre,9,nchar(dc$carre))
+
+    dc_y <- aggregate(id_carre ~year,dc,length)
+
 
 }

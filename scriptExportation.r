@@ -388,7 +388,8 @@ ca.id_carre, annee;",sep="")
 
     dbDisconnect(con)
 
-    cat("     #      ==> Duree:",round(as.difftime(end - start,units="mins")),"minutes\n")
+     diff_time <- end - start
+    cat("\n     #      ==> Duree:",round(diff_time[[1]],2),units(diff_time),"\n")
     if(output) return(d)
 }
 
@@ -722,7 +723,8 @@ pa.id_point, annee;",sep="")
 
     dbDisconnect(con)
 
-    cat("\n     #      ==> Duree:",round(as.difftime(end - start,units="auto")),"\n")
+    diff_time <- end - start
+    cat("\n     #      ==> Duree:",round(diff_time[[1]],2),units(diff_time),"\n")
     if(output) return(d)
 }
 
@@ -1032,7 +1034,9 @@ group by id_carre, annee;",sep="")
 
     dbDisconnect(con)
 
-    cat("     #      ==> Duree:",round(as.difftime(end - start,units="mins")),"minutes\n")
+    diff_time <- end - start
+    cat("\n     #      ==> Duree:",round(diff_time[[1]],2),units(diff_time),"\n")
+
     if(output) return(tabTRIM)
 }
 
@@ -1181,8 +1185,10 @@ WHERE
 
         dbDisconnect(con)
 
-        cat("\n     #      ==> Duree:",round(as.difftime(end - start,units="mins")),"minutes\n")
-        if(output) return(d)
+        diff_time <- end - start
+    cat("\n     #      ==> Duree:",round(diff_time[[1]],2),units(diff_time),"\n")
+
+    if(output) return(d)
 
 
 
@@ -1288,7 +1294,10 @@ WHERE
 
     end <- Sys.time() ## heure de fin
     dbDisconnect(con)
-    cat("\n     #      ==> Duree:",round(as.difftime(end - start,units="mins")),"minutes\n")
+
+    diff_time <- end - start
+    cat("\n     #      ==> Duree:",round(diff_time[[1]],2),units(diff_time),"\n")
+
     if(output) return(d)
 }
 
@@ -1382,7 +1391,11 @@ order by i.id_carre, i.annee;")
 
         dbDisconnect(con)
 
-        cat("\n     #      ==> Duree:",round(as.difftime(end - start,units="mins")),"minutes\n")
+
+    diff_time <- end - start
+        cat("\n     #      ==> Duree:",round(diff_time[[1]],2),units(diff_time),"\n")
+
+
         if(output) return(d)
 
 

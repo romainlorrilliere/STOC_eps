@@ -658,7 +658,7 @@ om.id_point, annee,code_sp; ",sep="")
 from
 point_annee as pa, point as p, carre as c ", ifelse(champsHabitat,", carre_annee as ca ",""), "
 where
-pa.id_point = p.pk_point and pa.id_carre = c.pk_carre and p.altitude <= ",altitude," and  pa.annee >= ",firstYear,"  and pa.annee <= ",lastYear,ifelse(champsHabitat," and pa.id_carre = ca.id_carre and pa.annee = ca.annee ",""),ifelse(is.null(departement),"",paste(" and p.departement in ",depList," ")),
+pa.id_point = p.pk_point and pa.id_carre = c.pk_carre and  p.altitude <= ",altitude_max," and  p.altitude >= ",altitude_min," and  pa.annee >= ",firstYear,"  and pa.annee <= ",lastYear,ifelse(champsHabitat," and pa.id_carre = ca.id_carre and pa.annee = ca.annee ",""),ifelse(is.null(departement),"",paste(" and p.departement in ",depList," ")),
 ifelse(!is.null(selectHabitat),paste(" and p_milieu in ",habList," ")," "),ifelse(!is.null(selectTypeHabitat),queryTypeHab," "),"
 order by
 pa.id_point, annee;",sep="")
@@ -722,7 +722,7 @@ pa.id_point, annee;",sep="")
 
     dbDisconnect(con)
 
-    cat("\n     #      ==> Duree:",round(as.difftime(end - start,units="mins")),"minutes\n")
+    cat("\n     #      ==> Duree:",round(as.difftime(end - start,units="auto")),"\n")
     if(output) return(d)
 }
 

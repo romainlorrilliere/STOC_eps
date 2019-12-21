@@ -716,7 +716,7 @@ pa.id_point, annee;",sep="")
     if(is.null(sp)) suffSp <- "allSp" else if(length(sp)<4) suffSp <- paste(sp,collapse="-") else suffSp <- paste(length(sp),"sp",sep="")
 
     fileOut <- paste("export/data_FrenchBBS_point_",id_output,"_",suffSp,"_",firstYear,"_",lastYear,ifelse(isEnglish,"eng","fr"),".csv",sep="")
-    write.csv2(d,fileOut,row.names=FALSE)
+    write.csv2(d,fileOut,row.names=FALSE,fileEncoding=encodingSave)
     cat(" --> ",fileOut,"\n")
 
     end <- Sys.time() ## heure de fin

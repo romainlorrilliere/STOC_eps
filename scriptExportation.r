@@ -110,8 +110,8 @@ makeTableCarre <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,savePostgres=FA
     if(is.null(lastYear)) lastYear <- as.numeric(format(start,"%Y"))
     if(is.null(altitude_max)) altitude_max <- 8000
     if(is.null(altitude_min)) altitude_min <- 0
-
-    if(is.null(distance_contact)) {
+##browser()
+    if(is.null(distance_contact) | distance_contact == "") {
         distance_contact_txt <- ""
     } else {
         if(distance_contact == "100") {
@@ -129,7 +129,7 @@ makeTableCarre <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,savePostgres=FA
     seuil_txt <- as.character(trunc(seuilAbondance*100))
 
 
-    if(is.null(distance_contact)) {
+    if(is.null(distance_contact) | distance_contact == "") {
         champ_seuil <- paste("abondAll_seuil",seuil_txt,sep="")
     } else {
         if(distance_contact == "100") {
@@ -449,7 +449,7 @@ makeTablePoint <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,savePostgres=FA
     if(is.null(altitude_max)) altitude_max <- 8000
     if(is.null(altitude_min)) altitude_min <- 0
 
-    if(is.null(distance_contact)) {
+    if(is.null(distance_contact)|distance_contact=="") {
         distance_contact_txt <- ""
     } else {
         if(distance_contact == "100") {
@@ -467,7 +467,7 @@ makeTablePoint <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,savePostgres=FA
     seuil_txt <- as.character(trunc(seuilAbondance*100))
 
 
-    if(is.null(distance_contact)) {
+    if(is.null(distance_contact)|distance_contact=="") {
         champ_seuil <- paste("abondAll_seuil",seuil_txt,sep="")
     } else {
         if(distance_contact == "100") {
@@ -805,7 +805,7 @@ makeTableTRIM <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,savePostgres=FAL
 
 
 
-    if(is.null(distance_contact)) {
+    if(is.null(distance_contact)|distance_contact=="") {
         distance_contact_txt <- ""
     } else {
         if(distance_contact == "100") {
@@ -823,7 +823,7 @@ makeTableTRIM <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,savePostgres=FAL
     seuil_txt <- as.character(trunc(seuilAbondance*100))
 
 
-    if(is.null(distance_contact)) {
+    if(is.null(distance_contact)|distance_contact=="") {
         champ_seuil <- paste("abondAll_seuil",seuil_txt,sep="")
     } else {
         if(distance_contact == "100") {
@@ -1097,7 +1097,7 @@ makeTableBrut <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,output=TRUE,sp=N
 nbp_foret_ps as carre_nb_pts_foret_ps, nbp_ouvert_ps as carre_nb_pts_ouvert_ps, nbp_agri_ps as carre_nb_pts_agricole_ps, nbp_urbain_ps  as carre_nb_pts_urbain_ps, "
 
 
-        if(is.null(distance_contact)) {
+        if(is.null(distance_contact)|distance_contact=="") {
             distance_contact_txt <- ""
         } else {
             if(distance_contact == "100") {
@@ -1559,16 +1559,16 @@ sp.id_carre = cnbp.id_carre and sp.date = cnbp.date and sp.id_carre = c.pk_carre
                                       encodingSave="utf-8",test=FALSE) {
 
 
-        con=NULL;savePostgres=FALSE;output=TRUE;sp=NULL;champSp = "code_sp";
-        spExcluPassage1=c("MOTFLA","SAXRUB","ANTPRA")  ;seuilAbondance=.99;
-        champsHabitat=TRUE;champsCoordGrid=TRUE;altitude=NULL;firstYear=NULL;lastYear=NULL;
-        departement="44";onf=TRUE;distance_contact="100";
-        selectHabitat = NULL; selectTypeHabitat= NULL#c("urbain_ps","agri_ps");
-        formatTrend = FALSE;anglais=FALSE;addAbscence=FALSE;
-        id_output="VincentP_2017-10-16"; #"NicolasM";
-        operateur=c("Lorrilliere Romain",
-                    "lorrilliere@mnhn.fr");
-        encodingSave="utf-8"
+  ##    con=NULL;savePostgres=FALSE;output=TRUE;sp=NULL;champSp = "code_sp";
+  ##    spExcluPassage1=c("MOTFLA","SAXRUB","ANTPRA")  ;seuilAbondance=.99;
+  ##    champsHabitat=TRUE;champsCoordGrid=TRUE;altitude=NULL;firstYear=NULL;lastYear=NULL;
+  ##    departement="44";onf=TRUE;distance_contact="100";
+  ##    selectHabitat = NULL; selectTypeHabitat= NULL#c("urbain_ps","agri_ps");
+  ##    formatTrend = FALSE;anglais=FALSE;addAbscence=FALSE;
+  ##    id_output="VincentP_2017-10-16"; #"NicolasM";
+  ##    operateur=c("Lorrilliere Romain",
+  ##                "lorrilliere@mnhn.fr");
+  ##    encodingSave="utf-8"
 
 
 
@@ -1583,6 +1583,7 @@ sp.id_carre = cnbp.id_carre and sp.date = cnbp.date and sp.id_carre = c.pk_carre
             lastYear <- as.numeric(format(start,"%Y"))
         d<-if(is.null(altitude))
                altitude <- 8000
+
 
 
 
@@ -1615,6 +1616,28 @@ ifelse(!is.null(selectHabitat),paste(" and p_milieu in ",habList," ")," "),"
 
     }
 
+
+
+   makeTableSample <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,output=FALSE,encodingSave="utf-8") {
+                                        #spExcluPassage1=c("MOTFLA","SAXRUB","ANTPRA","OENOEN","PHYTRO"),# (Prince et al. 2013 Env. Sc. and Pol.) + "OENOEN","PHYTRO" avis d'expert F. Jiguet
+
+        if(is.null(con)) con <- openDB.PSQL(user,mp,nomDB)
+
+        query <- paste("SELECT pk_inventaire, date, annee, inv.id_carre, longitude_grid_wgs84, latitude_grid_wgs84, id_point, longitude_wgs84, latitude_wgs84, inv.etude, pt.commune, pt.site, pt.insee, pt.departement, passage_stoc, nombre_de_passage, info_entre_passage
+FROM inventaire as inv, carre as ca, point as pt
+WHERE inv.id_point = pt.pk_point AND inv.id_carre = ca.pk_carre
+")
+
+        cat("\n QUERY sample:\n--------------\n\n",query,"\n")
+
+        d <- dbGetQuery(con, query)
+
+        write.csv2(d,paste("export/data_FrenchBBS_sample.csv",sep=""),row.names=FALSE,fileEncoding=encodingSave)
+
+        dbDisconnect(con)
+        return(d)
+
+    }
 
 
 

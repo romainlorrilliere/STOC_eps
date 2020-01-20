@@ -1107,7 +1107,7 @@ analyseGroupe <- function(id=NA,tabsp,ICfigureGroupeSp=TRUE,powerWeight=2,
     donneesTrend <- read.csv2(nameFileTrend)
     donneesTrend <- subset(donneesTrend, select = c(code_espece,valide,mediane_occurrence))
     ## table de reference espece
-    if(class(tabsp)[1] == "character") tabsp <- read.csv(tabsp)
+    if(class(tabsp)[1] == "character") tabsp <- read.csv2(tabsp)
     tabsp <- subset(tabsp, select= c(sp,nom,indicateur, specialisation))
     donnees <- merge(donnees,donneesTrend,by="code_espece")
     donnees <- merge(donnees,tabsp,by.x="code_espece",by.y="sp")

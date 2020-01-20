@@ -1,12 +1,12 @@
 #############################################################################
 
 ### Analyse des variations d'abondance des donnees issues du protocole STOCeps
-###      Romain Lorrilliere 
-### makeTrend() 
+###      Romain Lorrilliere
+### makeTrend()
 
 ##############################################################################
 
-#### V3.6 - 2017-10-10 
+#### V3.6 - 2017-10-10
 ##            ajout du multi-thread
 
 
@@ -19,7 +19,7 @@ ip <- installed.packages()[,1]
 vecPackage <-  c("lme4","arm","ggplot2","speedglm","psych","scales")
 for(p in vecPackage)
     if (!(p %in% ip))
-        install.packages(pkgs=p,repos = "http://cran.univ-paris1.fr/", dependencies=TRUE) 
+        install.packages(pkgs=p,repos = "http://cran.univ-paris1.fr/", dependencies=TRUE)
 
 library(lme4)
 library(arm)
@@ -58,9 +58,9 @@ makeTrend <- function(idcluster=1,nbcluster=5,
                       ecritureStepByStep=TRUE,
                       groupeNom = c("generaliste","milieux batis","milieux forestiers","milieux agricoles"),
                       groupeCouleur = c("black","firebrick3","chartreuse4","orange")) {
-    
-    
- 
+
+
+
 
 
 ## idcluster=3;nbcluster=5;fileData="dataSTOCallSp_France_trend_2001_2017_France_clean";
@@ -77,17 +77,17 @@ makeTrend <- function(idcluster=1,nbcluster=5,
 ## ecritureStepByStep=TRUE;
 ## groupeNom = c("generaliste","milieux batis","milieux forestiers","milieux agricoles");
 ## groupeCouleur = c("black","firebrick3","chartreuse4","orange")
-    
+
     cat("\n")
     start <- Sys.time() ## heure de demarage est utilisée comme identifiant par defaut
     cat(format(start, "%d-%m-%Y %HH%M"),"\n")
     cat("\n")
-    
-    
+
+
     ## creation d'un dossier pour y mettre les resultats
     dir.create(paste(idcluster,sep=""),showWarnings = FALSE)
     dir.create(paste(idcluster,"/Incertain/",sep=""),showWarnings = FALSE)
-    
+
     ## importation des donnees
     fname <- paste(fileData,".csv",sep="")
     data <- read.csv2(fname)
@@ -100,14 +100,14 @@ makeTrend <- function(idcluster=1,nbcluster=5,
 
     seqClusterSp <- trunc(seq(1,length(spList),length.out = nbcluster+1))
 
-    vecCluster <- seqClusterSp[idcluster]:(seqClusterSp[idcluster+1]-1) 
+    vecCluster <- seqClusterSp[idcluster]:(seqClusterSp[idcluster+1]-1)
     if(idcluster == nbcluster) vecCluster <- c(vecCluster,length(spList))
 
     spList.clust <- spList[vecCluster]
-    
+
     tabsp <- subset(tabsp,espece %in% spList.clust)
     data <- subset(data,espece %in% spList.clust)
-    
+
 
     if(!is.null(spExclude)) {
 
@@ -122,14 +122,14 @@ makeTrend <- function(idcluster=1,nbcluster=5,
     listSp <- spList.clust
     annees <- firstYear:lastYear
     main.glm(idcluster,data,assessIC=assessIC,listSp,tabsp,annees,figure,description,tendanceSurFigure,tendanceGroupSpe,seuilOccu=14,seuilAbond=NA,ecritureStepByStep)
-    
-    
+
+
     if(tendanceGroupSpe) {
         cat("3) DYNAMIQUE PAR GROUPE D'ESPECES \n--------------------------------\n")
         flush.console()
         analyseGroupe(id,tabsp,ICfigureGroupeSp,groupeNom = groupeNom,groupeCouleur=groupeCouleur)
     }
-    
+
 }
 
 
@@ -139,13 +139,13 @@ makeTrend <- function(idcluster=1,nbcluster=5,
 makeTableAnalyse <- function(data) {
     tab <- reshape(data
                   ,v.names="nombre"
-                  ,idvar=c("carre","annee")      
+                  ,idvar=c("carre","annee")
                   ,timevar="espece"
                   ,direction="wide")
     tab[is.na(tab)] <- 0
                                         #  filename <- "touverUnNom"
                                         #  chemin <- paste(rep,filename,sep="/")
-                                        #  write.table(tab, chemin) 
+                                        #  write.table(tab, chemin)
     colnames(tab) <- sub("nombre.","",colnames(tab))
 
     return(tab)
@@ -166,7 +166,7 @@ filtreEspeceRare <- function(tab) {
         ## v0 presence abscence par annee
         v0 <- ifelse(v>0,1,0)
         tx <- paste(v0,collapse="")
-        
+
         p <- unlist(strsplit(tx,"0"))
         p <- p[p!=""]
         ## gsSup0 plus grande serie temporelle de presence
@@ -208,7 +208,7 @@ filtreAnalyse <- function(tab,tabsp) {
     if(length(colNull)>0){
         cat("\n",length(colNull)," Espèces enlevées de l'analyse car abondance toujours égale a 0\n\n",sep="")
         tabNull <- data.frame(Code_espece = colNull, nom_espece = tabsp[colNull,"nom"])
-        print(tabNull)  
+        print(tabNull)
         cat("\n\n",sep="")
         tab <- tab[,c("carre","annee",colConserve)]
     }
@@ -219,15 +219,15 @@ filtreAnalyse <- function(tab,tabsp) {
     colConserve <- lfiltre$colConserve
     ## colsupr espece trop rare et donc supprimé de l'analyse
     colSupr <- lfiltre$colSupr
-    
+
     ## affichage des especes retirer de l'analyse
     if(length(colSupr)>0){
         cat("\n",length(colSupr)," Espèces enlevées de l' analyse car espèces trop rares\n\n",sep="")
         tabSupr <- subset(tabsp,espece %in% colSupr ,select=c("espece","nom"))
         tabSupr <- tabSupr[order(tabSupr$espece),]
-        print(tabSupr)  
+        print(tabSupr)
         cat("\n\n",sep="")
-        
+
     }
     if(length(colConserve)==0) {
         mess <- "Aucun espèce elligible dans le jeu de données pour le calcul de variation d'abondance"
@@ -244,7 +244,7 @@ filtreAnalyse <- function(tab,tabsp) {
 filtreAnnees <- function(tab) {
     sumAn <- by(tab[,3],tab$annee,sum)
     return(names(sumAn)[which(sumAn==0)])
-    
+
 }
 
 ## filtre les carres ayant jamais vu l espece
@@ -274,17 +274,17 @@ affectCatEBCC <- function(trend,pVal,ICinf,ICsup){
 stripGlmLR <- function(cm) {
   cm$y = c()
   cm$model = c()
-  
+
   cm$residuals = c()
   cm$fitted.values = c()
   cm$effects = c()
-  cm$qr$qr = c()  
+  cm$qr$qr = c()
   cm$linear.predictors = c()
   cm$weights = c()
   cm$prior.weights = c()
   cm$data = c()
 
-  
+
   cm$family$variance = c()
   cm$family$dev.resids = c()
   cm$family$aic = c()
@@ -292,7 +292,7 @@ stripGlmLR <- function(cm) {
   cm$family$simulate = c()
   attr(cm$terms,".Environment") = c()
   attr(cm$formula,".Environment") = c()
-  
+
   cm
 }
 
@@ -319,14 +319,14 @@ main.glm <- function(id,donneesAll,assessIC= TRUE,listSp=NULL,tabsp,annees=NULL,
 
     fileSaveGLMs <-  paste(id,"/listGLM_",sep = "")
 
-    
+
     ## seuil de significativite
     seuilSignif <- 0.05
-    
+
     ## tabsp table de reference des especes
     rownames(tabsp) <- tabsp$espece
-    
-    
+
+
     ##vpan vecteur des panels de la figure
     vpan <- c("Variation abondance")
     if(description) vpan <- c(vpan,"Occurrences","Abondances brutes")
@@ -342,10 +342,10 @@ main.glm <- function(id,donneesAll,assessIC= TRUE,listSp=NULL,tabsp,annees=NULL,
     ## Ordre de traitement des especes
     spOrdre <- aggregate(abond~espece,data=donneesAll,sum)
     spOrdre <- merge(spOrdre,tabsp,by="espece")
-    
+
     spOrdre <- spOrdre[order(as.numeric(spOrdre$indicateur),spOrdre$abond,decreasing = TRUE),]
-    
-    
+
+
     listSp <- spOrdre$espece
     i <- 0
     nbSp <- length(listSp)
@@ -356,7 +356,7 @@ main.glm <- function(id,donneesAll,assessIC= TRUE,listSp=NULL,tabsp,annees=NULL,
     cat("\n",nbSp," Espèces conservées pour l'analyse\n\n",sep="")
     rownames(tabsp) <- tabsp$espece
     tabCons <- data.frame(Code_espece = listSp, nom_espece = tabsp[as.character(listSp),"nom"])
-    print(tabCons)  
+    print(tabCons)
     cat("\n\n",sep="")
     flush.console()
 
@@ -365,16 +365,16 @@ main.glm <- function(id,donneesAll,assessIC= TRUE,listSp=NULL,tabsp,annees=NULL,
 
     ## initialisation de la liste de sauvegarde
 
-    
+
 
 
 ##browser()
-    
+
     for (sp in listSp) {
        #           browser()
 ## sp="LANEXC"
         i <- i + 1
-        ## d data pour l'espece en court    
+        ## d data pour l'espece en court
         d <- subset(donneesAll,espece==sp)
         ## info sp
         nomSp <- as.character(tabsp[sp,"nom"])
@@ -382,7 +382,7 @@ main.glm <- function(id,donneesAll,assessIC= TRUE,listSp=NULL,tabsp,annees=NULL,
         flush.console()
 #### shortlist espece fait partie des especes indiactrice reconnue à l'echelle national
 ### shortlist <- tabsp[sp,"shortlist"]
-        ## indic espèce utilisé pour le calcul des indicateurs par groupe de specialisation 
+        ## indic espèce utilisé pour le calcul des indicateurs par groupe de specialisation
         indic <- tabsp[sp,"indicateur"]
 
         ## Occurrence
@@ -395,7 +395,7 @@ main.glm <- function(id,donneesAll,assessIC= TRUE,listSp=NULL,tabsp,annees=NULL,
                            catPoint=NA,pval=NA,
                            courbe=rep(c("carre","presence"),each=length(annee)),panel=vpan[2])
         tab2$catPoint <- ifelse(tab2$val == 0,"0",ifelse(tab2$val < seuilOccu,"infSeuil",NA))
-        
+
         ## abondance brut
         ## abond abondance par annee
         abond <- tapply(d$abond,d$annee,sum)
@@ -429,7 +429,7 @@ main.glm <- function(id,donneesAll,assessIC= TRUE,listSp=NULL,tabsp,annees=NULL,
         ## erreur standard back transformee
         erreurannee1 <- c(0,erreuran*exp(coefan))
         pval <- c(1,as.numeric(as.character(sglm1[,4])))
-        
+
         ## calcul des intervalle de confiance
         if(is.glm1) {
         glm1.sim <- sim(glm1)
@@ -438,10 +438,10 @@ main.glm <- function(id,donneesAll,assessIC= TRUE,listSp=NULL,tabsp,annees=NULL,
         } else {
             ic_inf_sim <- NA
             ic_sup_sim <- NA
- 
+
         }
-        
-        
+
+
         ## tab1 table pour la realisation des figures
         tab1 <- data.frame(annee,val=coefannee,
                            LL=ic_inf_sim,UL=ic_sup_sim,
@@ -461,19 +461,19 @@ main.glm <- function(id,donneesAll,assessIC= TRUE,listSp=NULL,tabsp,annees=NULL,
         if(is.glm1) dispAn <- glm1$deviance/glm1$null.deviance else dispAn <- glm1$deviance/glm1$nulldev
 
 
-        ## tabAn table de sauvegarde des resultats      
+        ## tabAn table de sauvegarde des resultats
         tabAn <- data.frame(id,code_espece=sp, nom_espece = nomSp,indicateur = indic,annee = tab1$annee,
                             abondance_relative=round(tab1$val,3),
                             IC_inferieur = round(tab1$LL,3), IC_superieur = round(tab1$UL,3),
                             erreur_standard = round(erreurannee1,4),
                             p_value = round(tab1$pval,3),significatif = !is.na(tab1$catPoint),
                             nb_carre,nb_carre_presence,abondance=abond)
-        
+
         ## GLM tendance generale sur la periode
         formule <- as.formula(paste("abond~ as.factor(carre) + annee",sep=""))
           #  browser()
-    
-       
+
+
          if(assessIC) {
              md2 <- glm(formule,data=d,family=quasipoisson)
              is.glm2 <- TRUE
@@ -486,23 +486,23 @@ main.glm <- function(id,donneesAll,assessIC= TRUE,listSp=NULL,tabsp,annees=NULL,
                     }
             }
 
-        
+
        smd2 <- summary(md2)
        smd2 <- coefficients(smd2)
        smd2 <- tail(smd2,1)
-       
+
         ## tendences sur la periode
         coefan <- as.numeric(as.character(smd2[,1]))
         trend <- round(exp(coefan),3)
         ## pourcentage de variation sur la periode
         pourcentage <- round((exp(coefan*pasdetemps)-1)*100,2)
         pval <- as.numeric(as.character(smd2[,4]))
-        
-        erreuran <- as.numeric(as.character(smd2[,2])) 
-        ## erreur standard 
+
+        erreuran <- as.numeric(as.character(smd2[,2]))
+        ## erreur standard
         erreurannee2 <- erreuran*exp(coefan)
-        
-        
+
+
         ## calcul des intervalle de confiance
         LL <- NA
         UL <- NA
@@ -514,13 +514,13 @@ main.glm <- function(id,donneesAll,assessIC= TRUE,listSp=NULL,tabsp,annees=NULL,
             LL <- NA
             UL <- NA
         }
-        
-        ## tab1t table utile pour la realisation des figures 
+
+        ## tab1t table utile pour la realisation des figures
         tab1t <- data.frame(Est=trend,
                             LL , UL,
                             pourcent=pourcentage,signif=pval<seuilSignif,pval)
-        
-        
+
+
         trendsignif <- tab1t$signif
         pourcent <- round((exp(coefan*pasdetemps)-1)*100,3)
         ## surdispersion
@@ -528,7 +528,7 @@ main.glm <- function(id,donneesAll,assessIC= TRUE,listSp=NULL,tabsp,annees=NULL,
           if(is.glm2) dispTrend <- md2$deviance/md2$null.deviance else dispTrend <- md2$deviance/md2$nulldev
 
 
-        
+
         ## classement en categorie incertain
       #  browser()
       #  if(assessIC) {
@@ -547,9 +547,9 @@ main.glm <- function(id,donneesAll,assessIC= TRUE,listSp=NULL,tabsp,annees=NULL,
        #     catIncert <- NA
        #     raisonIncert <- NA
        # }
-        
-        
-        
+
+
+
         ## affectation des tendence EBCC
         catEBCC <- NA
         if(assessIC)  catEBCC <- affectCatEBCC(trend = as.vector(trend),pVal = pval,ICinf=as.vector(LL),ICsup=as.vector(UL)) else catEBCC <- NA
@@ -565,12 +565,12 @@ main.glm <- function(id,donneesAll,assessIC= TRUE,listSp=NULL,tabsp,annees=NULL,
 
         glm1l <- stripGlmLR(glm1)
         glm2l <- stripGlmLR(md2)
-   
+
 
         if(assessIC)  listGLMsp <- list(list(glm1l,glm1.sim,glm2l,md2.sim)) else  listGLMsp <- list(list(glm1l,glm2l))
-        names(listGLMsp)[[1]] <-sp 
+        names(listGLMsp)[[1]] <-sp
         fileSaveGLMsp <- paste(fileSaveGLMs,"_",sp,".Rdata",sep="")
-        
+
         save(listGLMsp,file=fileSaveGLMsp)
         cat("--->",fileSaveGLMsp,"\n")
         flush.console()
@@ -582,41 +582,41 @@ main.glm <- function(id,donneesAll,assessIC= TRUE,listSp=NULL,tabsp,annees=NULL,
             glmAn <- rbind(glmAn,tabAn)
             glmTrend <- rbind(glmTrend,tabTrend)
         }
-	## les figures     
+	## les figures
         if(figure) {
             ## table complete pour la figure en panel par ggplot2
             ## table pour graphe en panel par ggplot2
             if(description)	dgg <- rbind(tab1,tab2,tab3) else dgg <- tab1
-            ## les figures     
-            
+            ## les figures
+
             ggplot.espece(dgg,tab1t,id,serie=NULL,sp,valide=catIncert,nomSp,description,tendanceSurFigure,seuilOccu=14,vpan = vpan)
-            
+
         }
-        
+
         if(ecritureStepByStep) {
 
             write.csv2(glmAn,filesaveAn,row.names=FALSE,quote=FALSE)
             cat("--->",filesaveAn,"\n")
             write.csv2(glmTrend,filesaveTrend,row.names=FALSE,quote=FALSE)
             cat("--->",filesaveTrend,"\n")
-            
+
             flush.console()
 
         }
-        
-        
+
+
     }
-    
+
     write.csv2(glmAn,filesaveAn,row.names=FALSE,quote=FALSE)
     cat("--->",filesaveAn,"\n")
     write.csv2(glmTrend,filesaveTrend,row.names=FALSE,quote=FALSE)
     cat("--->",filesaveTrend,"\n")
-    
-    
+
+
     flush.console()
-    
-    
-    
+
+
+
 }
 
 
@@ -636,7 +636,7 @@ repChoix <- function(vecChoix) {
     reponse <- readline(prompt= mess)
     while(!(reponse %in% vecChoix)) {
         reponse <- readline(prompt= mess)
-        
+
     }
     return(reponse)
 }
@@ -661,12 +661,12 @@ completeSortieDescription <- function(id,listSp,taban) {
 	} else {
             cat("Quel est le fichier à traiter\n")
             cat("Notez le nom du fichier sans son extension\n")
-            
+
             nomfichier <- repChoix(vecChoix)
             donneesAll <-  read.data(file=nomfichier)
 	}
-    } else { 
-	if(length(listeFichier) == 1) { 
+    } else {
+	if(length(listeFichier) == 1) {
             cat("Le fichier de données suivant est il le bon ? \n")
             cat(listeFichier)
             cat("\n")
@@ -674,25 +674,25 @@ completeSortieDescription <- function(id,listSp,taban) {
             if(reponse == "OUI") {
                 donneesAll <-  read.data()
             } else {
-                mess <- "Veuillez mettre vos données dans le dossier 'Donnees'\n"	
+                mess <- "Veuillez mettre vos données dans le dossier 'Donnees'\n"
                 stop(mess)
             }
-	} else { 
-            mess <- "Veuillez mettre vos données dans le dossier 'Donnees'\n"	
+	} else {
+            mess <- "Veuillez mettre vos données dans le dossier 'Donnees'\n"
             stop(mess)
-	} 
+	}
     }
 
     for(sp in listSp) {
         d <- data.frame(abond=donneesAll[,sp],annee = donneesAll$annee,carre = donneesAll$carre)
-        ## d data pour l'espece en court  
+        ## d data pour l'espece en court
         ## Occurrence
         ## nb_carre nombre de carre suivie par annee
         nb_carre = tapply(rep(1,nrow(d)),d$annee,sum)
         ## nb_carre_presence nombre de carre de presence par annee
         nb_carre_presence = tapply(ifelse(d$abond>0,1,0),d$annee,sum)
         ## tab2 table de resultat d'analyse
-        
+
         ## abondance brut
         ## abond abondance par annee
         abond <- tapply(d$abond,d$annee,sum)
@@ -706,11 +706,11 @@ completeSortieDescription <- function(id,listSp,taban) {
     tabDescri <- subset(tabDescri, select = c("idmerge","nb_carre","nb_carre_presence","abondance"))
     glmAn <- merge(taban,tabDescri,by="idmerge",all=TRUE)
     glmAn <- glmAn[,-1]
-    
+
     filesaveAn <-  paste("Resultats/",id,"/variationsAnnuellesEspece_",id,".csv",
                          sep = "")
     write.csv2(glmAn,filesaveAn,row.names=FALSE,quote=FALSE)
-    
+
     cat("--->",filesaveAn,"\n")
     flush.console()
 
@@ -737,7 +737,7 @@ ggplot.espece <- function(dgg,tab1t,id,serie=NULL,sp,valide,nomSp=NULL,descripti
     ## coordonnée des ligne horizontal de seuil pour les abondances et les occurences
     hline.data1 <- data.frame(z = c(1), panel = c(vpan[1]),couleur = "variation abondance",type="variation abondance")
     hline.data2 <- data.frame(z = c(0,seuilOccu), panel = c(vpan[2],vpan[2]),couleur = "seuil",type="seuil")
-    hline.data3 <- data.frame(z = 0, panel = vpan[3] ,couleur = "seuil",type="seuil")  
+    hline.data3 <- data.frame(z = 0, panel = vpan[3] ,couleur = "seuil",type="seuil")
     hline.data <- rbind(hline.data1,hline.data2,hline.data3)
     titre <- paste(nomSp)#,"\n",min(annee)," - ",max(annee),sep="")
 
@@ -779,7 +779,7 @@ ggplot.espece <- function(dgg,tab1t,id,serie=NULL,sp,valide,nomSp=NULL,descripti
         p <- p + geom_hline(data =hline.data,mapping = aes(yintercept=z, colour = couleur,linetype=type ),
                             alpha=1,size=1.2)
   if(any(!is.na(dgg$LL))) {
-        p <- p + geom_ribbon(mapping=aes(ymin=LL,ymax=UL),fill=col[vpan[1]],alpha=.2) 
+        p <- p + geom_ribbon(mapping=aes(ymin=LL,ymax=UL),fill=col[vpan[1]],alpha=.2)
         p <- p + geom_pointrange(mapping= aes(y=val,ymin=LL,ymax=UL),fill=col[vpan[1]],alpha=.2)
         }
         p <- p + geom_line(mapping=aes(colour=courbe),size = 1.5)
@@ -802,7 +802,7 @@ ggplot.espece <- function(dgg,tab1t,id,serie=NULL,sp,valide,nomSp=NULL,descripti
         p <- p + geom_hline(data =subset(hline.data,panel=="Variation abondance"),mapping = aes(yintercept=z, colour = couleur,linetype=type ),
                             alpha=1,size=1.2)
         if(any(!is.na(dgg$LL))) {
-            p <- p + geom_ribbon(mapping=aes(ymin=LL,ymax=UL),fill=col[vpan[1]],alpha=.2) 
+            p <- p + geom_ribbon(mapping=aes(ymin=LL,ymax=UL),fill=col[vpan[1]],alpha=.2)
             p <- p + geom_pointrange(mapping= aes(y=val,ymin=LL,ymax=UL),fill=col[vpan[1]],alpha=.2)
         }
         p <- p + geom_line(mapping=aes(colour=courbe),size = 1.5)
@@ -810,7 +810,7 @@ ggplot.espece <- function(dgg,tab1t,id,serie=NULL,sp,valide,nomSp=NULL,descripti
         p <- p + geom_point(mapping=aes(colour=catPoint,alpha=ifelse(!is.na(catPoint),1,0)),size = 2)
         p <-  p + geom_text(data=tabTextPent, mapping=aes(x,y,label=txt),parse=FALSE,color=col[vpan[1]],fontface=2, size=4)
                                         #
-       
+
         ggsave(figname, p,width=15,height=9,units="cm")
     }
 }
@@ -854,14 +854,14 @@ my.geometric.mean <- function(x) exp(mean(log(x)))
 analyseGroupe.cluster <- function(nbCluster=10) {
     require(psych)
     require(scales)
-    
+
     #nbCluster=10
     groupeNom = c("generaliste","milieux batis","milieux forestiers","milieux agricoles","toutes espèces")
     groupeCouleur = c("black","firebrick3","chartreuse4","orange","blue")
     groupelegend = c("Généraliste","Milieux bâtis","Milieux forestiers","Milieu agricoles","Toutes espèces")
 
     histo <- read.csv("historic_trendGr.csv")
-    
+
     donnees <- getSpecificAnnualVariation(nbCluster)
     donneesTrend <- getSpecificTrend(nbCluster)
 
@@ -873,25 +873,25 @@ analyseGroupe.cluster <- function(nbCluster=10) {
     colnames(tsp)[1] <- "code_espece"
     donnees <- merge(donnees,tsp,by="code_espece")
 
-    
+
     donnees$abondance_relative[donnees$abondance_relative > 1000] <- NA
-    
+
     da <- aggregate(abondance_relative ~ specialisation + annee,data=donnees,FUN= geometric.mean, na.rm =NA)
     da2 <- aggregate(abondance_relative ~ annee,data=donnees,FUN= geometric.mean, na.rm =NA)
     da2$specialisation <- "toutes espèces"
     da2 <- da2[,colnames(da)]
 
     da <- rbind(da,da2)
- 
+
     colnames(da)[3] <- "indicateur"
 
     for(s in as.character(unique(da$specialisation))) {
         init <- subset(histo,specialisation == s & annee == 2001)$indicateur
-        da[da$specialisation == s,"indicateur"] <-  da[da$specialisation == s,"indicateur"]+init -1 
+        da[da$specialisation == s,"indicateur"] <-  da[da$specialisation == s,"indicateur"]+init -1
     }
-    
+
 histo <- subset(histo,annee<2001)
-    
+
     da <- rbind(da,histo)
 
     nameFileSpe <- "VariationsTemporellesGroupes.csv"
@@ -912,16 +912,16 @@ histo <- subset(histo,annee<2001)
                                      tendance=round(sumlm$coefficients[2,1],3),
                                      pourcentage_variation=round(sumlm$coefficients[2,1]*(nrow(subtab)-1)*100,3))
             datasum <- rbind(datasum,subdatasum)
-            
+
         }
-        
+
     }
                                         #datasum$cat_tendance_EBCC <- affectCatEBCC(trend,pVal,ICinf,ICsup
     namefilesum <- paste("tendancesGlobalesGroupes.csv",sep="" )
     write.csv2(datasum,file=namefilesum,row.names=FALSE,quote=FALSE)
     cat(" <--",namefilesum,"\n")
- 
-    
+
+
     ## figure par ggplot2
     titre <- paste("Variation de l'indicateur groupe de spécialisation",sep="")
 
@@ -939,40 +939,40 @@ histo <- subset(histo,annee<2001)
     datasum2 <- round(datasum2)
 
     groupelegend <- paste("\n",groupelegend,"\n    ",datasum2[groupeNom,1],"%\n")
-    
+
     vecLegende <- setNames(groupelegend, groupeNom)
-    
+
                                         #browser()
     p <- ggplot(data = da, mapping = aes(x = annee, y = indicateur, colour=specialisation))
-    p <- p + geom_hline(aes(yintercept = 1), colour="white", alpha=1,size=1.2) 
+    p <- p + geom_hline(aes(yintercept = 1), colour="white", alpha=1,size=1.2)
     p <- p +  geom_smooth(span = .3,size=1,alpha=.5,se=FALSE)
     p <- p +  ylab("") + xlab("Année")+ ggtitle(titre)
-   
+
     p <- p + scale_colour_manual(values=vecCouleur, name = "" ,labels=vecLegende)+
                                 scale_x_continuous(breaks=pretty_breaks())
-    
-    p <- p +  theme(panel.grid.minor.y=element_blank(), panel.grid.major.y=element_blank()) 
-    
+
+    p <- p +  theme(panel.grid.minor.y=element_blank(), panel.grid.major.y=element_blank())
+
 
     nameFile.png <- "indicateurGroupeSmooth.png"
     ggsave(nameFile.png, p,width=17,height=10,units="cm")
 
     p <- ggplot(data = da, mapping = aes(x = annee, y = indicateur, colour=specialisation))
-    p <- p + geom_hline(aes(yintercept = 1), colour="white", alpha=1,size=1.2) 
+    p <- p + geom_hline(aes(yintercept = 1), colour="white", alpha=1,size=1.2)
     p <- p +  geom_line(size=1,alpha=.9)
     p <- p +  ylab("") + xlab("Année")+ ggtitle(titre)
-   
+
     p <- p + scale_colour_manual(values=vecCouleur, name = "" ,labels=vecLegende)+
                                 scale_x_continuous(breaks=pretty_breaks())
-    
-    p <- p +  theme(panel.grid.minor.y=element_blank(), panel.grid.major.y=element_blank()) 
-    
+
+    p <- p +  theme(panel.grid.minor.y=element_blank(), panel.grid.major.y=element_blank())
+
 
     nameFile.png <- "indicateurGroupe.png"
     ggsave(nameFile.png, p,width=17,height=10,units="cm")
 
 
-    
+
 
 
     donnees$generaliste <- ifelse(donnees$specialisation == "generaliste","generaliste","specialiste")
@@ -982,7 +982,7 @@ histo <- subset(histo,annee<2001)
 
    for(s in as.character(unique(da3$specialisation))) {
         init <- subset(histo3,specialisation == s & annee == 2001)$indicateur
-        da3[da3$specialisation == s,"indicateur"] <-  da3[da3$specialisation == s,"indicateur"]+init -1 
+        da3[da3$specialisation == s,"indicateur"] <-  da3[da3$specialisation == s,"indicateur"]+init -1
     }
 
     histo3 <- subset(histo3,annee<2001)
@@ -1007,18 +1007,18 @@ histo <- subset(histo,annee<2001)
                                      tendance=round(sumlm$coefficients[2,1],3),
                                      pourcentage_variation=round(sumlm$coefficients[2,1]*(nrow(subtab)-1)*100,3))
             datasumGen <- rbind(datasumGen,subdatasum)
-            
+
         }
-        
+
     }
-  
+
 
 
 
     namefilesum <- paste("tendancesGlobalesSpeGen.csv",sep="" )
     write.csv2(datasumGen,file=namefilesum,row.names=FALSE,quote=FALSE)
     cat(" <--",namefilesum,"\n")
- 
+
 
   titre <- paste("Variation de l'abondance des populations d'oiseaux communs métropolitains spécialistes
 et généralistes ",sep="")
@@ -1037,24 +1037,24 @@ et généralistes ",sep="")
     datasumGen2 <- round(datasumGen2)
 
     groupelegend <- paste("\n",groupelegend,"\n    ",datasumGen2[groupeNom,1],"%\n")
-    
+
     vecLegende <- setNames(groupelegend, groupeNom)
-    
- 
+
+
                                         #datasum$cat_tendance_EBCC <- affectCatEBCC(trend,pVal,ICinf,ICsup
-  
-  
- 
-    
-    
+
+
+
+
+
   p <- ggplot(data = da3, mapping = aes(x = annee, y = indicateur, colour=specialisation))
-    p <- p + geom_hline(aes(yintercept = 1), colour="white", alpha=1,size=1.2) 
+    p <- p + geom_hline(aes(yintercept = 1), colour="white", alpha=1,size=1.2)
     p <- p +  geom_smooth(span = .3,size=1,alpha=.5,se=FALSE)
     p <- p +  ylab("") + xlab("Année")+ ggtitle(titre)
       p <- p + scale_colour_manual(values=vecCouleur, name = "" ,labels=vecLegende)+
                                 scale_x_continuous(breaks=pretty_breaks())
-    
-    p <- p +  theme(panel.grid.minor.y=element_blank(), panel.grid.major.y=element_blank()) 
+
+    p <- p +  theme(panel.grid.minor.y=element_blank(), panel.grid.major.y=element_blank())
     p <- p + theme(plot.title = element_text(size=10))
     p
 
@@ -1062,26 +1062,26 @@ et généralistes ",sep="")
     ggsave(nameFile.png, p,width=17,height=10,units="cm")
 
 
-    
+
   p <- ggplot(data = subset(da3,generaliste=="specialiste"), mapping = aes(x = annee, y = indicateur, colour=generaliste))
-    p <- p + geom_hline(aes(yintercept = 1), colour="white", alpha=1,size=1.2) 
+    p <- p + geom_hline(aes(yintercept = 1), colour="white", alpha=1,size=1.2)
     p <- p +  geom_smooth(span = .3,size=1,alpha=.5,se=FALSE)
     p <- p +  ylab("") + xlab("Année")+ ggtitle(titre)
       p <- p + scale_colour_manual(values=vecCouleur, name = "" ,labels=vecLegende,limits="specialiste")+
                                 scale_x_continuous(breaks=pretty_breaks())
-    
-    p <- p +  theme(panel.grid.minor.y=element_blank(), panel.grid.major.y=element_blank()) 
+
+    p <- p +  theme(panel.grid.minor.y=element_blank(), panel.grid.major.y=element_blank())
     p <- p + theme(plot.title = element_text(size=10))
 
 
     nameFile.png <- "indicateurSpecialiste.png"
     ggsave(nameFile.png, p,width=17,height=10,units="cm")
 
-    
-                                        #   cat(" <==",nameFileSpepng,"\n")
-    
 
-     
+                                        #   cat(" <==",nameFileSpepng,"\n")
+
+
+
 }
 
 
@@ -1097,10 +1097,10 @@ analyseGroupe <- function(id=NA,tabsp,ICfigureGroupeSp=TRUE,powerWeight=2,
                           correctionAbondanceNull = 0.000001,
                           groupeNom = c("generaliste","milieux batis","milieux forestiers","milieux agricoles"),
                           groupeCouleur = c("black","firebrick3","chartreuse4","orange")) {
-    
-    
-    nameFile <- paste(id,"/variationsAnnuellesEspece_",id,".csv",sep="" )
-    nameFileTrend <- paste(id,"/tendanceGlobalEspece_",id,".csv",sep="" )
+
+
+    nameFile <- paste0("output/",id,"/variationsAnnuellesEspece.csv")
+    nameFileTrend <- paste0("output/",id,"/tendanceGlobalEspece.csv")
     ## donnees variations d'abondance annuels
     donnees <-  read.csv2(nameFile)
     ## donnees tendences globales
@@ -1112,16 +1112,14 @@ analyseGroupe <- function(id=NA,tabsp,ICfigureGroupeSp=TRUE,powerWeight=2,
     donnees <- merge(donnees,tabsp,by.x="code_espece",by.y="sp")
     ## table de correspondance de biais en fonction des medianes des occuerences
     tBiais <- read.csv("Librairie/biais.csv")
-    nameFileSpe <-  paste(id,"/variationsAnnuellesGroupes_",id,
-                          ".csv",sep="" )
-    nameFileSpepng <-  paste(id,"/variationsAnnuellesGroupes_",id,
-                             ".png",sep="" )
-    
+    nameFileSpe <-  paste0("output/",id,"/variationsAnnuellesGroupes.csv")
+    nameFileSpepng <-  paste0("output/",id,"/variationsAnnuellesGroupes.png")
+
     grpe <- donnees$specialisation
-    
+
     ## recherche d'un maximum
     ff <- function(x,y) max(which(y<=x))
-    ## poids du à l'incertitude 
+    ## poids du à l'incertitude
     IncertW <- ifelse(donnees$valide=="Incertain",tBiais$biais[sapply(as.vector(donnees$mediane_occurrence),ff,y=tBiais$occurrenceMed)],1)
     ## poids du à la qualité de l'estimation
                                         #   erreur_stW <- 1/((donnees$erreur_st+1)^powerWeight)
@@ -1129,27 +1127,26 @@ analyseGroupe <- function(id=NA,tabsp,ICfigureGroupeSp=TRUE,powerWeight=2,
     erreur_stW <- ifelse(is.na(donnees$IC_superieur),0,1)
     ## poids total
     W <- IncertW * erreur_stW
-    
+
     ## variable de regroupement pour les calculs
     grAn <- paste(donnees$specialisation,donnees$annee,sep="_")
     ## data frame pour le calcul
-    dd <- data.frame(grAn,annee = donnees$annee, grpe,W,ab=donnees$abondance_relative,ICinf= donnees$IC_inferieur, ICsup= ifelse(is.na(donnees$IC_superieur),10000,donnees$IC_superieur)) 
+    dd <- data.frame(grAn,annee = donnees$annee, grpe,W,ab=donnees$abondance_relative,ICinf= donnees$IC_inferieur, ICsup= ifelse(is.na(donnees$IC_superieur),10000,donnees$IC_superieur))
     ## table resumer de tous les poids
-    ddd <- data.frame(code_espece = donnees$code_espece,nom_espece = donnees$nom_espece,annee = donnees$annee, 
+    ddd <- data.frame(code_espece = donnees$code_espece,nom_espece = donnees$nom_espece,annee = donnees$annee,
                       groupe_indicateur = grpe,
                       poids_erreur_standard = round(erreur_stW,3), poids_incertitude = round(IncertW,3),poids_final = round(W,3),
                       abondance_relative=donnees$abondance_relative,
-                      IC_inferieur= donnees$IC_inferieur, 
+                      IC_inferieur= donnees$IC_inferieur,
                       IC_superieur= ifelse(is.na(donnees$IC_superieur),10000,donnees$IC_superieur),
-                      valide = donnees$valide, mediane_occurrence = donnees$mediane_occurrence) 
+                      valide = donnees$valide, mediane_occurrence = donnees$mediane_occurrence)
 
-    nomFileResum <- paste("Resultats/",id,"/donneesGroupes_",id,
-                          ".csv",sep="" )
+    nomFileResum <- paste("output/",id,"/donneesGroupes.csv",sep="" )
     write.csv2(ddd,nomFileResum,row.names=FALSE)
     cat(" <--",nomFileResum,"\n")
-    
-    ## calcul des moyennes pondéré par groupe par an et pour les estimates et les IC	
-    for(j in 5:7) dd[,j] <- ifelse(dd[,j]==0,correctionAbondanceNull,dd[,j])	
+
+    ## calcul des moyennes pondéré par groupe par an et pour les estimates et les IC
+    for(j in 5:7) dd[,j] <- ifelse(dd[,j]==0,correctionAbondanceNull,dd[,j])
     ag <- apply(dd[,5:7], 2,
                 function(x) {
                     sapply(split(data.frame(dd[,1:4], x), dd$grAn),
@@ -1172,7 +1169,7 @@ analyseGroupe <- function(id=NA,tabsp,ICfigureGroupeSp=TRUE,powerWeight=2,
     tIncert <- data.frame(groupe=names(Incert),Incertain=Incert)
 
     tIncert <- merge(tIncert,tbon,by="groupe")
-    
+
     ## table de resultat
     da <- merge(unique(dd[,1:3]),ag,by="grAn")[,-1]
     colnames(da) <- c("annee","groupe","abondance_relative","IC_inferieur","IC_superieur")
@@ -1186,26 +1183,26 @@ analyseGroupe <- function(id=NA,tabsp,ICfigureGroupeSp=TRUE,powerWeight=2,
 
     cat(" <--",nameFileSpe,"\n")
     yearsrange <- c(min(da$annee),max(da$annee))
-    
+
     ## figure par ggplot2
     titre <- paste("Variation de l'indicateur groupe de spécialisation",sep="")
 
     vecCouleur <- setNames(groupeCouleur,groupeNom)
                                         #browser()
     p <- ggplot(data = da, mapping = aes(x = annee, y = abondance_relative, colour=groupe,fill=groupe))
-    p <- p + geom_hline(aes(yintercept = 1), colour="white", alpha=1,size=1.2) 
+    p <- p + geom_hline(aes(yintercept = 1), colour="white", alpha=1,size=1.2)
     if(ICfigureGroupeSp)
-        p <- p + geom_ribbon(mapping=aes(ymin=IC_inferieur,ymax=IC_superieur),linetype=2,alpha=.1,size=0.1) 
+        p <- p + geom_ribbon(mapping=aes(ymin=IC_inferieur,ymax=IC_superieur),linetype=2,alpha=.1,size=0.1)
     p <- p + geom_line(size=1.5)
-    p <- p +  ylab("") + xlab("Année")+ ggtitle(titre) 
+    p <- p +  ylab("") + xlab("Année")+ ggtitle(titre)
     if(!is.null(groupeNom)) p <- p + scale_colour_manual(values=vecCouleur, name = "" )+
                                 scale_x_continuous(breaks=unique(da$annee))
     if(!is.null(groupeNom)) p <- p +  scale_fill_manual(values=vecCouleur, name="")
-    p <- p +  theme(panel.grid.minor=element_blank(), panel.grid.major.y=element_blank()) 
+    p <- p +  theme(panel.grid.minor=element_blank(), panel.grid.major.y=element_blank())
     ggsave(nameFileSpepng, p,width=17,height=10,units="cm")
 
                                         #   cat(" <==",nameFileSpepng,"\n")
-    
+
     ## calul pour chaque groupe une pente de regression de la variation d'abondance
     vecSpe <- unique(da$groupe)
     datasum <- data.frame(groupe=NULL,tendance=NULL,pourcentage_variation=NULL)
@@ -1218,15 +1215,14 @@ analyseGroupe <- function(id=NA,tabsp,ICfigureGroupeSp=TRUE,powerWeight=2,
                                      tendance=round(sumlm$coefficients[2,1],3),
                                      pourcentage_variation=round(sumlm$coefficients[2,1]*(nrow(subtab)-1)*100,3))
             datasum <- rbind(datasum,subdatasum)
-            
+
         }
-        
+
     }
     datasum <- merge(datasum,tIncert,by="groupe")
     datasum <- data.frame(id,datasum)
                                         #datasum$cat_tendance_EBCC <- affectCatEBCC(trend,pVal,ICinf,ICsup
-    namefilesum <- paste("Resultats/",id,"/tendancesGlobalesGroupes_",id,
-                         ".csv",sep="" )
+    namefilesum <- paste("output/",id,"/tendancesGlobalesGroupes.csv",sep="" )
     write.csv2(datasum,file=namefilesum,row.names=FALSE,quote=FALSE)
     cat(" <--",namefilesum,"\n")
 }
@@ -1245,18 +1241,18 @@ figure.espece <- function(id,serie=NULL,listSp=NULL,description=TRUE,tendanceSur
     ##vpan vecteur des panels de la figure
     vpan <- c("Variation abondance")
     if(description) vpan <- c(vpan,"Occurrences","Abondances brutes")
-    
-    
+
+
     ## tabsp table de reference des especes
     tabsp <- read.csv2("Librairie/espece.csv")
     rownames(tabsp) <- tabsp$sp
-    
-    
+
+
     ##vpan vecteur des panels de la figure
     vpan <- c("Variation abondance")
     if(description) vpan <- c(vpan,"Occurrences","Abondances brutes")
-    
-    ## import des fichiers de résultats 
+
+    ## import des fichiers de résultats
     filesaveAn <-  paste("Resultats/",id,"/variationsAnnuellesEspece_",id,".csv",
                          sep = "")
     filesaveTrend <-  paste("Resultats/",id,"/tendanceGlobalEspece_",id,".csv",
@@ -1264,7 +1260,7 @@ figure.espece <- function(id,serie=NULL,listSp=NULL,description=TRUE,tendanceSur
     taban <- read.csv2(filesaveAn)
     tabtrend <- read.csv2(filesaveTrend)
 
-    if(is.null(annees)) { 
+    if(is.null(annees)) {
         vecAnnees <- min(taban$annee):max(taban$annee)
     } else {
         vecAnnees <- annees
@@ -1279,7 +1275,7 @@ figure.espece <- function(id,serie=NULL,listSp=NULL,description=TRUE,tendanceSur
         if(!("nb_carre" %in% colnames(taban))) {
             listSpTotal <- as.character(unique(taban$code_espece))
             taban <- completeSortieDescription(id,listSpTotal,taban)
-        } 
+        }
     }
 
     i <- 0
@@ -1292,7 +1288,7 @@ figure.espece <- function(id,serie=NULL,listSp=NULL,description=TRUE,tendanceSur
         nomSp <- as.character(tabsp[sp,"nom"])
         cat("\n(",i,"/",nbSp,") ",sp," | ", nomSp,"\n",sep="")
         flush.console()
-	
+
         tabanSp <- subset(taban,code_espece == sp)
         tabtrendSp <- subset(tabtrend,code_espece == sp)
 
@@ -1309,14 +1305,14 @@ figure.espece <- function(id,serie=NULL,listSp=NULL,description=TRUE,tendanceSur
                            catPoint=ifelse(tabanSp$significatif,"significatif",NA),pval = tabanSp$p_val,
                            courbe=vpan[1],
                            panel=vpan[1])
-        ## netoyage des intervalle de confiance superieur très très grande				   
+        ## netoyage des intervalle de confiance superieur très très grande
                                         #   tab1$UL <- ifelse( nb_carre_presence==0,NA,tab1$UL)
         tab1$UL <-  ifelse(tab1$UL == Inf, NA,tab1$UL)
         tab1$UL <-  ifelse(tab1$UL > 1.000000e+20, NA,tab1$UL)
         tab1$UL[1] <- 1
         tab1$val <-  ifelse(tab1$val > 1.000000e+20,1.000000e+20,tab1$val)
-        
-        ## tab1t table utile pour la realisation des figures 
+
+        ## tab1t table utile pour la realisation des figures
         tab1t <- data.frame(Est=tabtrendSp$tendance,
                             LL= tabtrendSp$IC_inferieur , UL=tabtrendSp$IC_superieur,
                             pourcent=tabtrendSp$pourcentage_variatio,signif=tabtrendSp$significatif,pval=tabtrendSp$p_value,
@@ -1324,19 +1320,19 @@ figure.espece <- function(id,serie=NULL,listSp=NULL,description=TRUE,tendanceSur
 
 	## table pour graphe en panel par ggplot2
         if(description)	dgg <- rbind(tab1,tab2,tab3) else dgg <- tab1
-    	## les figures     
-        
+    	## les figures
+
         ggplot.espece(dgg,tab1t,id,serie,sp,valide=tabtrendSp$valide,nomSp,description,tendanceSurFigure,seuilOccu=14,vpan = vpan)
     }
-    
+
 }
 
 
-##' Recherche des especes deja traiter quand le modele doit être relancé 
+##' Recherche des especes deja traiter quand le modele doit être relancé
 ##'
 ##' .. content for \details{} ..
 ##' @title findSp2Exclude
-##' @param rep CHAR id du batch a checker 
+##' @param rep CHAR id du batch a checker
 ##' @return CHAR[] vecteur des espèces à exclure
 ##' @author Romain Lorrilliere
 findSp2Exclude <- function(id="test44_FRANCE_2017") {
@@ -1345,7 +1341,7 @@ findSp2Exclude <- function(id="test44_FRANCE_2017") {
     vecfile <- dir(rep)
     vecfile <- vecfile[grep(".png",vecfile)]
     vecSp <- substr(vecfile,1,6)
-    
+
 
 }
 
@@ -1391,20 +1387,20 @@ dda <- subset(da,specialisation %in% c("generaliste","milieux agricoles","toutes
     datasum2 <- round(datasum2)
 
     groupelegend <- paste("\n",groupelegend,"\n    ",datasum2[groupeNom,1],"%\n")
-    
+
     vecLegende <- setNames(groupelegend, groupeNom)
-    
+
                                         #browser()
     p <- ggplot(data = dda, mapping = aes(x = annee, y = indicateur, colour=specialisation))
-    p <- p + geom_hline(aes(yintercept = 1), colour="white", alpha=1,size=1.2) 
+    p <- p + geom_hline(aes(yintercept = 1), colour="white", alpha=1,size=1.2)
     p <- p +  geom_smooth(span = .3,size=1,alpha=.5,se=FALSE)
     p <- p +  ylab("") + xlab("Année")+ ggtitle(titre)
-   
+
     p <- p + scale_colour_manual(values=vecCouleur, name = "" ,labels=vecLegende)+
                                 scale_x_continuous(breaks=pretty_breaks())
-    
-    p <- p +  theme(panel.grid.minor.y=element_blank(), panel.grid.major.y=element_blank()) 
-    
+
+    p <- p +  theme(panel.grid.minor.y=element_blank(), panel.grid.major.y=element_blank())
+
 
 p
 
@@ -1427,12 +1423,12 @@ fig.variation_agri_urban<-  function() {
  namefilesum <- paste("tendancesGlobalesGroupes.csv",sep="" )
     datasum <- read.csv2(namefilesum)
 
-    
+
 dda <- subset(da,specialisation %in% c("milieux batis","milieux agricoles","toutes espèces"))
 
    datasum2 <- subset(datasum,specialisation %in% c("milieux batis","milieux agricoles","toutes espèces"))
- 
- 
+
+
 
    titre <- paste("",sep="")
 
@@ -1449,20 +1445,20 @@ dda <- subset(da,specialisation %in% c("milieux batis","milieux agricoles","tout
     datasum2 <- round(datasum2)
 
     groupelegend <- paste("\n",groupelegend,"\n    ",datasum2[groupeNom,1],"%\n")
-    
+
     vecLegende <- setNames(groupelegend, groupeNom)
-    
+
                                         #browser()
     p <- ggplot(data = subset(dda,specialisation %in% c("milieux agricoles","toutes espèces")), mapping = aes(x = annee, y = indicateur, colour=specialisation))
-    p <- p + geom_hline(aes(yintercept = 1), colour="white", alpha=1,size=1.2) 
+    p <- p + geom_hline(aes(yintercept = 1), colour="white", alpha=1,size=1.2)
     p <- p +  geom_smooth(span = .3,size=1,alpha=.5,se=FALSE)
     p <- p +  ylab("") + xlab("Année")+ ggtitle(titre)
-   
+
     p <- p + scale_colour_manual(values=vecCouleur, name = "" ,labels=vecLegende)+
                                 scale_x_continuous(breaks=pretty_breaks())
-    
-    p <- p +  theme(panel.grid.minor.y=element_blank(), panel.grid.major.y=element_blank(),legend.position="none") 
-    
+
+    p <- p +  theme(panel.grid.minor.y=element_blank(), panel.grid.major.y=element_blank(),legend.position="none")
+
 
 p
 
@@ -1471,15 +1467,15 @@ nameFile.png <- "indicateurGroupeAgri_urban_Smooth_eng_1.png"
     ggsave(nameFile.png, p,width=17,height=10,units="cm")
 
   p <- ggplot(data = dda, mapping = aes(x = annee, y = indicateur, colour=specialisation))
-    p <- p + geom_hline(aes(yintercept = 1), colour="white", alpha=1,size=1.2) 
+    p <- p + geom_hline(aes(yintercept = 1), colour="white", alpha=1,size=1.2)
     p <- p +  geom_smooth(span = .3,size=1,alpha=.5,se=FALSE)
     p <- p +  ylab("") + xlab("Année")+ ggtitle(titre)
-   
+
     p <- p + scale_colour_manual(values=vecCouleur, name = "" ,labels=vecLegende)+
                                 scale_x_continuous(breaks=pretty_breaks())
-    
-    p <- p +  theme(panel.grid.minor.y=element_blank(), panel.grid.major.y=element_blank(),legend.position="none") 
-    
+
+    p <- p +  theme(panel.grid.minor.y=element_blank(), panel.grid.major.y=element_blank(),legend.position="none")
+
 
 p
 
@@ -1488,18 +1484,18 @@ nameFile.png <- "indicateurGroupeAgri_urban_Smooth_eng_2.png"
     ggsave(nameFile.png, p,width=17,height=10,units="cm")
 
 
-    
+
 
   p <- ggplot(data = dda, mapping = aes(x = annee, y = indicateur, colour=specialisation))
-    p <- p + geom_hline(aes(yintercept = 1), colour="white", alpha=1,size=1.2) 
+    p <- p + geom_hline(aes(yintercept = 1), colour="white", alpha=1,size=1.2)
     p <- p +  geom_smooth(span = .3,size=1,alpha=.5,se=FALSE)
     p <- p +  ylab("") + xlab("Année")+ ggtitle(titre)
-   
+
     p <- p + scale_colour_manual(values=vecCouleur, name = "" ,labels=vecLegende)+
                                 scale_x_continuous(breaks=pretty_breaks())
-    
-    p <- p +  theme(panel.grid.minor.y=element_blank(), panel.grid.major.y=element_blank()) 
-    
+
+    p <- p +  theme(panel.grid.minor.y=element_blank(), panel.grid.major.y=element_blank())
+
 
 p
 
@@ -1508,5 +1504,5 @@ nameFile.png <- "indicateurGroupeAgri_urban_Smooth_eng_2_leg.png"
     ggsave(nameFile.png, p,width=17,height=10,units="cm")
 
 
-    
+
 }

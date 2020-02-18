@@ -1088,3 +1088,28 @@ proc.time()-ptm
 stopCluster(cl)
 
     }
+
+
+
+
+
+
+
+
+
+
+get_glm_from_Rdata <- function() {
+
+    load("output/test/listGLM__ALAARV.Rdata")
+
+    names(listGLMsp[[1]]$md2)
+
+    tabTrend <- data.frame(
+            id,code_espece=sp,nom_espece = nomSp,indicateur = indic,
+            nombre_annees = pasdetemps,premiere_annee = firstY,derniere_annee = lastY,
+            tendance = as.vector(trend) ,  IC_inferieur=as.vector(LL) , IC_superieur = as.vector(UL),pourcentage_variation=as.vector(pourcent),
+            erreur_standard = as.vector(round(erreurannee2,4)), p_value = round(pval,3),
+            significatif = trendsignif,categorie_tendance_EBCC=catEBCC,mediane_occurrence=median( nb_carre_presence) ,
+            valide = catIncert,raison_incertitude = raisonIncert)
+
+}

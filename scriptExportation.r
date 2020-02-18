@@ -313,10 +313,10 @@ oc.id_carre, annee,code_sp;",sep="")
         queryCarreAn <- paste("select ca.id_carre as carre, ca.annee, pk_carre_annee as id_carre_annee, etude,
  c.commune,c.insee,c.departement,qualite_inventaire_stoc,
 c.altitude, longitude_grid_wgs84 ,latitude_grid_wgs84, ",
-ifelse(champsHabitat," foret_p as forest_p, ouvert_p as open_p, agri_p as farmland_p, urbain_p as urban_p,
-foret_ps as forest_ps, ouvert_ps as open_ps, agri_ps as farmland_ps, urbain_ps as urban_ps,
-nbp_foret_p as nbp_forest_p, nbp_ouvert_p as nbp_open_p, nbp_agri_p as nbp_farmland_p, nbp_urbain_p as nbp_urban_p,
-nbp_foret_ps as nbp_forest_ps, nbp_ouvert_ps as nbp_open_ps, nbp_agri_ps as nbp_farmland_ps, nbp_urbain_ps as nbp_urban_ps, ",""),
+ifelse(champsHabitat," foret_p, ouvert_p , agri_p , urbain_p ,
+foret_ps , ouvert_ps, agri_ps , urbain_ps,
+nbp_foret_p, nbp_ouvert_p , nbp_agri_p , nbp_urbain_p,
+nbp_foret_ps, nbp_ouvert_ps , nbp_agri_ps, nbp_urbain_ps, ",""),
 " c.db as data_base_name, ",
 "'",dateExport,"'::varchar(10) as date_export,
 '",operateur[1],"'::varchar(50) as operateur,
@@ -330,7 +330,7 @@ order by
 ca.id_carre, annee;",sep="")
 
 
-                                        # browser()
+
         cat("\nRequete inventaire: Recherche de tous les inventaires\n\n",queryCarreAn,"\n\n")
 
         dToutCarreAn <- dbGetQuery(con, queryCarreAn)
@@ -348,7 +348,7 @@ ca.id_carre, annee;",sep="")
             dCarreAbs <- cbind(dCarreAbs2,dspAbs)
             dCarreAbs$abondance <- 0
             dCarreAbs$abondance_brut <- 0
-#browser()
+
             dCarreAbs <- dCarreAbs[,colnames(d)]
 
             d <- rbind(dd,dCarreAbs)

@@ -79,7 +79,7 @@ clone dans dossier git à la racine (ex: "C:/git/")
 
 ## sourcer le script
 ```R
-source("scriptPrepaNouvelBaseSTOC.r")
+source("stoc_eps_db_functions.r")
 ```
 
  
@@ -113,34 +113,34 @@ prepaData(dateExportVP=laDate, importationDataBrut=FALSE, constructionPoint=FALS
 
 tous les parametres: 
 
-- dateExportVP date de l'export des données VP au format YYYY-MM-JJ
-- nomFileVP nom du fichier exporté de VP
-- nomFileVP_ONF nom du fichier exporté de VP pour les données ONF
-- dateExportFNat [="2017-01-04" ] date de l'export FNAT par default
-- importACCESS [=FALSE] valeur booleenne permet l'export des données FNAT directement dans la base access. ATTENTION cette fonctionne uniquement sous windows avec une version 32bit de R (.../bin/i386/Rgui.exe)
-- nomFileFNat [="FNat_plat_2017-01-04.csv"] nom du fichier à plat de FNat
-- nomDBFNat "Base FNat2000.MDB"
-- importationDataBrut [=TRUE] valeur booleene qui permet d'activé la récupération des données brut
-- constructionPoint [=TRUE] valeur booleene qui active la création de la table point
-- constructionCarre [=TRUE] valeur booleene qui active la création de la table carré
-- constructionInventaire [=TRUE] valeur booleene qui active la création de la table inventaire
-- constructionObservation [=TRUE] valeur booleene qui active la création de la table observation
-- constructionHabitat [=TRUE] valeur booleene qui active la création de la table habitat
-- dateConstruction [=NULL] date de la constuction de la base si null la date du jour si au format "YYYY-MM-JJ"
-- postgresql_import [=TRUE]  valeur booleene pour importer les tables dans la base postgres
-- nomDBpostgresql [=NULL] nom de la base postgres si null "stoc_eps"
-- postgresql_createAll [=TRUE] valeur booleene qui active la création complete de la base de données avec l'import des tables génériques
-- postgresUser [="postgres"] nom de l'utilisateur de de la base de données par default "postgres"
-- postgresPassword [="postgres"] mot de passe de l'utilisateur de de la base de données par default "postgres"
-- postGIS_initiation [=FALSE] valeur booleene qui permet d'activé l'initialisation de l'extension posgis de la base de données
-- import_shape [=FALSE] valeur booleene qui permet d'activé l'importation de shape_file dans la base de donnée
-- repertoire [=NULL] repertoire de travail du script par default le repertoire courant
-- postgresql_abondanceSeuil [=TRUE] valeur booleene qui permet d'activé le calcul du seuil des abondances par espèces et par classe de distance
-- seuilAbondance [0.99] valeur du seuil par default 0.99
-- historiqueCarre [=TRUE]  valeur booleene qui permet d'activé le calcul d'un historique des carrés
-- pointCarreAnnee [=TRUE] valeur booleene qui permet d'activé la création des tables point_annee et carre_annee
-- importPointCarreAnnee [=TRUE]  valeur booleene qui permet d'activé l'importation des tables point_annee et carre_annee
-- fileTemp[=FALSE]  valeur booleene qui permet d'activé qui de conservé les fichier sql créer lors du processus, par default FALSE
+- __dateExportVP__ date de l'export des données VP au format YYYY-MM-JJ
+- __nomFileVP__ nom du fichier exporté de VP
+- __nomFileVP_ONF__ nom du fichier exporté de VP pour les données ONF
+- __dateExportFNat__ [=_"2017-01-04"_] date de l'export FNAT par default
+- __importACCESS__ [=_FALSE_] valeur booleenne permet l'export des données FNAT directement dans la base access. ATTENTION cette fonctionne uniquement sous windows avec une version 32bit de R (.../bin/i386/Rgui.exe)
+- __nomFileFNat__ [= _"FNat_plat_2017-01-04.csv"_] nom du fichier à plat de FNat
+- __nomDBFNat__ [= _"Base FNat2000.MDB"_]
+- __importationDataBrut__ [= _TRUE_] valeur booleene qui permet d'activé la récupération des données brut
+- __constructionPoint__ [= _TRUE_] valeur booleene qui active la création de la table point
+- __constructionCarre__ [= _TRUE_] valeur booleene qui active la création de la table carré
+- __constructionInventaire__ [=_TRUE_] valeur booleene qui active la création de la table inventaire
+- __constructionObservation__ [= _TRUE_] valeur booleene qui active la création de la table observation
+- __constructionHabitat__ [= _TRUE_] valeur booleene qui active la création de la table habitat
+- __dateConstruction__ [= _NULL_] date de la constuction de la base si null la date du jour si au format "YYYY-MM-JJ"
+- __postgresql_import__ [= _TRUE_]  valeur booleene pour importer les tables dans la base postgres
+- __nomDBpostgresql__ [= _NULL_] nom de la base postgres si null "stoc_eps"
+- __postgresql_createAll__ [= _TRUE_] valeur booleene qui active la création complete de la base de données avec l'import des tables génériques
+- __postgresUser__ [= _"postgres"_] nom de l'utilisateur de de la base de données par default "postgres"
+- __postgresPassword__ [= _"postgres"_] mot de passe de l'utilisateur de de la base de données par default "postgres"
+- __postGIS_initiation__ [= _FALSE_] valeur booleene qui permet d'activé l'initialisation de l'extension posgis de la base de données
+- __import_shape__ [= _FALSE_] valeur booleene qui permet d'activé l'importation de shape_file dans la base de donnée
+- __repertoire__ [= _NULL_] repertoire de travail du script par default le repertoire courant
+- __postgresql_abondanceSeuil__ [= _TRUE_] valeur booleene qui permet d'activé le calcul du seuil des abondances par espèces et par classe de distance
+- __seuilAbondance__ [= _0.99_] valeur du seuil par default 0.99
+- __historiqueCarre__ [= _TRUE_]  valeur booleene qui permet d'activé le calcul d'un historique des carrés
+- __pointCarreAnnee__ [= _TRUE_] valeur booleene qui permet d'activé la création des tables _point\_annee_ et _carre\_annee_
+- __importPointCarreAnnee__ [= _TRUE_]  valeur booleene qui permet d'activé l'importation des tables _point\_annee_ et _carre\_annee_
+- __fileTemp__ [= _FALSE_]  valeur booleene qui permet d'activé qui de conservé les fichier sql créer lors du processus, par default FALSE
 
 
 

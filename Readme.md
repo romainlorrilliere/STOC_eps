@@ -66,10 +66,10 @@ table spatiales de la DB postgreSQL
 ## github
 Se creer un compte github
 demander un accès au repositroy :
-https://github.com/romainlorrilliere/STOC_eps
+https://github.com/romainlorrilliere/STOC_eps_database
 
 installer github desktop 
-clone dans dossier git à la racine (ex: "C:/git/")
+ et cloner le dossier git (STOC_eps_database) à la racine (ex: "C:/git/")
 
 
 
@@ -150,7 +150,7 @@ tous les parametres:
 
 ## sourcer le script
 ```R
-source("scriptPrepaNouvelBaseSTOC.r")
+source("stoc_eps_db_functions.r")
 ```
 
  

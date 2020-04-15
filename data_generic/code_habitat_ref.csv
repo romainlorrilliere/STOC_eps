@@ -1,168 +1,168 @@
-milieu;level;value;nom;name
-A;milieu;A;Foret - Arbres > 5 m;Forest - Trees > 5 m
-A;type;1;Feuillus;Deciduous trees
-A;type;2;ConifËres;Conifers
-A;type;3;Mixte (> 10% de chaque);Mixed (> 10% of each)
-A;sous-cat1;1;Semi-naturelle ou ‚ges mÈlangÈs;Semi-natural or mixed ages
-A;sous-cat1;2;Plantation Èquienne;Plantation equine
-A;sous-cat1;3;Plantation non-Èquienne;Non-equian plantation
-A;sous-cat1;4;Plantation m‚ture (> 10m);Mature planting (> 10m)
-A;sous-cat1;5;Jeune plantation (5-10m);Young plantation (5-10m)
-A;sous-cat1;6;Parc (arbres Èparses et prairies);Park (scattered trees and meadows)
-A;sous-cat1;7;Sous-bois dense;Dense undergrowth
-A;sous-cat1;8;Sous-bois modÈrÈ;Moderate undergrowth
-A;sous-cat1;9;Sous-bois Èparse;Scattered undergrowth
-A;sous-cat1;10;Bois mort prÈsent;Dead wood present
-A;sous-cat1;11;Bois mort absent;Missing dead wood
-A;sous-cat2;1;ChÍne;Oak
-A;sous-cat2;2;HÍtre;Beech
-A;sous-cat2;3;Erable;Maple
-A;sous-cat2;4;Ch‚taignier;Chestnut tree
-A;sous-cat2;5;Autre essence feuillue;Other hardwood species
-A;sous-cat2;6;Sapin;Fir
-A;sous-cat2;7;EpicÈa;Spruce
-A;sous-cat2;8;Pin;Pine
-A;sous-cat2;9;MÈlËze;Larch
-A;sous-cat2;10;Autre essence conifËre;Other coniferous species
-A;sous-cat2;11;Autre essence;Other species
-B;milieu;B;Buissons/jeune forÍt < 5m;Bushes/young forest < 5m
-B;type;1;ForÍt de rÈgÈnÈration;Regeneration forest
-B;type;2;Buissons calcicoles;Calcicolous bushes
-B;type;3;Lande;Heath
-B;type;4;Jeune taillis;Young coppice
-B;type;5;Nouvelle plantation;New plantation
-B;type;6;Coupe ´ ‡ blanc ª;"Blank"" cut"
-B;type;7;Autres;Others
-B;sous-cat1;1;Feuillus;Deciduous trees
-B;sous-cat1;2;ConifËres;Conifers
-B;sous-cat1;3;Mixte (10% de chaque);Mixed (10% of each)
-B;sous-cat1;4;Buissons feuillus de marais;Deciduous swamp bushes
-B;sous-cat1;5;Buissons conifËres de marais;Coniferous marsh shrubs
-B;sous-cat1;6;Buissons mixtes de marais;Mixed marsh shrubs
-B;sous-cat1;7;Feuilles persistantes;Evergreen leaves
-B;sous-cat1;8;Garrigue;Garrigue
-B;sous-cat1;9;Maquis;Maquis
-B;sous-cat2;1;Surtout grands (3-5m);Especially tall (3-5m)
-B;sous-cat2;2;Surtout petits (1-3m);Especially small (1-3m)
-B;sous-cat2;3;Sous-bois dense;Dense undergrowth
-B;sous-cat2;4;Sous-bois modÈrÈ;Moderate undergrowth
-B;sous-cat2;5;Sous-bois Èparse;Scattered undergrowth
-B;sous-cat2;6;FougËres;Ferns
-B;sous-cat2;7;P‚turÈ;Grazed
-C;milieu;C;Pelouses, marais et landes;Lawns, swamps and moors
-C;type;1;Pelouse calcaire sËche;Dry Limestone Lawn
-C;type;2;Lande herbacÈe;Herbaceous Heath
-C;type;3;Lande de bruyËre;Heather Heath
-C;type;4;Pelouse humide naturelle;Natural moist lawn
-C;type;5;Autres pelouses sËches (mur, fossÈ);Other dry lawns (wall, ditch)
-C;type;6;Pelouse inondÈe/marais p‚turÈ;Flooded lawn/pastured swamp
-C;type;7;RoseliËre;RoseliËre
-C;type;8;Autres marais ouverts;Other open marshes
-C;type;9;Marais salants;Salt marshes
-C;type;10;TourbiËres;Peat bogs
-C;type;11;Marais salÈ;Salt marsh
-C;sous-cat1;1;Haies avec arbres;Hedges with trees
-C;sous-cat1;2;Haies sans arbres;Treeless Hedges
-C;sous-cat1;3;Lignes díarbres sans haie;Lines of trees without hedges
-C;sous-cat1;4;Autre limite de terrain;Other land boundary
-C;sous-cat1;5;Groupe isolÈ de 1-10 arbres;Isolated group of 1-10 trees
-C;sous-cat1;6;Pas de haie;No hedges.
-C;sous-cat1;7;Montagne;Mountain
-C;sous-cat1;8;Digue;Dyke
-C;sous-cat2;1;Non p‚turÈ;Ungrazed
-C;sous-cat2;2;P‚turÈ;Grazed
-C;sous-cat2;3;Foin;Hay
-C;sous-cat2;4;Beaucoup de fougËres;Lots of ferns
-D;milieu;D;Milieux agricoles;Farmland
-D;type;1;Prairie cultivÈe;cultivated prairie
-D;type;2;Prairie non cultivÈe;Uncultivated prairie
-D;type;3;MixitÈ prairie / cultures;Mixed meadow / crops
-D;type;4;Grandes cultures;Field crops
-D;type;5;Verger / vignes / maraÓchers (mur, fossÈ);Orchard / vineyards / market gardeners (wall, ditch)
-D;type;6;Autres types de cultures;Other types of crops
-D;sous-cat1;1;Haies avec arbres;Hedges with trees
-D;sous-cat1;2;Haies sans arbres;Treeless Hedges
-D;sous-cat1;3;Ligne díarbres sans haie;Line of trees without hedges
-D;sous-cat1;4;Autre limite de terrain;Other land boundary
-D;sous-cat1;5;Groupes isolÈs de 1-10 arbres;Isolated groups of 1-10 shafts
-D;sous-cat1;6;Cour de ferme, basse-cour;Farmyard, farmyard
-D;sous-cat1;7;Pas de haie;No hedges.
-D;sous-cat2;1;Non p‚turÈ;Ungrazed
-D;sous-cat2;2;P‚turÈ;Grazed
-D;sous-cat2;3;CÈrÈales;Cereals
-D;sous-cat2;4;MaÔs;Corn
-D;sous-cat2;5;Tournesol;Sunflower
-D;sous-cat2;6;Colza;Rape
-D;sous-cat2;7;Cultures ‡ racines;Root crops
-D;sous-cat2;8;Sol nu;Bare ground
-D;sous-cat2;9;Autres cultures;Other crops
-D;sous-cat2;10;RiziËres;Rice paddies
-E;milieu;E;Milieux b‚tis ou urbanisÈs;Built or urban habitats
-E;type;1;Urbain;Urban
-E;type;2;Suburbain;Suburban
-E;type;3;Rural;Rural
-E;sous-cat1;1;B‚timents;Buildings
-E;sous-cat1;2;Jardins;Gardens
-E;sous-cat1;3;Parcs municipaux, zones de loisirs;Municipal parks, recreation areas
-E;sous-cat1;4;Traitement des eaux urbaines;Urban water treatment
-E;sous-cat1;5;PrËs díune route (< 50m);Near a road (< 50m)
-E;sous-cat1;6;PrËs díune voie ferrÈe (< 50m);Near a railway (< 50m)
-E;sous-cat1;7;DÈcharge díordures;Garbage dump
-E;sous-cat1;8;Beaucoup de buissons;Lots of bushes
-E;sous-cat1;9;Peu de buissons;Few bushes
-E;sous-cat2;1;Industriel;Industrial
-E;sous-cat2;2;RÈsidentiel;Residential
-E;sous-cat2;3;Beaucoup díarbres;Lots of trees
-E;sous-cat2;4;Peu díarbres;Few trees
-E;sous-cat2;5;Grande surface de jardins (> 450m2);Large garden area (> 450m2)
-E;sous-cat2;6;Moyenne surface de jardins (100 -450 m2);Average garden area (100 -450 m2)
-E;sous-cat2;7;Faible surface de jardins (< 100 m2);Small garden area (< 100 m2)
-F;milieu;F;Milieux aquatiques;Aquatic environments
-F;type;1;Mare (moins de 50 m2);Pond (less than 50 m2)
-F;type;2;Petit Ètang (50 -450 m2);Small pond (50 -450 m2)
-F;type;3;Lac/rÈservoir (berges naturelles);Lake/reservoir (natural banks)
-F;type;4;RÈservoir(berges non naturelles);Reservoir (unnatural banks)
-F;type;5;CarriËre de gravier, de sable;Gravel and sand quarry
-F;type;6;Ruisseau -Larg.< 3m;Stream - Width < 3m
-F;type;7;RiviËre -Larg. 3 ‡ 10m;River -Width 3 to 10m
-F;type;8;FossÈ inondÈ -Larg. < 2m;Flooded ditch - Width < 2m
-F;type;9;Petit canal ñLarg. 2 ‡ 5m;Small channel -Width 2 to 5m
-F;type;10;Grand canal-Larg. > 5m;Large channel-width > 5m
-F;type;11;Eaux saum‚tres salins, lagunes;Saline brackish water, lagoons
-F;type;11;Rives avec falaise;Banks with cliff
-F;type;12;Fleuve, riviËre Larg.> 10m;River, river Larg.> 10m
-F;sous-cat1;1;Non utilisÈ/non perturbÈ;Not used/undisturbed
-F;sous-cat1;2;Sports nautiques;Water Sports
-F;sous-cat1;3;PÍche ‡ la ligne (eau claire, peu díalgues);Angling (clear water, little algae)
-F;sous-cat1;4;ActivitÈ industrielle;Industrial activity
-F;sous-cat1;5;Traitements díeaux usÈes;Sewage treatment
-F;sous-cat1;6;Autres dÈrangements (eau claire, bcpdíalgues);Other disturbances (clear water, bcpd'algae)
-F;sous-cat1;7;ActivitÈ industrielle;Industrial activity
-F;sous-cat1;8;Petites Óles;Small Islands
-F;sous-cat2;1;Eutrophique (eau verte);Eutrophic (green water)
-F;sous-cat2;2;Oligotrophique;Oligotrophic
-F;sous-cat2;3;Dystrophique (eau noire);Dystrophic (black water)
-F;sous-cat2;4;BigarrÈ;Colorful
-F;sous-cat2;5;Courant faible / moyen;Low / medium current
-F;sous-cat2;6;Courant fort;Strong current
-F;sous-cat2;7;DraguÈ;Dredge
-F;sous-cat2;8;Non draguÈ;Not dredged
-F;sous-cat2;9;Rives nues;Bare Banks
-F;sous-cat2;10;Rives avec vÈgÈtation;Banks with vegetation
-G;milieu;G;Rochers terrestres ou cÙtiers;Land or coastal rocks
-G;type;1;Falaise;Falaise
-G;type;2;Eboulis, pente rocheuse;Slope, rocky slope
-G;type;3;Pavement calcaire;Limestone paving
-G;type;4;Autres sols rocheux;Other rocky soils
-G;type;5;CarriËre (grimpeurs, promeneurs);Career (climbers, walkers)
-G;type;6;Mine / abÓme / terril;Mine / abyss / slag heap
-G;type;7;Grotte;Grotto
-G;type;8;Dune;Dune
-G;sous-cat1;1;Montagne;Mountain
-G;sous-cat1;2;Pas en montagne;Not in the mountains
-G;sous-cat1;3;Bord de mer (mousses, lichens);Seaside (mosses, lichens)
-G;sous-cat1;4;Fort dÈrangement par líhomme;Strong human disturbance
-G;sous-cat2;1;Roche nue;Bare rock
-G;sous-cat2;2;VÈgÈtation basse prÈsente;Low vegetation present
-G;sous-cat2;3;GraminÈes prÈsentes;Grasses present
-G;sous-cat2;4;Buissons prÈsents;Bushes present
+pk_habitat_code_ref;milieu;level;value;nom;name
+1;A;milieu;A;Foret - Arbres > 5 m;Forest - Trees > 5 m
+2;A;type;1;Feuillus;Deciduous trees
+3;A;type;2;Conif√®res;Conifers
+4;A;type;3;Mixte (> 10% de chaque);Mixed (> 10% of each)
+5;A;sous-cat1;1;Semi-naturelle ou √¢ges m√©lang√©s;Semi-natural or mixed ages
+6;A;sous-cat1;2;Plantation √©quienne;Plantation equine
+7;A;sous-cat1;3;Plantation non-√©quienne;Non-equian plantation
+8;A;sous-cat1;4;Plantation m√¢ture (> 10m);Mature planting (> 10m)
+9;A;sous-cat1;5;Jeune plantation (5-10m);Young plantation (5-10m)
+10;A;sous-cat1;6;Parc (arbres √©parses et prairies);Park (scattered trees and meadows)
+11;A;sous-cat1;7;Sous-bois dense;Dense undergrowth
+12;A;sous-cat1;8;Sous-bois mod√©r√©;Moderate undergrowth
+13;A;sous-cat1;9;Sous-bois √©parse;Scattered undergrowth
+14;A;sous-cat1;10;Bois mort pr√©sent;Dead wood present
+15;A;sous-cat1;11;Bois mort absent;Missing dead wood
+16;A;sous-cat2;1;Ch√™ne;Oak
+17;A;sous-cat2;2;H√™tre;Beech
+18;A;sous-cat2;3;Erable;Maple
+19;A;sous-cat2;4;Ch√¢taignier;Chestnut tree
+20;A;sous-cat2;5;Autre essence feuillue;Other hardwood species
+21;A;sous-cat2;6;Sapin;Fir
+22;A;sous-cat2;7;Epic√©a;Spruce
+23;A;sous-cat2;8;Pin;Pine
+24;A;sous-cat2;9;M√©l√®ze;Larch
+25;A;sous-cat2;10;Autre essence conif√®re;Other coniferous species
+26;A;sous-cat2;11;Autre essence;Other species
+27;B;milieu;B;Buissons/jeune for√™t < 5m;Bushes/young forest < 5m
+28;B;type;1;For√™t de r√©g√©n√©ration;Regeneration forest
+29;B;type;2;Buissons calcicoles;Calcicolous bushes
+30;B;type;3;Lande;Heath
+31;B;type;4;Jeune taillis;Young coppice
+32;B;type;5;Nouvelle plantation;New plantation
+33;B;type;6;Coupe ¬´ √† blanc ¬ª;"Blank"" cut"
+34;B;type;7;Autres;Others
+35;B;sous-cat1;1;Feuillus;Deciduous trees
+36;B;sous-cat1;2;Conif√®res;Conifers
+37;B;sous-cat1;3;Mixte (10% de chaque);Mixed (10% of each)
+38;B;sous-cat1;4;Buissons feuillus de marais;Deciduous swamp bushes
+39;B;sous-cat1;5;Buissons conif√®res de marais;Coniferous marsh shrubs
+40;B;sous-cat1;6;Buissons mixtes de marais;Mixed marsh shrubs
+41;B;sous-cat1;7;Feuilles persistantes;Evergreen leaves
+42;B;sous-cat1;8;Garrigue;Garrigue
+43;B;sous-cat1;9;Maquis;Maquis
+44;B;sous-cat2;1;Surtout grands (3-5m);Especially tall (3-5m)
+45;B;sous-cat2;2;Surtout petits (1-3m);Especially small (1-3m)
+46;B;sous-cat2;3;Sous-bois dense;Dense undergrowth
+47;B;sous-cat2;4;Sous-bois mod√©r√©;Moderate undergrowth
+48;B;sous-cat2;5;Sous-bois √©parse;Scattered undergrowth
+49;B;sous-cat2;6;Foug√®res;Ferns
+50;B;sous-cat2;7;P√¢tur√©;Grazed
+51;C;milieu;C;Pelouses, marais et landes;Lawns, swamps and moors
+52;C;type;1;Pelouse calcaire s√®che;Dry Limestone Lawn
+53;C;type;2;Lande herbac√©e;Herbaceous Heath
+54;C;type;3;Lande de bruy√®re;Heather Heath
+55;C;type;4;Pelouse humide naturelle;Natural moist lawn
+56;C;type;5;Autres pelouses s√®ches (mur, foss√©);Other dry lawns (wall, ditch)
+57;C;type;6;Pelouse inond√©e/marais p√¢tur√©;Flooded lawn/pastured swamp
+58;C;type;7;Roseli√®re;Roseli√®re
+59;C;type;8;Autres marais ouverts;Other open marshes
+60;C;type;9;Marais salants;Salt marshes
+61;C;type;10;Tourbi√®res;Peat bogs
+62;C;type;11;Marais sal√©;Salt marsh
+63;C;sous-cat1;1;Haies avec arbres;Hedges with trees
+64;C;sous-cat1;2;Haies sans arbres;Treeless Hedges
+65;C;sous-cat1;3;Lignes d‚Äôarbres sans haie;Lines of trees without hedges
+66;C;sous-cat1;4;Autre limite de terrain;Other land boundary
+67;C;sous-cat1;5;Groupe isol√© de 1-10 arbres;Isolated group of 1-10 trees
+68;C;sous-cat1;6;Pas de haie;No hedges.
+69;C;sous-cat1;7;Montagne;Mountain
+70;C;sous-cat1;8;Digue;Dyke
+71;C;sous-cat2;1;Non p√¢tur√©;Ungrazed
+72;C;sous-cat2;2;P√¢tur√©;Grazed
+73;C;sous-cat2;3;Foin;Hay
+74;C;sous-cat2;4;Beaucoup de foug√®res;Lots of ferns
+75;D;milieu;D;Milieux agricoles;Farmland
+76;D;type;1;Prairie cultiv√©e;cultivated prairie
+77;D;type;2;Prairie non cultiv√©e;Uncultivated prairie
+78;D;type;3;Mixit√© prairie / cultures;Mixed meadow / crops
+79;D;type;4;Grandes cultures;Field crops
+80;D;type;5;Verger / vignes / mara√Æchers (mur, foss√©);Orchard / vineyards / market gardeners (wall, ditch)
+81;D;type;6;Autres types de cultures;Other types of crops
+82;D;sous-cat1;1;Haies avec arbres;Hedges with trees
+83;D;sous-cat1;2;Haies sans arbres;Treeless Hedges
+84;D;sous-cat1;3;Ligne d‚Äôarbres sans haie;Line of trees without hedges
+85;D;sous-cat1;4;Autre limite de terrain;Other land boundary
+86;D;sous-cat1;5;Groupes isol√©s de 1-10 arbres;Isolated groups of 1-10 shafts
+87;D;sous-cat1;6;Cour de ferme, basse-cour;Farmyard, farmyard
+88;D;sous-cat1;7;Pas de haie;No hedges.
+89;D;sous-cat2;1;Non p√¢tur√©;Ungrazed
+90;D;sous-cat2;2;P√¢tur√©;Grazed
+91;D;sous-cat2;3;C√©r√©ales;Cereals
+92;D;sous-cat2;4;Ma√Øs;Corn
+93;D;sous-cat2;5;Tournesol;Sunflower
+94;D;sous-cat2;6;Colza;Rape
+95;D;sous-cat2;7;Cultures √† racines;Root crops
+96;D;sous-cat2;8;Sol nu;Bare ground
+97;D;sous-cat2;9;Autres cultures;Other crops
+98;D;sous-cat2;10;Rizi√®res;Rice paddies
+99;E;milieu;E;Milieux b√¢tis ou urbanis√©s;Built or urban habitats
+100;E;type;1;Urbain;Urban
+101;E;type;2;Suburbain;Suburban
+102;E;type;3;Rural;Rural
+103;E;sous-cat1;1;B√¢timents;Buildings
+104;E;sous-cat1;2;Jardins;Gardens
+105;E;sous-cat1;3;Parcs municipaux, zones de loisirs;Municipal parks, recreation areas
+106;E;sous-cat1;4;Traitement des eaux urbaines;Urban water treatment
+107;E;sous-cat1;5;Pr√®s d‚Äôune route (< 50m);Near a road (< 50m)
+108;E;sous-cat1;6;Pr√®s d‚Äôune voie ferr√©e (< 50m);Near a railway (< 50m)
+109;E;sous-cat1;7;D√©charge d‚Äôordures;Garbage dump
+110;E;sous-cat1;8;Beaucoup de buissons;Lots of bushes
+111;E;sous-cat1;9;Peu de buissons;Few bushes
+112;E;sous-cat2;1;Industriel;Industrial
+113;E;sous-cat2;2;R√©sidentiel;Residential
+114;E;sous-cat2;3;Beaucoup d‚Äôarbres;Lots of trees
+115;E;sous-cat2;4;Peu d‚Äôarbres;Few trees
+116;E;sous-cat2;5;Grande surface de jardins (> 450m2);Large garden area (> 450m2)
+117;E;sous-cat2;6;Moyenne surface de jardins (100 -450 m2);Average garden area (100 -450 m2)
+118;E;sous-cat2;7;Faible surface de jardins (< 100 m2);Small garden area (< 100 m2)
+119;F;milieu;F;Milieux aquatiques;Aquatic environments
+120;F;type;1;Mare (moins de 50 m2);Pond (less than 50 m2)
+121;F;type;2;Petit √©tang (50 -450 m2);Small pond (50 -450 m2)
+122;F;type;3;Lac/r√©servoir (berges naturelles);Lake/reservoir (natural banks)
+123;F;type;4;R√©servoir(berges non naturelles);Reservoir (unnatural banks)
+124;F;type;5;Carri√®re de gravier, de sable;Gravel and sand quarry
+125;F;type;6;Ruisseau -Larg.< 3m;Stream - Width < 3m
+126;F;type;7;Rivi√®re -Larg. 3 √† 10m;River -Width 3 to 10m
+127;F;type;8;Foss√© inond√© -Larg. < 2m;Flooded ditch - Width < 2m
+128;F;type;9;Petit canal ‚ÄìLarg. 2 √† 5m;Small channel -Width 2 to 5m
+129;F;type;10;Grand canal-Larg. > 5m;Large channel-width > 5m
+130;F;type;11;Eaux saum√¢tres salins, lagunes;Saline brackish water, lagoons
+131;F;type;11;Rives avec falaise;Banks with cliff
+132;F;type;12;Fleuve, rivi√®re Larg.> 10m;River, river Larg.> 10m
+133;F;sous-cat1;1;Non utilis√©/non perturb√©;Not used/undisturbed
+134;F;sous-cat1;2;Sports nautiques;Water Sports
+135;F;sous-cat1;3;P√™che √† la ligne (eau claire, peu d‚Äôalgues);Angling (clear water, little algae)
+136;F;sous-cat1;4;Activit√© industrielle;Industrial activity
+137;F;sous-cat1;5;Traitements d‚Äôeaux us√©es;Sewage treatment
+138;F;sous-cat1;6;Autres d√©rangements (eau claire, bcpd‚Äôalgues);Other disturbances (clear water, bcpd'algae)
+139;F;sous-cat1;7;Activit√© industrielle;Industrial activity
+140;F;sous-cat1;8;Petites √Æles;Small Islands
+141;F;sous-cat2;1;Eutrophique (eau verte);Eutrophic (green water)
+142;F;sous-cat2;2;Oligotrophique;Oligotrophic
+143;F;sous-cat2;3;Dystrophique (eau noire);Dystrophic (black water)
+144;F;sous-cat2;4;Bigarr√©;Colorful
+145;F;sous-cat2;5;Courant faible / moyen;Low / medium current
+146;F;sous-cat2;6;Courant fort;Strong current
+147;F;sous-cat2;7;Dragu√©;Dredge
+148;F;sous-cat2;8;Non dragu√©;Not dredged
+149;F;sous-cat2;9;Rives nues;Bare Banks
+150;F;sous-cat2;10;Rives avec v√©g√©tation;Banks with vegetation
+151;G;milieu;G;Rochers terrestres ou c√¥tiers;Land or coastal rocks
+152;G;type;1;Falaise;Falaise
+153;G;type;2;Eboulis, pente rocheuse;Slope, rocky slope
+154;G;type;3;Pavement calcaire;Limestone paving
+155;G;type;4;Autres sols rocheux;Other rocky soils
+156;G;type;5;Carri√®re (grimpeurs, promeneurs);Career (climbers, walkers)
+157;G;type;6;Mine / ab√Æme / terril;Mine / abyss / slag heap
+158;G;type;7;Grotte;Grotto
+159;G;type;8;Dune;Dune
+160;G;sous-cat1;1;Montagne;Mountain
+161;G;sous-cat1;2;Pas en montagne;Not in the mountains
+162;G;sous-cat1;3;Bord de mer (mousses, lichens);Seaside (mosses, lichens)
+163;G;sous-cat1;4;Fort d√©rangement par l‚Äôhomme;Strong human disturbance
+164;G;sous-cat2;1;Roche nue;Bare rock
+165;G;sous-cat2;2;V√©g√©tation basse pr√©sente;Low vegetation present
+166;G;sous-cat2;3;Gramin√©es pr√©sentes;Grasses present
+167;G;sous-cat2;4;Buissons pr√©sents;Bushes present

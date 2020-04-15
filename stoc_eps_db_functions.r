@@ -1,62 +1,67 @@
 ######################################################################################
 ##
-##                     Fonctions d'utilisation de la base de donnÃ©es STOC_eps
+##                     Fonctions d'utilisation de la base de données STOC_eps
 ##  R. Lorrilliere
 ######################################################################################
 
 
 
+if(!("stoc_eps_db_functions.r" %in% dir())) stop("ERREUR !!! \n Changer le repertoire de travail \n STOC_eps/\n\n")
 
-source("fonctions/fun_generic.r")
+
+source("functions/fun_create_stoc_eps_db.r")
 
 
-### 1- crÃ©ation et importation de la base de donnÃ©es
+
+#source("functions/fun_export.r")
+
+### 1- création et importation de la base de données
 
 
 
 ##' .. content for \description{} (no empty lines) ..
 ##'
 ##' .. content for \details{} ..
-##' @title Fonction de crÃ©ation de la base de donnÃ©es STOC EPS
-##' @param dateExportVP date de l'export des donnÃ©es VP au format YYYY-MM-JJ
-##' @param nomFileVP nom du fichier exportÃ© de VP
-##' @param nomFileVP_ONF nom du fichier exportÃ© de VP pour les donnÃ©es ONF
+##' @title Fonction de création de la base de données STOC EPS
+##' @param dateExportVP date de l'export des données VP au format YYYY-MM-JJ
+##' @param nomFileVP nom du fichier exporté de VP
+##' @param nomFileVP_ONF nom du fichier exporté de VP pour les données ONF
 ##' @param dateExportFNat [="2017-01-04" ] date de l'export FNAT par default
-##' @param importACCESS [=FALSE] valeur booleenne permet l'export des donnÃ©es FNAT directement dans la base access. ATTENTION cette fonctionne uniquement sous windows avec une version 32bit de R (.../bin/i386/Rgui.exe)
-##' @param nomFileFNat [="FNat_plat_2017-01-04.csv"] nom du fichier Ã  plat de FNat
+##' @param importACCESS [=FALSE] valeur booleenne permet l'export des données FNAT directement dans la base access. ATTENTION cette fonctionne uniquement sous windows avec une version 32bit de R (.../bin/i386/Rgui.exe)
+##' @param nomFileFNat [="FNat_plat_2017-01-04.csv"] nom du fichier à plat de FNat
 ##' @param nomDBFNat "Base FNat2000.MDB"
-##' @param importationDataBrut [=TRUE] valeur booleene qui permet d'activÃ© la rÃ©cupÃ©ration des donnÃ©es brut
-##' @param constructionPoint [=TRUE] valeur booleene qui active la crÃ©ation de la table point
-##' @param constructionCarre [=TRUE] valeur booleene qui active la crÃ©ation de la table carrÃ©
-##' @param constructionInventaire [=TRUE] valeur booleene qui active la crÃ©ation de la table inventaire
-##' @param constructionObservation [=TRUE] valeur booleene qui active la crÃ©ation de la table observation
-##' @param constructionHabitat [=TRUE] valeur booleene qui active la crÃ©ation de la table habitat
+##' @param importationDataBrut [=TRUE] valeur booleene qui permet d'activé la récupération des données brut
+##' @param constructionPoint [=TRUE] valeur booleene qui active la création de la table point
+##' @param constructionCarre [=TRUE] valeur booleene qui active la création de la table carré
+##' @param constructionInventaire [=TRUE] valeur booleene qui active la création de la table inventaire
+##' @param constructionObservation [=TRUE] valeur booleene qui active la création de la table observation
+##' @param constructionHabitat [=TRUE] valeur booleene qui active la création de la table habitat
 ##' @param dateConstruction [=NULL] date de la constuction de la base si null la date du jour si au format "YYYY-MM-JJ"
 ##' @param postgresql_import [=TRUE]  valeur booleene pour importer les tables dans la base postgres
 ##' @param nomDBpostgresql [=NULL] nom de la base postgres si null "stoc_eps"
-##' @param postgresql_createAll [=TRUE] valeur booleene qui active la crÃ©ation complete de la base de donnÃ©es avec l'import des tables gÃ©nÃ©riques
-##' @param postgresUser [="postgres"] nom de l'utilisateur de de la base de donnÃ©es par default "postgres"
-##' @param postgresPassword [="postgres"] mot de passe de l'utilisateur de de la base de donnÃ©es par default "postgres"
-##' @param postGIS_initiation [=FALSE] valeur booleene qui permet d'activÃ© l'initialisation de l'extension posgis de la base de donnÃ©es
-##' @param import_shape [=FALSE] valeur booleene qui permet d'activÃ© l'importation de shape_file dans la base de donnÃ©e
+##' @param postgresql_createAll [=TRUE] valeur booleene qui active la création complete de la base de données avec l'import des tables génériques
+##' @param postgresUser [="postgres"] nom de l'utilisateur de de la base de données par default "postgres"
+##' @param postgresPassword [="postgres"] mot de passe de l'utilisateur de de la base de données par default "postgres"
+##' @param postGIS_initiation [=FALSE] valeur booleene qui permet d'activé l'initialisation de l'extension posgis de la base de données
+##' @param import_shape [=FALSE] valeur booleene qui permet d'activé l'importation de shape_file dans la base de donnée
 ##' @param repertoire [=NULL] repertoire de travail du script par default le repertoire courant
-##' @param postgresql_abondanceSeuil [=TRUE] valeur booleene qui permet d'activÃ© le calcul du seuil des abondances par espÃ¨ces et par classe de distance
+##' @param postgresql_abondanceSeuil [=TRUE] valeur booleene qui permet d'activé le calcul du seuil des abondances par espèces et par classe de distance
 ##' @param seuilAbondance [0.99] valeur du seuil par default 0.99
-##' @param historiqueCarre [=TRUE]  valeur booleene qui permet d'activÃ© le calcul d'un historique des carrÃ©s
-##' @param pointCarreAnnee [=TRUE] valeur booleene qui permet d'activÃ© la crÃ©ation des tables point_annee et carre_annee
-##' @param importPointCarreAnnee [=TRUE]  valeur booleene qui permet d'activÃ© l'importation des tables point_annee et carre_annee
-##' @param fileTemp[=FALSE]  valeur booleene qui permet d'activÃ© qui de conservÃ© les fichier sql crÃ©er lors du processus, par default FALSE
+##' @param historiqueCarre [=TRUE]  valeur booleene qui permet d'activé le calcul d'un historique des carrés
+##' @param pointCarreAnnee [=TRUE] valeur booleene qui permet d'activé la création des tables point_annee et carre_annee
+##' @param importPointCarreAnnee [=TRUE]  valeur booleene qui permet d'activé l'importation des tables point_annee et carre_annee
+##' @param fileTemp[=FALSE]  valeur booleene qui permet d'activé qui de conservé les fichier sql créer lors du processus, par default FALSE
 ##' @return nothing just data importation in postgres database
 ##' @author Romain Lorrilliere
 
 ## ## ex:
-## ## Importatoin Ã  partir des fichiers bruts issues de VigiePlume
+## ## Importatoin à partir des fichiers bruts issues de VigiePlume
 ## laDate <- as.Date(Sys.time())
 ## prepaData(dateExportVP=laDate,nomFileVP="export_stoc_25112019.txt",nomFileVP_ONF="export_stoc_onf_03122019.txt",dateExportFNat="2017-01-04", importACCESS=FALSE, nomFileFNat="FNat_plat_2017-01-04.csv", importationDataBrut=TRUE, constructionPoint=TRUE,constructionCarre=TRUE, constructionInventaire=TRUE,constructionObservation = TRUE, constructionHabitat = TRUE,dateConstruction=NULL,postgresql_import=TRUE,nomDBpostgresql=NULL,postgresql_createAll=TRUE,postgresUser="posgres", postgresPassword="postgres",postGIS_initiation=TRUE,import_shape=FALSE,repertoire=NULL, postgresql_abondanceSeuil=TRUE,seuilAbondance = .99, historiqueCarre=TRUE, pointCarreAnnee=TRUE,importPointCarreAnnee=TRUE,fileTemp=FALSE)
 
-## ## si l'ordinateur n'a pas assez de mÃ©moire RAM (16Go recommandÃ©), voici comment lancÃ© l'importationÃ  partir des fichiers prÃ©-construits
+## ## si l'ordinateur n'a pas assez de mémoire RAM (16Go recommandé), voici comment lancé l'importationà partir des fichiers pré-construits
 
-## laDate <- ["la date notÃ© dans les noms des fichier"]
+## laDate <- ["la date noté dans les noms des fichier"]
 ## prepaData(dateExportVP=laDate, importationDataBrut=FALSE, constructionPoint=FALSE,constructionCarre=FALSE, constructionInventaire=FALSE,constructionObservation = FALSE, constructionHabitat = FALSE,dateConstruction=NULL,postgresql_import=TRUE,nomDBpostgresql=NULL,postgresql_createAll=TRUE,postgresUser="postgres", postgresPassword="postgres",postGIS_initiation=TRUE,import_shape=FALSE,repertoire=NULL, postgresql_abondanceSeuil=TRUE,seuilAbondance = .99, historiqueCarre=TRUE, pointCarreAnnee=TRUE,importPointCarreAnnee=TRUE,fileTemp=FALSE)
 
 
@@ -97,6 +102,11 @@ prepaData <- function(dateExportVP,nomFileVP,nomFileVP_ONF,
 
 
 ### 2- export
+
+
+
+
+
 
 
 

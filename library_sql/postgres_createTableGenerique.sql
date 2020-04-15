@@ -68,4 +68,49 @@ CREATE TABLE species_indicateur_fonctionnel
 				trophic_vertebrate smallint);
 
 	
+---------------------------------------------
+
+DROP TABLE IF EXISTS habitat_code_ref;
+
+CREATE TABLE habitat_code_ref
+       (pk_habitat_code_ref smallint PRIMARY KEY,
+       milieu varchar(1),
+       level varchar(10),
+       value varchar(2),
+       nom varchar(50),
+       name varchar(55));
+
+
+
+---------------------------------------------
+
+DROP TABLE IF EXISTS habitat_cat;
+
+CREATE TABLE habitat_cat
+       (pk_habitat_code smallint PRIMARY KEY,
+       habitat_code varchar(3),
+       habitat_nom varchar(50),
+       habitat_name varchar(60),
+       habitat_cat_strict varchar(15),
+       habitat_cat_strict_eng varchar(10),
+       milieu_code varchar(1),
+       milieu_nom varchar(30),
+       milieu_name varchar(30),
+       type_code smallint,
+       type_nom varchar(50),
+       type_name varchar(60),
+       foret_strict boolean,
+       foret_large boolean,
+       ouvert_nat_strict boolean,
+       ouvert_nat_large boolean,
+       agricole_strict boolean,
+       agricole_large boolean,
+       urbain_strict boolean,
+       urbain_large boolean,
+       aquatique_strict boolean,
+       aquatique_large boolean);
+
+
+-------------------------------------------------
+
 

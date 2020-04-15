@@ -1,6 +1,8 @@
 
+source("functions/fun_generic.r")
+
 if("STOC_eps_database" %in% dir()) setwd("STOC_eps_database/")
-if(!("export" %in% dir())) dir.create("export")
+if(!("output_export" %in% dir())) dir.create("output_export")
 
 
 makeTableCarre <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,savePostgres=FALSE,output=TRUE,sp=NULL,

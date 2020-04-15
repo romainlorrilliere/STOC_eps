@@ -1,16 +1,31 @@
 
-vecPackage=c("RODBC","dplyr","reshape","data.table","rgdal","lubridate","RPostgreSQL","doBy","reshape2")
+vecPackage=c("RODBC","dplyr","data.table","rgdal","lubridate","RPostgreSQL","doBy","reshape2","sf","maptools","maps","animation","dplyr")
 ip <- installed.packages()[,1]
 
 for(p in vecPackage){
     if (!(p %in% ip))
         install.packages(pkgs=p,repos = "http://cran.univ-paris1.fr/",dependencies=TRUE)
- require(p,character.only=TRUE)
+    require(p,character.only=TRUE)
 }
 
 
-source("functions/fun_create_stoc_eps_db.r")
-source("functions/fun_export.r")
+
+
+
+myshell <- function(mycmd,myinvisible=TRUE) {
+    is.windows <- Sys.info()["sysname"] == "Windows"
+
+    cat("System command: ",mycmd,"\n",paste="")
+    if(is.windows){
+        cat("     - OS: Windows \n")
+        shell(cmd=mycmd,invisible=myinvisible)
+    }else{
+        cat("     - OS: Linux alike \n")
+        system2(mycmd)
+    }
+}
+
+
 
 
   openDB.PSQL <- function(user=NULL,pw=NULL,DBname=NULL){
@@ -58,7 +73,7 @@ clean.PSQL <- function(nomDB=NULL) {
 getCode_sp <- function(con,champSp,sp) {
     if(is.null(con)) con <- openDB.PSQL()
     querySp <- paste(" select ",champSp,", pk_species as code_sp, french_name from species where ",champSp," in  ",paste("('",paste(sp,collapse="' , '"),"')",";",sep=""),sep="")
-    cat("\nRequete recupÃ©ration des code_sp:\n\n",querySp,"\n\n")
+    cat("\nRequete recupération des code_sp:\n\n",querySp,"\n\n")
 
     dsp <- dbGetQuery(con, querySp)
 

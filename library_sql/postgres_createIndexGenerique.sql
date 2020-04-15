@@ -33,3 +33,24 @@ CREATE INDEX indic_montane ON species_list_indicateur (montane_lehikoinen);
 CREATE INDEX indic_trim ON species_list_indicateur (french_trim);
 
 --- CREATE INDEX indic_ebcc ON species_list_indicateur (french_ebcc);
+
+
+
+CREATE INDEX hab_code ON habitat_cat(habitat_code);
+CREATE INDEX hab_nom ON habitat_cat(habitat_nom);
+CREATE INDEX hab_name ON habitat_cat(habitat_name);
+CREATE INDEX hab_foret_s ON habitat_cat(foret_strict);
+CREATE INDEX hab_foret_l ON habitat_cat(foret_large);
+CREATE INDEX hab_ouvert_nat_s ON habitat_cat(ouvert_nat_strict);
+CREATE INDEX hab_ouvert_nat_l ON habitat_cat(ouvert_nat_large);
+CREATE INDEX hab_agricole_s ON habitat_cat(agricole_strict);
+CREATE INDEX hab_agricole_l ON habitat_cat(agricole_large);
+CREATE INDEX hab_urbain_s ON habitat_cat(urbain_strict);
+CREATE INDEX hab_urbain_l ON habitat_cat(urbain_large);
+CREATE INDEX hab_aquatique_s ON habitat_cat(aquatique_strict);
+CREATE INDEX hab_aquatique_l ON habitat_cat(aquatique_large);
+
+
+CREATE INDEX href_milieu ON habitat_code_ref(milieu);
+CREATE INDEX href_value ON habitat_code_ref(value);
+CREATE INDEX href_level ON habitat_code_ref(level);

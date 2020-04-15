@@ -1,27 +1,16 @@
-output/
 data_raw/
-data_weather/
 data/
-moulinetteChiro/SaisieChiro_Result/
-moulinetteChiro/saisieChiroFileAttenteXLS/
-wc0.5/
-archive/
-data_csv-Copie/
-data_csv/
-DB_import/
-outputImport/
+*archive/
+data_DB_import/
+output_import/
 output/
-STOC_martinique/
 export/
-data_various/
+sig/
 
 .Rproj.user
 .Rhistory
 *.html
 *.r~
-BCI2017.R
-monScript_capture.r
-sig/
 *.dbf
 *.prj
 *.qpj
@@ -44,13 +33,3 @@ _*.sql
 
 my*
 
-isd-history.csv
-
-f_coord_ROUTE.R
-
-myScript_trend.R
-BBS_N2000.csv
-.#myScript_export.r
-.#myScript_export.r
-*.md~
-.#myScript_export.r

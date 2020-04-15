@@ -54,7 +54,7 @@ historicCarre  <- function(con,anneeMax=2017) {
 
     gg <- ggplot(subset(ggAnnee,variable != "NonAjour"),aes(x=annee,y=value,colour=variable))+geom_line(size=1.5)+geom_point(size=2)
     gg <- gg + scale_colour_manual(values=c("nbCarre" = "#0d259f","Nouveaux"="#0d9f1b","Arrete" = "#9f0d0d" ),
-                                   labels=c("nbCarre" = "CarrÃ©s actif","Nouveaux"="Nouveaux carrÃ©s","Arrete" = "CarrÃ©s arrÃªtÃ©s"),name="" )
+                                   labels=c("nbCarre" = "Carrés actif","Nouveaux"="Nouveaux carrés","Arrete" = "Carrés arrêtés"),name="" )
     gg <- gg + labs(title="",x="",y="")
     ggsave("Output/carreSTOC.png",gg)
 
@@ -81,7 +81,7 @@ historicCarre  <- function(con,anneeMax=2017) {
 
 
     gg <- ggplot(ggAge,aes(age,id_carre))+ geom_col() + facet_wrap(~annee)
-    gg <- gg + labs(title="Pyramide des ages des stations STOC EPS",x="Age",y="Nombre de carrÃ© STOC actifs")
+    gg <- gg + labs(title="Pyramide des ages des stations STOC EPS",x="Age",y="Nombre de carré STOC actifs")
 
     ggsave("Output/carreSTOC_pyramideAge.png",gg)
 
@@ -186,7 +186,7 @@ verificationCarre <- function() {
         ddFNat <- merge(dFNat,dCarreONF,by=c("lieudit","dept"),all=TRUE)
         ## pour un bug incomprehenssible dans le merge
         ddFNat[grep("Messarges",ddFNat$lieudit),"id_carre"] <- "030523"
-        ddFNat[grep("TronÃ§ais",ddFNat$lieudit),"id_carre"] <- "030143"
+        ddFNat[grep("Tronçais",ddFNat$lieudit),"id_carre"] <- "030143"
         ddFNat <- subset(ddFNat,!is.na(unique_citation))
         dFNat <- ddFNat
         dFNat$id_carre <- ifelse(is.na(dFNat$id_carre),paste(dFNat$dept,substring(dFNat$lieudit,13,nchar(dFNat$lieudit)),sep=""),dFNat$id_carre)

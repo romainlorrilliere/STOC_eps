@@ -71,7 +71,7 @@ CREATE TABLE inventaire
        neige int,
        db varchar(10) NOT NULL,
        date_export varchar(10) NOT NULL,
-       version varchar(10) NOT NULL);
+       version varchar(20) NOT NULL);
 
 
 DROP table if exists observation;

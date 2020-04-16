@@ -132,11 +132,13 @@ f_prepaData <- function(dateExportVP="2019-01-10",nomFileVP="export_stoc_1001201
     cat("\n\n repertoire output import:",repOut)
 
 
-    cat("\n\n 1) Importation\n----------------------\n")
+    cat("\n\n 1) Importation et preparation \n----------------------\n")
     if(importationDataBrut) {
 
         cat("\n - VigiePlume\n <-- Fichier a plat:",nomFileVP,"\n")
         flush.console()
+
+#        dVP <- vp_importation(nomFileVP,nomFileVPonf,dateExportVP,repOut)
         dVP <- read.csv(nomFileVP,h=TRUE,stringsAsFactors=FALSE,fileEncoding="utf-8",sep="\t")
 
 
@@ -274,12 +276,12 @@ f_prepaData <- function(dateExportVP="2019-01-10",nomFileVP="export_stoc_1001201
     if(constructionInventaire | constructionObservation) {
         cat("\n - VigiePlume: ")
         flush.console()
-        ddVP.inv <- vp2inventaire(dVP,dateExportVP,version,repOut,TRUE)
+        ddVP.inv <- vp2inventaire(dVP,dateExportVP,version,dateConstruction,repOut,TRUE)
         cat(nrow(ddVP.inv)," lignes \n")
 
         cat("\n - FNat: ")
         flush.console()
-        ddFNat.inv <- FNat2inventaire(dFNat,dateExportFNat,version,repOut,TRUE)
+        ddFNat.inv <- FNat2inventaire(dFNat,dateExportFNat,version,dateConstruction,repOut,TRUE)
         cat(nrow(ddFNat.inv)," lignes \n")
 
         cat("\n  -> union: ")
@@ -299,7 +301,7 @@ f_prepaData <- function(dateExportVP="2019-01-10",nomFileVP="export_stoc_1001201
     if(constructionObservation) {
         cat("\n - VigiePlume: ")
         flush.console()
-        ddVP.obs <- vp2observation(dVP,dateExportVP,repOut,TRUE)
+        ddVP.obs <- vp2observation(dVP,dateExportVP,dateConstruction,repOut,TRUE)
         cat(nrow(ddVP.obs)," lignes \n")
 
         cat("\n - FNat: ")
@@ -307,7 +309,7 @@ f_prepaData <- function(dateExportVP="2019-01-10",nomFileVP="export_stoc_1001201
         cat("\n",  nrow(subset(dFNat,!(unique_inventaire %in% ddFNat.inv$unique_inventaire_fnat)))," lignes exclues !!\n")
         dFNat <- subset(dFNat,unique_inventaire %in% ddFNat.inv$unique_inventaire_fnat)
 
-        ddFNat.obs <- FNat2observation(dFNat,dateExportFNat,repOut,TRUE)
+        ddFNat.obs <- FNat2observation(dFNat,dateExportFNat,dateConstruction,repOut,TRUE)
 
         ddFNat.obs <- subset(ddFNat.obs,!(id_inventaire %in% ddVP.inv$pk_inventaire))
         cat(nrow(ddFNat.obs)," lignes \n")
@@ -505,34 +507,111 @@ WHERE (((TLDescEPS.Habitat)='S'));"
 
 
 
+vp_importation <- function(nomFileVP,nomFileVPonf,dateExportVP,repOut) {
+    d <- read.csv(nomFileVP,h=TRUE,stringsAsFactors=FALSE,fileEncoding="utf-8",sep="\t")
+
+    d <- data.table(d)
+    cat("\n    !!! suppression des lignes  issue d'une etude LPO ahiqutaine hors echantillonage STOC-EPS 'PRANAT','Frolet'\n")
+
+
+    ligneExclu <- union(grep("NAT",d$N..Carré.EPS),grep("Frolet",d$N..Carré.EPS))
+    cat(length(ligneExclu)," lignes exclues\n\n")
+    ligneConserv <- setdiff(1:nrow(d),ligneExclu)
+    d <- d[ligneConserv,]
+    cat(" <-- Fichier a plat ONF:",nomFileVPonf,"\n")
+    flush.console()
+    donf <- read.csv(nomFileVPonf,h=TRUE,stringsAsFactors=FALSE,fileEncoding="utf-8",sep="\t")
+    d <- rbind(d,donf)
+
+    cat("\n    !!! suppression des lignes pour les quelles le numéros du point n'est pas saisie\n")
+
+    d.sansPoint <- subset(d,EXPORT_STOC_TEXT_EPS_POINT=="")
+
+    if(nrow(d.sansPoint) > 0) {
+        cat("\   il y a ",nrow(d.sansPoint)," observation dans les données vigiplume qui n'ont pas de numéros de point\n")
+        fileCSV <- paste0(repOut,"_erreur_abscence_numeros_point.csv")
+        cat("  -->",fileCSV,"\n")
+        write.csv(d.sansPoint,fileCSV,row.names=FALSE)
+        d <- subset(d,EXPORT_STOC_TEXT_EPS_POINT != "")
+    }
+
+
+
+    d <- d[!is.na(Nombre) & !is.na(Espèce) & Espèce != "",]
+
+    d <- d[,INSEE := sprintf("%05d", INSEE)]
+    d <- d[,Département := sprintf("%02d", Département)]
+    d <- d[,the_date := as.Date(Date,format="%d.%m.%Y")]
+    d <- d[,id_carre := substring(N..Carré.EPS,9,nchar(N..Carré.EPS))]
+    d <- d[,point := substring(EXPORT_STOC_TEXT_EPS_POINT,nchar(EXPORT_STOC_TEXT_EPS_POINT)-1,nchar(EXPORT_STOC_TEXT_EPS_POINT))]
+    d <- d[,id_point := paste0(id_carre,"P",point)]
+    d <- d[,num_point := as.numeric(point)]
+    d <- d[,jour_julien := as.numeric(format(the_date,"%j"))]
+    d <- d[,id_inventaire := paste0(format(the_date,"%Y%m%d"),id_point)]
+    d <- d[,duree_minute := as.numeric(difftime(strptime(Heure.fin,"%H:%M"),strptime(Heure,"%H:%M")))]
+    d <- d[,id_data := paste0(id_inventaire,"_",substring(Espèce,1,6),"_",Distance.de.contact)]
+    d <- setorder(d, id_inventaire,Espèce,Distance.de.contact)
+    d <- d[,inventaire_inc := 1:.N,by=id_inventaire]
+    d <- d[,inventaire_inc :=sprintf("%02d",inventaire_inc)]
+    d <- d[,id_observation := paste0(id_inventaire,inventaire_inc)]
+    d <- d[,date_export:= dateExport]
+    d <- d[,db:="vigieplume"]
+    return(d)
+}
+
+
 
 vp2point <- function(d,dateExport,repOut="",output=FALSE) {
 
-    dd <- data.frame(pk_point=paste0(substring(d$N..Carré.EPS,9),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1,nchar(d$EXPORT_STOC_TEXT_EPS_POINT))),
-                     id_carre = substring(d$N..Carré.EPS,9,nchar(d$N..Carré.EPS)),
-                     commune = d$Commune,
-                     site = d$Site,
-                     insee = d$INSEE,
-                     departement = d$Département,
-                     nom_point = d$EXPORT_STOC_TEXT_EPS_POINT,
-                     num_point = as.numeric(substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1,nchar(d$EXPORT_STOC_TEXT_EPS_POINT))),
-                     altitude = d$Altitude,
-                     longitude_wgs84 = d$Longitude,
-                     latitude_wgs84 = d$Latitude,
-                     db = "vigieplume",date_export=dateExport)
+## la table de base
+    d_col <- c("id_point","id_carre","Commune","Site","INSEE","Département","EXPORT_STOC_TEXT_EPS_POINT","num_point","Altitude","Longitude","Latitude","db","date_export")
+    dd <- d[,d_col,with=FALSE]
+## changement des noms de colonnes
+    dd <- setnames(dd,old=c("id_point","Commune","Site","INSEE","Département","EXPORT_STOC_TEXT_EPS_POINT","Altitude","Longitude","Latitude"),new=c("pk_point","commune","site","insee","departement","nom_point","altitude","longitude_wgs84","latitude_wgs84"))
 
-    dd_maj <- aggregate(subset(dd,select=c("commune","site","insee","departement")), list(pk_point=dd$pk_point), function(x) levels(x)[which.max(table(x))])
-    dd_med <- aggregate(subset(dd,select=c("altitude","latitude_wgs84","longitude_wgs84")), list(pk_point=dd$pk_point), function(x) median(x) )
-    dd_med$altitude <- round(dd_med$altitude)
-    dd_point <- unique(subset(dd,select=c("pk_point","id_carre","nom_point","num_point")))
+##    dd <- data.frame(pk_point=paste0(substring(d$N..Carré.EPS,9),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1,nchar(d$EXPORT_STOC_TEXT_EPS_POINT))),
+##                     id_carre = substring(d$N..Carré.EPS,9,nchar(d$N..Carré.EPS)),
+##                     commune = d$Commune,
+##                     site = d$Site,
+##                     insee = d$INSEE,
+##                     departement = d$Département,
+##                     nom_point = d$EXPORT_STOC_TEXT_EPS_POINT,
+##                     num_point = as.numeric(substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1,nchar(d$EXPORT_STOC_TEXT_EPS_POINT))),
+##                     altitude = d$Altitude,
+##                     longitude_wgs84 = d$Longitude,
+##                     latitude_wgs84 = d$Latitude,
+##                     db = "vigieplume",date_export=dateExport)
+    ##
 
-    dd <- merge(dd_point,dd_maj,by="pk_point")
-    dd <- merge(dd,dd_med,by="pk_point")
 
-    dd <- data.frame(dd[,c("pk_point","id_carre","commune","site","insee","departement",
-                           "nom_point","num_point","altitude",
-                           "longitude_wgs84","latitude_wgs84")],
-                     db="vigieplume",date_export=dateExport)
+    ## on conserve le nom de commune du département et de l'insee le plus commun
+    dd <- dd[,`:=` (commune = get_mode(commune),
+                    site = get_mode(site),
+                    insee = get_mode(insee),
+                    departement = get_mode(departement)),
+             by=pk_point]
+
+    ## calcul la mediane des valeur numérique
+
+    dd <- dd[, altitude := as.numeric(altitude)]
+    dd <- dd[,`:=` (altitude = median(altitude),
+                    latitude_wgs84 = median(latitude_wgs84),
+                    longitude_wgs84 = median(longitude_wgs84)),
+             by=pk_point]
+
+### dd_med <- aggregate(subset(dd,select=c("altitude","latitude_wgs84","longitude_wgs84")), list(pk_point=dd$pk_point), function(x) median(x) )
+### dd_med$altitude <- round(dd_med$altitude)
+###  dd_point <- unique(subset(dd,select=c("pk_point","id_carre","nom_point","num_point")))
+
+###   dd <- merge(dd_point,dd_maj,by="pk_point")
+###   dd <- merge(dd,dd_med,by="pk_point")
+
+    dd <- unique(dd)
+
+###    dd <- data.frame(dd[,c("pk_point","id_carre","commune","site","insee","departement",
+###                           "nom_point","num_point","altitude",
+###                           "longitude_wgs84","latitude_wgs84")],
+###                     db="vigieplume",date_export=dateExport)
 
     filename <- paste0(repOut,"point_VP_",dateExport,".csv")
     write.csv(dd,filename,row.names=FALSE)
@@ -589,7 +668,7 @@ vp2carre <- function(d,dateExport,repOut="",output=FALSE) {
 
 }
 
-vp2inventaire <- function(d,dateExport,version = "V.1",repOut="",output=FALSE) {
+vp2inventaire <- function(d,dateExport,version = "V.1",dateConstruction="",repOut="",output=FALSE) {
 
    ## dateExport=dateExportVP
    ## d=dVP
@@ -767,7 +846,7 @@ vp2inventaire <- function(d,dateExport,version = "V.1",repOut="",output=FALSE) {
     dd<-dd[,c("pk_inventaire","unique_inventaire_fnat","id_carre","id_point","num_point","etude","annee","date","jour_julien","passage","info_passage","passage_stoc","nombre_de_passage","temps_entre_passage","info_entre_passage","heure_debut","heure_fin","duree_minute","observateur","email","nuage","pluie","vent","visibilite","neige","db","date_export","version")]
 
 
-    filename <- paste0(repOut,"inventaire_VP_",dateExport,".csv")
+    filename <- paste0(repOut,"inventaire_VP_",dateConstruction,".csv")
     write.csv(dd,filename,row.names=FALSE)
     cat("  (->",filename,")\n")
 
@@ -777,7 +856,7 @@ vp2inventaire <- function(d,dateExport,version = "V.1",repOut="",output=FALSE) {
 
 
 
-vp2observation <- function(d,dateExport,repOut="",output=FALSE) {
+vp2observation <- function(d,dateExport,dateConstruction="",repOut="",output=FALSE) {
 
     dd <- data.frame(pk_observation= paste0(format(as.Date(d$Date,format="%d.%m.%Y"),"%Y%m%d"),substring(d$N..Carré.EPS,9),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1)),
                      id_fnat_unique_citation = NA,
@@ -806,7 +885,7 @@ vp2observation <- function(d,dateExport,repOut="",output=FALSE) {
     if(length(doublon)>0) {
         tDoublon <- subset(dd,id_data %in% doublon)
         tDoublon <- tDoublon[order(tDoublon$id_data),]
-        file <- paste0(repOut,"_doublonInventaireVigiePlume_",dateExport,".csv")
+        file <- paste0(repOut,"_doublonObservationVigiePlume_",dateConstruction,".csv")
         cat("  \n !!! Doublon saisies \n c est a dire plusieurs lignes pour un inventaire une espece et une distance\n Ceci concerne ", nrow(tDoublon)," lignes\n")
         cat("  Toutes lignes sont présenté dans le fichier: \n  --> ",file,"\n")
         write.csv(tDoublon[,-ncol(tDoublon)],file,row.names=FALSE)
@@ -821,7 +900,7 @@ vp2observation <- function(d,dateExport,repOut="",output=FALSE) {
         dataExclues <- subset(tDoublon,!conservee)
         dataEclues <-subset(dataExclues,select=c("pk_observation","id_fnat_unique_citation","id_inventaire","id_point","id_carre","num_point","passage","date","annee","classe","espece","code_sp","distance_contact","abondance","db","date_export"))
 
-        file <- paste0(repOut,"_doublonInventaireVigiePlume_Exclu_",dateExport,".csv")
+        file <- paste0(repOut,"_doublonObservationVigiePlume_Exclu_",dateConstruction,".csv")
         cat("  \n !!! Doublon exclue enregistre dans le fichier \n --> ",file,"\n")
         write.csv(tDoublon[,-ncol(tDoublon)],file,row.names=FALSE)
 
@@ -833,7 +912,7 @@ vp2observation <- function(d,dateExport,repOut="",output=FALSE) {
     dd <- dd[,-ncol(dd)]
 
 
-    filename <- paste0(repOut,"observation_VP_",dateExport,".csv")
+    filename <- paste0(repOut,"observation_VP_",dateConstruction,".csv")
     write.csv(dd,filename,row.names=FALSE)
     cat("  (->",filename,")\n")
 
@@ -1124,7 +1203,7 @@ FNat2carre <- function(d,dateExport,repOut="",output=FALSE) {
 
 
 
-FNat2inventaire <-  function(d,dateExport,version = "V.1",repOut="",output=FALSE) {
+FNat2inventaire <-  function(d,dateExport,version = "V.1",dateConstruction="",repOut="",output=FALSE) {
     library(lubridate)
 
     #d = dFNat; dateExport = dateExportFNat ;verion = "VV";output=FALSE
@@ -1305,7 +1384,7 @@ FNat2inventaire <-  function(d,dateExport,version = "V.1",repOut="",output=FALSE
 
 
 
-   filename <- paste0(repOut,"inventaire_FNat_",dateExport,".csv")
+   filename <- paste0(repOut,"inventaire_FNat_",dateConstruction,".csv")
     write.csv(dd,filename,row.names=FALSE)
     cat("  (->",filename,")\n")
 
@@ -1318,7 +1397,7 @@ FNat2inventaire <-  function(d,dateExport,version = "V.1",repOut="",output=FALSE
 
 
 
-FNat2observation <- function(d,dateExport,repOut="",output=FALSE) {
+FNat2observation <- function(d,dateExport,dateConstruction="",repOut="",output=FALSE) {
     library(doBy)
   ##  d = dFNat; dateExport = dateExportFNat ;verion = "VV";output=FALSE
     dd <- data.frame(pk_observation= paste0(d$dateobs,d$id_carre,"P",substring(d$section_cadastrale,nchar(d$section_cadastrale)-1)),
@@ -1353,7 +1432,7 @@ FNat2observation <- function(d,dateExport,repOut="",output=FALSE) {
     doublon <- names(contDoublon)[contDoublon>1]
     if(length(doublon)>0) {
         tDoublon <- subset(dd,id_data %in% doublon)
-        file <- paste0(repOut,"_doublonObservationFNat_",dateExport,".csv")
+        file <- paste0(repOut,"_doublonObservationFNat_",dateConstruction,".csv")
         cat("  \n !!! Doublon saisies \n c est a dire plusieurs lignes pour un inventaire une espece et une distance\n Ceci concerne ", nrow(tDoublon)," lignes\n")
         cat("  Toutes lignes sont présenté dans le fichier: \n  --> ",file,"\n")
         write.csv(tDoublon[,-ncol(tDoublon)],file,row.names=FALSE)
@@ -1368,7 +1447,7 @@ FNat2observation <- function(d,dateExport,repOut="",output=FALSE) {
         dataExclues <- subset(tDoublon,!conservee)
         dataEclues <-subset(dataExclues,select=c("pk_observation","id_fnat_unique_citation","id_inventaire","id_point","id_carre","num_point","passage","date","annee","classe","espece","code_sp","distance_contact","abondance","db","date_export"))
 
-        file <- paste0(repOut,"_doublonObservationVigiePlume_FNat_",dateExport,".csv")
+        file <- paste0(repOut,"_doublonObservationFNat_Exclu_",dateConstruction,".csv")
         cat("  \n !!! Doublon exclue enregistre dans le fichier \n --> ",file,"\n")
         write.csv(tDoublon[,-ncol(tDoublon)],file,row.names=FALSE)
 
@@ -1381,7 +1460,7 @@ FNat2observation <- function(d,dateExport,repOut="",output=FALSE) {
     dd <- dd[,-ncol(dd)]
 
 
-    filename <-  paste0(repOut,"observation_FNat_",dateExport,".csv")
+    filename <-  paste0(repOut,"observation_FNat_",dateConstruction,".csv")
     write.csv(dd,filename,row.names=FALSE)
     cat("  (->",filename,")\n")
 

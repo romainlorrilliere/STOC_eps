@@ -33,3 +33,5 @@ _*.sql
 
 my*
 
+.#my_stoc_eps_db.r
+functions/.#fun_create_stoc_eps_db.r

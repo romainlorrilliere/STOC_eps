@@ -102,7 +102,7 @@ prepaData(dateExportVP=laDate,nomFileVP="export_stoc_25112019.txt",nomFileVP_ONF
 
 
 si l'ordinateur n'a pas assez de mémoire RAM (16Go recommandé), voici
-comment lancé l'importationà partir des fichiers pré-construits
+comment lancé l'importation à partir des fichiers pré-construits
 ```R
 
 laDate <- ["la date noté dans les noms des fichier"]
@@ -152,5 +152,18 @@ tous les parametres:
 ```R
 source("stoc_eps_db_functions.r")
 ```
+
+
+
+# Les Mise à jours
+
+## Importation 
+  
+### Version "V.1.1_2020-04-07"
+
+- Restructuration des repertoires et des données fournies
+- 
+
+
 
  

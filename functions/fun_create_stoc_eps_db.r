@@ -24,6 +24,8 @@
 ### 2018-10-16 ajout des couches shape PRA et maille_atlas
 
 ### 2017-11-14 modification de l'entete de colonne des nom de point de la table vigieplume
+
+
 source("functions/fun_generic.r")
 
 
@@ -51,7 +53,9 @@ f_prepaData <- function(dateExportVP="2019-01-10",nomFileVP="export_stoc_1001201
     library(reshape)
     library(data.table)
     library(rgdal)
-
+    library(sf)
+    library(dplyr)
+    library(qdap) #multigsub
 
 
     cat("               ===========================================================================\n")
@@ -68,18 +72,18 @@ f_prepaData <- function(dateExportVP="2019-01-10",nomFileVP="export_stoc_1001201
 
 
 
-##   dateExportVP="2019-12-03";nomFileVP="export_stoc_25112019.txt";nomFileVP_ONF="export_stoc_onf_03122019.txt";
-##  dateExportFNat="2017-01-04"; importACCESS=FALSE;
-##  nomFileFNat="FNat_plat_2017-01-04.csv";nomDBFNat="Base FNat2000.MDB";importationDataBrut=TRUE;
-##  constructionPoint=TRUE;constructionCarre=TRUE;constructionInventaire=TRUE;
-##  constructionObservation = TRUE; constructionHabitat = TRUE;
-##   dateConstruction="2020-04-07";postgresql_import=TRUE;nomDBpostgresql=NULL;seuilAbondance = .99
-##   nomDBpostgresql="stoc_eps";
-##  postgresql_createAll=TRUE;postgresUser="romain";
-##  postGIS_initiation=TRUE;import_shape=FALSE;repertoire=NULL;postgresql_abondanceSeuil=TRUE;historiqueCarre=TRUE;
-##  pointCarreAnnee=TRUE;importPointCarreAnnee=TRUE;fileTemp=FALSE
-
-
+  dateExportVP=c("2019-11-25","2019-12-03");nomFileVP=c("export_stoc_25112019.txt","export_stoc_onf_03122019.txt");
+  dateExportFNat="2017-01-04"; importACCESS=FALSE;
+  nomFileFNat="FNat_plat_2017-01-04.csv";nomDBFNat="Base FNat2000.MDB";importationDataBrut=TRUE;
+    constructionPoint=TRUE;constructionCarre=TRUE;constructionInventaire=TRUE;
+    constructionObservation = TRUE; constructionHabitat = TRUE;
+    dateConstruction=NULL;postgresql_import=TRUE;nomDBpostgresql=NULL;seuilAbondance = .99
+    nomDBpostgresql="stoc_eps";
+    postgresql_createAll=TRUE;postgresUser="romain";
+    postGIS_initiation=TRUE;import_shape=FALSE;repertoire=NULL;postgresql_abondanceSeuil=TRUE;historiqueCarre=TRUE;
+    pointCarreAnnee=TRUE;importPointCarreAnnee=TRUE;fileTemp=FALSE
+##
+## ##    postgresPassword = "xxxxxx"
 
 
     start <- Sys.time() ## heure de demarage est utiliser comme identifiant par defaut
@@ -90,18 +94,18 @@ f_prepaData <- function(dateExportVP="2019-01-10",nomFileVP="export_stoc_1001201
 
     cat("\n     # Debut du process:",format(start, "%Y-%m-%d %H:%M\n"))
 
-    nomFileVP=paste0("data_raw/",nomFileVP)
-    nomFileVPonf=paste0("data_raw/",nomFileVP_ONF)
-
-    nomDBFNat=paste0("data_raw/",nomDBFNat)
-    nomFileFNat=paste0("data_raw/",nomFileFNat)
-
+##    nomFileVP=paste0("data_raw/",nomFileVP)
+##    nomFileVPonf=paste0("data_raw/",nomFileVP_ONF)
+##
+##    nomDBFNat=paste0("data_raw/",nomDBFNat)
+##    nomFileFNat=paste0("data_raw/",nomFileFNat)
+##
 
 
     cat("\n\n   Les paramètres:\n---------------------\n\n")
 
     cat("dateExportVP: ",dateExportVP,"\n")
-    cat("nomFileVP: ",nomFileVP,", nomFileVP_ONF: ",nomFileVP_ONF,"\n")
+    cat("nomFileVP: ",nomFileVP,"\n")
     cat("dateExportFNat: ",dateExportFNat,"\n")
     cat("importACCESS: ",importACCESS,"\n")
     cat("nomFileFNat: ",nomFileFNat,"\n")
@@ -129,7 +133,7 @@ f_prepaData <- function(dateExportVP="2019-01-10",nomFileVP="export_stoc_1001201
 
     cat("\n\ndateConstruction: ",dateConstruction,"\n")
 
-    cat("\n\n repertoire output import:",repOut)
+    cat("\n\n repertoire output import:",repOut,"\n")
 
 
     cat("\n\n 1) Importation et preparation \n----------------------\n")
@@ -138,39 +142,7 @@ f_prepaData <- function(dateExportVP="2019-01-10",nomFileVP="export_stoc_1001201
         cat("\n - VigiePlume\n <-- Fichier a plat:",nomFileVP,"\n")
         flush.console()
 
-#        dVP <- vp_importation(nomFileVP,nomFileVPonf,dateExportVP,repOut)
-        dVP <- read.csv(nomFileVP,h=TRUE,stringsAsFactors=FALSE,fileEncoding="utf-8",sep="\t")
-
-
-        cat("\n    !!! suppression des lignes  issue d'une etude LPO ahiqutaine hors echantillonage STOC-EPS 'PRANAT','Frolet'\n")
-
-
-        ligneExclu <- union(grep("NAT",dVP$N..Carré.EPS),grep("Frolet",dVP$N..Carré.EPS))
-        cat(length(ligneExclu)," lignes exclues\n\n")
-        ligneConserv <- setdiff(1:nrow(dVP),ligneExclu)
-        dVP <- dVP[ligneConserv,]
-        cat(" <-- Fichier a plat ONF:",nomFileVPonf,"\n")
-        flush.console()
-        dVPonf <- read.csv(nomFileVPonf,h=TRUE,stringsAsFactors=FALSE,fileEncoding="utf-8",sep="\t")
-        dVP <- rbind(dVP,dVPonf)
-
-       cat("\n    !!! suppression des lignes pour les quelles le numéros du point n'est pas saisie\n")
-
-        dVP.sansPoint <- subset(dVP,EXPORT_STOC_TEXT_EPS_POINT=="")
-
-        if(nrow(dVP.sansPoint) > 0) {
-            cat("\   il y a ",nrow(dVP.sansPoint)," observation dans les données vigiplume qui n'ont pas de numéros de point\n")
-            fileCSV <- paste0(repOut,"_erreur_abscence_numeros_point.csv")
-            cat("  -->",fileCSV,"\n")
-            write.csv(dVP.sansPoint,fileCSV,row.names=FALSE)
-            dVP <- subset(dVP,EXPORT_STOC_TEXT_EPS_POINT != "")
-        }
-
-
-
-        dVP <-subset(dVP,!is.na(Nombre) & !is.na(Espèce) & Espèce != "")
-        dVP$INSEE <-sprintf("%05d", dVP$INSEE)
-        dVP$Département <- sprintf("%02d", dVP$Département)
+      dVP <- vp_importation(nomFileVP,dateExportVP,repImport="data_raw/",repOut=repOut)
 
         cat("\n - FNat\n")
         if(importACCESS) {
@@ -186,36 +158,11 @@ f_prepaData <- function(dateExportVP="2019-01-10",nomFileVP="export_stoc_1001201
             cat(" <-- Fichier à plat:",nomFileFNat,"\n")
             cat(" Cette importation peut prendre un peu de temps,\nmerci de patienter .... \n")
             flush.console()
-            dFNat <- read.csv(nomFileFNat,fileEncoding="iso-8859-1",stringsAsFactors=FALSE)
+            dFNat <-  FNat_importation(nomFileFNat,dateExportFNat,repImport="data_raw/",repOut=repOut)
             cat("   --> OK \n")
             flush.console()
         }
 
-        dFNat$insee <- sprintf("%05d", dFNat$insee)
-        dFNat$heure <- sprintf("%04d", dFNat$heure)
-        dFNat$numobs <- as.character(dFNat$numobs)
-        dFNat$lieudit <- as.character(dFNat$lieudit)
-        dFNat$section_cadastrale <- as.character(dFNat$section_cadastrale)
-        dFNat <- subset(dFNat, etude %in% c("STOC-EPS","STOC-SITES ONF","STOC-EPS MAMMIFERES"))
-        dFNat$etude[dFNat$etude=="STOC-EPS"] <- "STOC_EPS"
-        dFNat$etude[dFNat$etude=="STOC-EPS MAMMIFERES"] <- "STOC_EPS"
-        dFNat$etude[dFNat$etude=="STOC-SITES ONF"] <- "STOC_ONF"
-
-      #  dFNat$etude[dFNat$id_carre == "761436"] <- "STOC_ONF"
-
-        dCarreONF <- read.csv("data_generic/siteONF.csv",encoding="UTF-8")
-        dCarreONF <- dCarreONF[,c(1,2,5)]
-        dCarreONF$nouveau_lieudit <- sprintf("%06d",dCarreONF$nouveau_lieudit)
-        colnames(dCarreONF) <- c("lieudit","dept","id_carre")
-
-        ddFNat <- merge(dFNat,dCarreONF,by=c("lieudit","dept"),all=TRUE)
-        ## pour un bug incomprehenssible dans le merge
-        ddFNat[grep("Messarges",ddFNat$lieudit),"id_carre"] <- "030523"
-        ddFNat[grep("Tronçais",ddFNat$lieudit),"id_carre"] <- "030143"
-        ddFNat <- subset(ddFNat,!is.na(unique_citation))
-        dFNat <- ddFNat
-        dFNat$id_carre <- ifelse(is.na(dFNat$id_carre),paste0(dFNat$dept,substring(dFNat$lieudit,13,nchar(dFNat$lieudit))),dFNat$id_carre)
-        dFNat$etude[dFNat$id_carre %in% unique(subset(dFNat,etude=="STOC_ONF")$id_carre)] <- "STOC_ONF"
     } else { cat(" ---> SKIP\n") }
 
 
@@ -225,7 +172,7 @@ f_prepaData <- function(dateExportVP="2019-01-10",nomFileVP="export_stoc_1001201
     if(constructionPoint) {
         cat("\n - VigiePlume: ")
         flush.console()
-        ddVP.point <- vp2point(dVP,dateExportVP,repOut,TRUE)
+        ddVP.point <- vp2point(dVP,dateConstruction,repOut,TRUE)
         cat(nrow(ddVP.point)," lignes \n")
         flush.console()
 
@@ -508,15 +455,18 @@ WHERE (((TLDescEPS.Habitat)='S'));"
 
 
 vp_importation <- function(nomFileVP,dateExportVP,repImport="data_raw/",repOut) {
-require(data.table)
+    require(data.table)
 
-       d_nom <- data.table(old=c("Code.inventaire","Etude","Site","Pays","Département","INSEE","Commune","N..Carré.EPS","Date","Heure","Heure.fin","N..Passage","Observateur","Email","EXPORT_STOC_TEXT_EPS_POINT","Altitude","Classe","Espèce","Nombre","Distance.de.contact","Longitude","Latitude","Type.de.coordonnées","Type.de.coordonnées.lambert","EPS.Nuage","EPS.Pluie","EPS.Vent","EPS.Visibilité","EPS.Neige","EPS.Transport","EPS.P.Milieu","EPS.P.Type","EPS.P.Cat1","EPS.P.Cat2","EPS.P.Sous.Cat1","EPS.P.Sous.Cat2","EPS.S.Milieu","EPS.S.Type","EPS.S.Cat1","EPS.S.Cat2","EPS.S.Sous.Cat1","EPS.S.Sous.Cat2"),new=c("Code.inventaire","eture","site","pays","departement","insee","commune","id_carre","date","heure","heure_fin","passage_observateur","observateur","email","point","altitude","classe","espece","abondance","distance_contact","longitude_wgs84","latitude_wgs84","type_coord","type_coord_lambert","nuage","pluie","vent","visibilite","neige","transport","p_milieu","p_type","p_cat1","p_cat2","p_sous_cat1","p_sous_cat2","s_milieu","s_type","s_cat1","s_cat2","s_sous_cat1","s_sous_cat2"))
+    d_nom <- data.table(old=c("Code.inventaire","Etude","Site","Pays","Département","INSEE","Commune","N..Carré.EPS","Date","Heure","Heure.fin","N..Passage","Observateur","Email","EXPORT_STOC_TEXT_EPS_POINT","Altitude","Classe","Espèce","Nombre","Distance.de.contact","Longitude","Latitude","Type.de.coordonnées","Type.de.coordonnées.lambert","EPS.Nuage","EPS.Pluie","EPS.Vent","EPS.Visibilité","EPS.Neige","EPS.Transport","EPS.P.Milieu","EPS.P.Type","EPS.P.Cat1","EPS.P.Cat2","EPS.P.Sous.Cat1","EPS.P.Sous.Cat2","EPS.S.Milieu","EPS.S.Type","EPS.S.Cat1","EPS.S.Cat2","EPS.S.Sous.Cat1","EPS.S.Sous.Cat2"),new=c("Code.inventaire","etude","site","pays","departement","insee","commune","id_carre","date","heure","heure_fin","passage_observateur","observateur","email","nom_point","altitude","classe","espece","abondance","distance_contact","longitude_wgs84","latitude_wgs84","type_coord","type_coord_lambert","nuage","pluie","vent","visibilite","neige","transport","p_milieu","p_type","p_cat1","p_cat2","p_sous_cat1","p_sous_cat2","s_milieu","s_type","s_cat1","s_cat2","s_sous_cat1","s_sous_cat2"))
 
     d <- NULL
 
+    if(length(dateExportVP) ==1) dateExportVP <- rep(dateExportVP,length(nomFileVP))
+
     nfile <- length(nomFileVP)
     cat("\n",nfile,"fichier(s) VigiePlume à importer\n")
-    for(i in length(nomFileVP)) {
+
+    for(i in 1:length(nomFileVP)) {
         nomFileVPi <- paste0(repImport,nomFileVP[i])
         cat(" <-- (",i,"/",nfile,") Fichier VigiePlume: ",nomFileVPi," ",sep="")
         flush.console()
@@ -539,16 +489,16 @@ require(data.table)
 
         } else {
 
-            di <- setnames(di,old=d_nom[,old],new=d_nom[,new])
+            setnames(di,old=d_nom[,old],new=d_nom[,new])
             cat("  DONE ! \n")
 
-            di <- di[,date_export:= dateExportVP[i]]
+            di[,date_export:= dateExportVP[i]]
             d <- rbind(d,di)
         }
     }
     ## renome les colonnes
 
-    cat("\n    !!! suppression des lignes  issue d'une etude LPO ahiqutaine hors echantillonage STOC-EPS 'PRANAT','Frolet'\n")
+    cat("\n    !!! suppression des lignes  issue d'une etude LPO aquitaine hors echantillonage STOC-EPS 'PRANAT','Frolet'\n")
 
     ligneExclu <- union(grep("NAT",d$carre),grep("Frolet",d$carre))
     cat(length(ligneExclu)," lignes exclues\n\n")
@@ -559,153 +509,102 @@ require(data.table)
 
     cat("\n    !!! suppression des lignes pour les quelles le numéros du point n'est pas saisie\n")
 
-    d.sansPoint <- d[point==""]
+    d.sansPoint <- d[nom_point==""]
 
     if(nrow(d.sansPoint) > 0) {
         cat("\   il y a ",nrow(d.sansPoint)," observation dans les données vigiplume qui n'ont pas de numéros de point\n")
         fileCSV <- paste0(repOut,"_erreur_abscence_numeros_point.csv")
         cat("  -->",fileCSV,"\n")
         write.csv(d.sansPoint,fileCSV,row.names=FALSE)
-        d <- d[point !=  ""]
+        d <- d[nom_point !=  ""]
     }
 
 
 
     d <- d[!is.na(abondance) & !is.na(espece) & espece != ""]
 
-    d <- d[,insee := sprintf("%05d", insee)]
-    d <- d[,departement := sprintf("%02d", departement)]
-    d <- d[,date := as.Date(date,format="%d.%m.%Y")]
-    d <- d[,id_carre := substring(id_carre,9,nchar(id_carre))]
-    d <- d[,point := gsub("Point N°","",point)]
-    d <- d[,id_point := paste0(id_carre,"P",point)]
-    d <- d[,num_point := as.numeric(point)]
-    d <- d[,jour_julien := as.numeric(format(the_date,"%j"))]
-    d <- d[,id_inventaire := paste0(format(the_date,"%Y%m%d"),id_point)]
-    d <- d[,duree_minute := as.numeric(difftime(strptime(Heure.fin,"%H:%M"),strptime(Heure,"%H:%M")))]
-    d <- d[,id_data := paste0(id_inventaire,"_",substring(Espèce,1,6),"_",Distance.de.contact)]
-    d <- setorder(d, id_inventaire,Espèce,Distance.de.contact)
-    d <- d[,inventaire_inc := 1:.N,by=id_inventaire]
-    d <- d[,inventaire_inc :=sprintf("%02d",inventaire_inc)]
-    d <- d[,id_observation := paste0(id_inventaire,inventaire_inc)]
+    d[,etude_detail := etude]
+    d[,insee := sprintf("%05d", insee)]
+    d[,departement := sprintf("%02d", departement)]
+    d[,date := as.Date(date,format="%d.%m.%Y")]
+    d[,id_carre := substring(id_carre,9,nchar(id_carre))]
+    d[,nom_carre := paste("Carre",id_carre,site)]
+    d[,point := gsub("Point N°","",nom_point)]
+    d[,id_point := paste0(id_carre,"P",point)]
+    d[,num_point := as.numeric(point)]
+    d[,jour_julien := as.numeric(format(date,"%j"))]
+    d[,annee := as.numeric(format(date,"%Y"))]
+    d[,id_inventaire := paste0(format(date,"%Y%m%d"),id_point)]
+    d[,duree_minute := as.numeric(difftime(as.POSIXct(heure_fin,format="%H:%M"),as.POSIXct(heure,format="%H:%M")))]
+    d[,id_data := paste0(id_inventaire,"_",substring(espece,1,6),"_",distance_contact)]
+    d <- setorder(d, id_inventaire,espece,distance_contact)
+    d[,inventaire_inc := 1:.N,by=id_inventaire]
+    d[,inventaire_inc :=sprintf("%02d",inventaire_inc)]
+    d[,id_observation := paste0(id_inventaire,inventaire_inc)]
 
-    d <- d[,db:="vigieplume"]
-    d <- d[,nom_carre_fnat := NA]
+    d[, altitude := as.numeric(altitude)]
 
+    d[,db:="vigieplume"]
+    d[,nom_carre_fnat := NA]
+    d[,info_passage := NA]
+    d[,passage_stoc := NA]
+    d[,espece := toupper(espece)]
+    d[,code_sp := substr(espece,1,6)]
+    d[,abondance := as.numeric(abondance)]
 
-
-
-    etude = d$Etude
-    id_point = paste0(carre,"P",point)
-    id_carre =  carre
-    num_point = as.numeric(point)
-    date = the_date
-    jour_julien = as.numeric(format(the_date,"%j"))
-    annee= year(the_date)
-    passage = d$N..Passage
-    info_passage=NA
-    passage_stoc=NA
-    heure_debut = d$Heure
-    heure_fin = d$Heure.fin
-    duree_minute = as.numeric(difftime(strptime(d$Heure.fin,"%H:%M"),strptime(d$Heure,"%H:%M")))
-    observateur = d$Observateur
-    email = d$Email
-    nuage = d$EPS.Nuage
-    pluie = d$EPS.Pluie
-    vent = d$EPS.Vent
-    visibilite = d$EPS.Visibilité
-    neige = d$EPS.Neige
-
-
-    passage = d$N..Passage
-    date = as.character(as.Date(d$Date,format="%d.%m.%Y"))
-    annee=as.numeric(substring(d$Date,7,10))
-    classe=d$Classe
-    espece = toupper(d$Espèce)
-    code_sp = substring(toupper(d$Espèce),1,6)
-    abondance = as.numeric(as.character(d$Nombre))
-    distance_contact=d$Distance.de.contact
-
-    p_milieu=toupper(ifelse(d$EPS.P.Milieu=="",NA,d$EPS.P.Milieu))
-    p_type=ifelse(d$EPS.P.Type=="",NA,d$EPS.P.Type)
-    p_cat1=ifelse(d$EPS.P.Cat1=="",NA,d$EPS.P.Cat1)
-    p_cat2 = ifelse(d$EPS.P.Cat2=="",NA,d$EPS.P.Cat2)
-    s_milieu=toupper(ifelse(d$EPS.S.Milieu=="",NA,d$EPS.S.Milieu))
-    s_type=ifelse(d$EPS.S.Type=="",NA,d$EPS.S.Type)
-    s_cat1=ifelse(d$EPS.S.Cat1=="",NA,d$EPS.S.Cat1)
-    s_cat2 = ifelse(d$EPS.S.Cat2=="",NA,d$EPS.S.Cat2)
-
-
-
-
-
+    d[, p_milieu := toupper(ifelse(p_milieu == "",NA,p_milieu))]
+    d[p_type == "", p_type := NA]
+    d[p_cat1 == "", p_cat1 := NA]
+    d[p_cat2 == "", p_cat2 := NA]
+    d[, s_milieu := toupper(ifelse(s_milieu == "",NA,s_milieu))]
+    d[s_type == "", s_type := NA]
+    d[s_cat1 == "", s_cat1 := NA]
+    d[s_cat2 == "", s_cat2 := NA]
 
     return(d)
 }
 
 
 
-vp2point <- function(d,dateExport,repOut="",output=FALSE) {
+vp2point <- function(d,dateConstruction,repOut="",output=FALSE) {
 
-## la table de base
-    d_col <- c("id_point","id_carre","Commune","Site","INSEE","Département","EXPORT_STOC_TEXT_EPS_POINT","num_point","Altitude","Longitude","Latitude","db","date_export")
-    dd <- d[,d_col,with=FALSE]
-## changement des noms de colonnes
-    dd <- setnames(dd,old=c("id_point","Commune","Site","INSEE","Département","EXPORT_STOC_TEXT_EPS_POINT","Altitude","Longitude","Latitude"),new=c("pk_point","commune","site","insee","departement","nom_point","altitude","longitude_wgs84","latitude_wgs84"))
+    ## d=dVP;dateExport=dateExportVP;repOut=repOut;output=TRUE
 
-##    dd <- data.frame(pk_point=paste0(substring(d$N..Carré.EPS,9),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1,nchar(d$EXPORT_STOC_TEXT_EPS_POINT))),
-##                     id_carre = substring(d$N..Carré.EPS,9,nchar(d$N..Carré.EPS)),
-##                     commune = d$Commune,
-##                     site = d$Site,
-##                     insee = d$INSEE,
-##                     departement = d$Département,
-##                     nom_point = d$EXPORT_STOC_TEXT_EPS_POINT,
-##                     num_point = as.numeric(substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1,nchar(d$EXPORT_STOC_TEXT_EPS_POINT))),
-##                     altitude = d$Altitude,
-##                     longitude_wgs84 = d$Longitude,
-##                     latitude_wgs84 = d$Latitude,
-##                     db = "vigieplume",date_export=dateExport)
-    ##
+    dagg <- d[, .(commune = get_mode(commune),
+                  site = get_mode(site),
+                  insee = get_mode(insee),
+                  nom_point = get_mode(nom_point),
+                  departement = get_mode(departement),
+                  altitude = median(altitude),
+                  latitude_wgs84 = median(latitude_wgs84),
+                  longitude_wgs84 = median(longitude_wgs84),
+                  latitude_wgs84_sd = sd(latitude_wgs84),
+                  longitude_wgs84_sd = sd(longitude_wgs84),
+                  date_export = max(date_export)),
+             by=id_point]
+
+    dd <- unique(d[,.(id_point,id_carre,num_point)])
+    dd[,db := "vigieplume"]
+
+    setkey(dagg,"id_point")
+    setkey(dd,"id_point")
+
+    dd <- dd[dagg]
+   setnames(dd,old=c("id_point"),new=c("pk_point"))
+
+    colorder <- c("pk_point","id_carre","commune","site","insee","departement","nom_point","num_point","altitude","longitude_wgs84","latitude_wgs84","longitude_wgs84_sd","latitude_wgs84_sd","db","date_export")
+    setcolorder(dd,colorder)
 
 
-    ## on conserve le nom de commune du département et de l'insee le plus commun
-    dd <- dd[,`:=` (commune = get_mode(commune),
-                    site = get_mode(site),
-                    insee = get_mode(insee),
-                    departement = get_mode(departement)),
-             by=pk_point]
-
-    ## calcul la mediane des valeur numérique
-
-    dd <- dd[, altitude := as.numeric(altitude)]
-    dd <- dd[,`:=` (altitude = median(altitude),
-                    latitude_wgs84 = median(latitude_wgs84),
-                    longitude_wgs84 = median(longitude_wgs84)),
-             by=pk_point]
-
-### dd_med <- aggregate(subset(dd,select=c("altitude","latitude_wgs84","longitude_wgs84")), list(pk_point=dd$pk_point), function(x) median(x) )
-### dd_med$altitude <- round(dd_med$altitude)
-###  dd_point <- unique(subset(dd,select=c("pk_point","id_carre","nom_point","num_point")))
-
-###   dd <- merge(dd_point,dd_maj,by="pk_point")
-###   dd <- merge(dd,dd_med,by="pk_point")
-
-    dd <- unique(dd)
-
-###    dd <- data.frame(dd[,c("pk_point","id_carre","commune","site","insee","departement",
-###                           "nom_point","num_point","altitude",
-###                           "longitude_wgs84","latitude_wgs84")],
-###                     db="vigieplume",date_export=dateExport)
-
-    filename <- paste0(repOut,"point_VP_",dateExport,".csv")
+    filename <- paste0(repOut,"point_VP_",dateConstruction,".csv")
     write.csv(dd,filename,row.names=FALSE)
-    cat("  (->",filename,")\n")
+    cat("  (->",filename,")\n",sep="")
 
     if(output) return(dd)
 }
 
 vp2carre <- function(d,dateExport,repOut="",output=FALSE) {
-    ## d <- dVP; dateExport = dateExportVP; output=FALSE
+    ## d <- dVP; dateExport = dateExportVP; output=FALSE; repOut=""
 
 ###dcarrenat <- read.csv("data_generic/carrenat.csv",encoding="UTF-8")
 ###dcarrenat$pk_carre <- sprintf("%06d",    dcarrenat$pk_carre)
@@ -714,46 +613,38 @@ vp2carre <- function(d,dateExport,repOut="",output=FALSE) {
     dcarrenat <- fread("data_generic/carrenat.csv")
     dcarrenat<- dcarrenat[,pk_carre := sprintf("%06d",pk_carre)]
 
+    setkey(dcarrenat,"pk_carre")
 
 
-      d_col <- c("id_carre","Commune","Site","INSEE","Département","N..Carré.EPS","nom_carre_fnat","EXPORT_STOC_TEXT_EPS_POINT","num_point","Altitude","Longitude","Latitude","db","date_export")
-    dd <- d[,d_col,with=FALSE]
+
+    ##  d_col <- c("id_carre","Commune","Site","INSEE","Département","N..Carré.EPS","nom_carre_fnat","EXPORT_STOC_TEXT_EPS_POINT","num_point","Altitude","Longitude","Latitude","db","date_export")
+   ## dd <- d[,d_col,with=FALSE]
 ## changement des noms de colonnes
 
+    dd <- d[, .(commune = get_mode(commune),
+                site = get_mode(site),
+                insee = get_mode(insee),
+                etude = get_mode(etude),
+                nom_carre = get_mode(nom_carre),
+                nom_carre_fnat = NA,
+                departement = get_mode(departement),
+                altitude = median(altitude),
+                latitude_wgs84 = median(latitude_wgs84),
+                longitude_wgs84 = median(longitude_wgs84),
+                date_export = max(date_export)),
+            by=id_carre]
 
 
-    dd <-  data.frame(pk_carre = substring(d$N..Carré.EPS,9,nchar(d$N..Carré.EPS)),
-                      commune = d$Commune,# Commune majoritaire
-                      site  = d$Site, # site majoritaire
-                      etude = d$Etude,
-                      insee = d$INSEE,# Commune majoritaire
-                      departement = d$Département, # Departement majoritaire
-                      nom_carre = d$N..Carré.EPS,
-                      nom_carre_fnat = NA,
-                      altitude = d$Altitude,
-                      latitude_wgs84 = d$Latitude,#moyenne des points
-                      longitude_wgs84 = d$Longitude, #moyenne des points
-                      db = "vigieplume",date_export=dateExport)
-    dd_etude <- unique(data.frame(pk_carre=dd$pk_carre,etude=as.character("STOC_EPS"),stringsAsFactors=FALSE))
-    dd_etude$etude[which(dd_etude$pk_carre %in% as.character(unique(subset(dd,etude=="STOC_ONF")$pk_carre)))] <- "STOC_ONF"
+    dd[,db := "vigieplume"]
+    setnames(dd,old=c("id_carre"),new=c("pk_carre"))
 
-    dd_maj <- aggregate(subset(dd,select=c("commune","site","insee","departement")), list(pk_carre=dd$pk_carre,nom_carre=dd$nom_carre), function(x) levels(x)[which.max(table(x))])
-    dd_mean <- aggregate(subset(dd,select=c("altitude","latitude_wgs84","longitude_wgs84")), list(pk_carre=dd$pk_carre), function(x) mean(x) )
-    dd <- merge(dd_maj,dd_mean,by="pk_carre")
-    dd <- merge(dd,dd_etude,by="pk_carre")
+    setkey(dd,"pk_carre")
+    dd <- dd[dcarrenat]
 
 
-    dd <- merge(dd,dcarrenat,by="pk_carre",all.x=TRUE)
+    colorder <- c("pk_carre","commune","site","etude","insee","departement","nom_carre","nom_carre_fnat,","altitude","latitude_wgs84","longitude_wgs84","latitude_grid_wgs84","longitude_grid_wgs84","db","date_export")
 
-
-    dd <- data.frame(pk_carre=dd$pk_carre,nom_carre=dd$nom_carre,
-                     nom_carre_fnat=NA,commune=dd$commune,site = dd$site,
-                     etude = dd$etude,
-                     insee=dd$insee,departement=dd$departement,altitude=round(dd$altitude),
-                     area = dd$area,perimeter=dd$perimeter,
-                     longitude_points_wgs84=dd$longitude_wgs84,latitude_points_wgs84=dd$latitude_wgs84,
-                     longitude_grid_wgs84=dd$lon_WGS84, latitude_grid_wgs84=dd$lat_WGS84,
-                     db="vigieplume",date_export=dateExport)
+    dd <- dd[,colorder,with=FALSE]
 
     filename <- paste0(repOut,"carre_VP_",dateExport,".csv")
     write.csv(dd,filename,row.names=FALSE)
@@ -1141,67 +1032,219 @@ vp2habitat <- function(d,dateExport,repOut="",output=FALSE) {
 
 
 
+FNat_importation <- function(nomFileFNat,dateExportFNat,repImport="data_raw/",repOut) {
+
+    ## file=nomDBFNat;fichierAPlat=nomFileFNat;output=TRUE;repImport="data_raw/"
+
+    require(data.table)
+    require(sf)
+
+    d_nom <- data.table(old=c("unique_inventaire","unique_citation","numobs","etude","unique_localite","section_cadastrale","lieudit","pays","dept","insee","dateobs","heure","duree","nbr_echantillon","nom","email","altitude","classe","espece","nbr_ind","classe_dist","longitude_lambert_93","latitude_lambert_93","nuage","pluie","vent","visibilite","hab_p_milieu","hab_p_type_milieu","hab_p_cat_1","hab_p_cat_2","hab_p_sous_cat_1","hab_p_sous_cat_2","hab_s_milieu","hab_s_type_milieu","hab_s_cat_1","hab_s_cat_2","hab_s_sous_cat_1","hab_s_sous_cat_2"),new=c("id_inventaire_fnat","id_fnat_unique_citation","numobs","etude","unique_localite","nom_point","nom_carre","pays","departement","insee","date","heure","duree_minute","passage_observateur","observateur","email","altitude","classe","espece","abondance","distance_contact","longitude_lambert_93","latitude_lambert_93","nuage","pluie","vent","visibilite","p_milieu","p_type","p_cat1","p_cat2","p_sous_cat1","p_sous_cat2","s_milieu","s_type","s_cat1","s_cat2","s_sous_cat1","s_sous_cat2"))
+
+
+    d <- NULL
+
+    if(length(dateExportFNat) ==1) dateExportFNat <- rep(dateExportFNat,length(nomFileFNat))
+
+    nfile <- length(nomFileFNat)
+    cat("\n",nfile,"fichier(s) FNat à importer\n")
+
+    for(i in 1:length(nomFileFNat)) {
+        nomFileFNati <- paste0(repImport,nomFileFNat[i])
+        cat(" <-- (",i,"/",nfile,") Fichier FNat: ",nomFileFNati," ",sep="")
+        flush.console()
+        di <- read.csv(nomFileFNati,h=TRUE,fileEncoding="iso-8859-1",stringsAsFactors=FALSE)
+        cat("  DONE ! \n")
+        flush.console()
+        di <- data.table(di)
+        cat(" vérification colonnes\n")
+
+        col_abs <- setdiff(d_nom[,old],colnames(di))
+        n_col_abs <- length(col_abs)
+        if(n_col_abs > 0) {
+            cat("  !! ATTENTION !! ",n_col_abs," absente(s):\n")
+            the_cols_txt <- paste(col_abs,collapse=", ")
+            cat(the_cols_txt,"\n")
+            txt <- "\n Choix: \n1- ne pas importer le fichier \n2- importer le fichier et ajoute NA dans les colonnes manquantes \n3- Arreter le processus\n"
+            cat(txt,"\n")
+            rep <- readline(prompt = txt)
+
+
+        } else {
+
+            di <- setnames(di,old=d_nom[,old],new=d_nom[,new])
+            cat("  DONE ! \n")
+
+            di[,date_export:= dateExportFNat[i]]
+            d <- rbind(d,di)
+        }
+    }
+    ## renome les colonnes
+
+
+
+    cat("\n    !!! suppression des lignes pour les quelles le numéros du point n'est pas saisie\n")
+
+    d.sansPoint <- d[nom_point==""]
+
+    if(nrow(d.sansPoint) > 0) {
+        cat("\   il y a ",nrow(d.sansPoint)," observation dans les données fnat qui n'ont pas de numéros de point\n")
+        fileCSV <- paste0(repOut,"FNAT_erreur_abscence_numeros_point.csv")
+        cat("  -->",fileCSV,"\n")
+        write.csv(d.sansPoint,fileCSV,row.names=FALSE)
+        d[nom_point !=  ""]
+    }
+
+
+    d <- d[!is.na(abondance) & !is.na(espece) & espece != ""]
+
+    d[,insee := sprintf("%05d", insee)]
+    d[,date := as.character(date)]
+    d[,date := as.Date(date,format="%Y%m%d")]
+    d[,heure := as.POSIXct(sprintf("%04d", heure),format="%H%M")]
+
+    d[,numobs := as.character(numobs)]
+    d[,nom_carre := as.character(nom_carre)]
+    d[,point := gsub("Point N°","",nom_point)]
+    d[,num_point := as.numeric(point)]
+
+    d[,etude_detail := etude]
+    d[etude %in% c("STOC-EPS","STOC-EPS MAMMIFERES"),etude := "STOC_EPS"]
+    d[etude =="STOC-SITES ONF",etude := "STOC_ONF"]
+    d[grep("SITE",etude), etude := "STOC_SITE"]
+
+
+    dCarreONF <- fread("data_generic/siteONF.csv",encoding="UTF-8")
+    dCarreONF <- dCarreONF[,c(1,2,5)]
+    dCarreONF$nouveau_lieudit <- sprintf("%06d",dCarreONF$nouveau_lieudit)
+    colnames(dCarreONF) <- c("nom_carre","departement","id_carre_onf")
+    dCarreONF[,departement := sprintf("%02d", departement)]
+
+      d[dCarreONF,on = .(nom_carre,departement),id_carre_onf := id_carre_onf]
+##################
+
+    d_abbrev <- fread("library/abbrev_carre.csv")
+    d_abbrev_l <- d_abbrev[lower == TRUE ,]
+    d_abbrev_u <- d_abbrev[lower == FALSE ,]
+
+    d[etude == "STOC_SITE",id_carre := nom_carre]
+
+    pat <- c(d_abbrev_l[,txt])
+    repl <-  c(d_abbrev_l[,abbrev])
+    d[etude == "STOC_SITE",id_carre := mgsub(pat,repl,id_carre)]
+    d[etude == "STOC_SITE",id_carre := gsub(".*Maille ","",id_carre)]
+    d[etude == "STOC_SITE",id_carre := gsub(".*: ","",id_carre)]
+
+    d[etude == "STOC_SITE", id_carre := toupper(id_carre)]
+
+    vec <- c("LE ","LA ","LES ","DE ","A ","AU ","L'","DU ","DES ","D'","& ")
+    d[etude == "STOC_SITE",id_carre := mgsub(vec,"",id_carre)]
+    pat <- c(d_abbrev_u[,txt])
+    repl <-  c(d_abbrev_u[,abbrev])
+    d[etude == "STOC_SITE",id_carre := mgsub(pat,repl,id_carre)]
+    vec <- c("(",")","_","-",".",",")
+    d[etude == "STOC_SITE",id_carre := mgsub(vec," ",id_carre)]
+
+    d[etude == "STOC_SITE" & nchar(gsub(' ','',id_carre)) <= 10 ,id_carre := gsub(' ','',id_carre)]
+    d[etude == "STOC_SITE" & nchar(gsub(' ','',id_carre)) > 10, id_carre := gsub(" ","",paste0(substr(id_carre,1,3),substr(id_carre,nchar(id_carre)-2,nchar(id_carre)),nchar(id_carre),nchar(gsub("[^aeiouy]","",id_carre, ignore.case = TRUE))))]
+
+
+    d[etude == "STOC_EPS",id_carre := substring(nom_carre,13,nchar(nom_carre))]
+    d[, id_carre:= paste0(departement,id_carre)]
+    d[etude == "STOC_SITE", id_carre := paste0("S",toupper(id_carre))]
+
+    d[,id_carre := ifelse(is.na(id_carre_onf),id_carre,id_carre_onf)]
+
+    d[id_carre %in% unique(d[etude=="STOC_ONF",id_carre]), etude := "STOC_ONF"]
+    d[,id_point := paste0(id_carre,"P",point)]
+
+
+    d[,jour_julien := as.numeric(format(date,"%j"))]
+    d[,annee := as.numeric(format(date,"%Y"))]
+
+    d[,id_inventaire :=  paste0(format(date,"%Y%m%d"),id_point)]
+    d[,heure_fin :=  format(heure+as.difftime(paste0("00:",sprintf("%02d", duree_minute)),"%H:%M"),"%H:%M")]
+    d[,heure :=  format(heure,"%H:%M")]
+
+     d[,id_data := paste0(id_inventaire,"_",substring(espece,1,6),"_",distance_contact)]
+    setorder(d, id_inventaire,espece,distance_contact)
+    d <- d[,inventaire_inc := 1:.N,by=id_inventaire]
+    d <- d[,inventaire_inc :=sprintf("%02d",inventaire_inc)]
+    d <- d[,id_observation := paste0(id_inventaire,inventaire_inc)]
+    d[,altitude := as.numeric(altitude)]
+
+
+
+
+    d[,db:="fnat"]
+    d[,info_passage := NA]
+    d[,passage_stoc := NA]
+    d[,espece := toupper(espece)]
+    d[,code_sp := substr(espece,1,6)]
+    d[,abondance := as.numeric(abondance)]
+
+    d[, p_milieu := toupper(ifelse(p_milieu == "",NA,p_milieu))]
+    d[p_type == "", p_type := NA]
+    d[p_cat1 == "", p_cat1 := NA]
+    d[p_cat2 == "", p_cat2 := NA]
+    d[, s_milieu := toupper(ifelse(s_milieu == "",NA,s_milieu))]
+    d[s_type == "", s_type := NA]
+    d[s_cat1 == "", s_cat1 := NA]
+    d[s_cat2 == "", s_cat2 := NA]
+
+
+
+    st_d <- st_as_sf(d,coords = c("longitude_lambert_93","latitude_lambert_93"),crs=2154) %>%
+        st_transform(,crs=4326) %>% st_coordinates()
+    colnames(st_d) <- c("longitude_wgs84","latitude_wgs84")
+
+    d <- cbind(d,st_d)
+    d[latitude_wgs84 < 41 | latitude_wgs84 > 52 ,latitude_wgs84 := NA]
+    d[longitude_wgs84 < -5 | longitude_wgs84 > 9 ,longitude_wgs84 := NA]
+
+
+
+    return(d)
+
+
+}
+
+
+
+
 FNat2point <- function(d,dateExport,repOut="",output=TRUE) {
                                         #   d <- dFNat
                                         #   dateExport <- dateExportFNat
                                         #    output=TRUE
 
-    library(rgdal)
-    dcoord <- data.frame(lon=d$longitude_lambert_93, lat=d$latitude_lambert_93)
-    coordinates(dcoord) <- c("lon", "lat")
-    proj4string(dcoord) <- CRS("+init=epsg:2154") # Lambert 93  27582
-    dcoord_WGS84 <- spTransform(dcoord, CRS("+init=epsg:4326"))
+
+    dagg <- d[, .(insee = get_mode(insee),
+                  nom_point = get_mode(nom_point),
+                  departement = get_mode(departement),
+                  altitude = median(altitude),
+                  latitude_wgs84 = median(latitude_wgs84),
+                  longitude_wgs84 = median(longitude_wgs84),
+                  latitude_wgs84_sd = sd(latitude_wgs84),
+                  longitude_wgs84_sd = sd(longitude_wgs84),
+                  date_export = max(date_export)),
+              by=id_point]
+
+    dd <- unique(d[,.(id_point,id_carre,num_point)])
+    dd[,`:=` (db = "FNat",commune = NA,site = NA)]
+
+    setkey(dagg,"id_point")
+    setkey(dd,"id_point")
+
+    dd <- dd[dagg]
+    setnames(dd,old=c("id_point"),new=c("pk_point"))
 
 
-    dd <- data.frame(pk_point=paste0(d$id_carre,"P",substring(d$section_cadastrale,nchar(d$section_cadastrale)-1)),
-                     id_carre =d$id_carre,
-                     commune = NA,
-                     insee = as.factor(ifelse(d$insee != 0,d$insee,NA)),
-                     site = NA,
-                     departement = as.factor(d$dept),
-                     nom_point = d$section_cadastrale,
-                     num_point = as.numeric(substring(d$section_cadastrale,nchar(d$section_cadastrale)-1)),
-                     altitude = d$altitude,
-                     latitude_wgs84 = dcoord_WGS84$lat,
-                     longitude_wgs84 = dcoord_WGS84$lon,
-                     db = "FNat",date_export=dateExport)
+    colorder <- c("pk_point","id_carre","commune","site","insee","departement","nom_point","num_point","altitude","longitude_wgs84","latitude_wgs84","longitude_wgs84_sd","latitude_wgs84_sd","db","date_export")
+    dd <- dd[,colorder,with=FALSE]
 
-
-    dd_maj <- aggregate(subset(dd,select=c("insee","departement")), list(pk_point=dd$pk_point), function(x) levels(x)[which.max(table(x))])
-    dd_maj$insee <- as.numeric(as.character(dd_maj$insee))
-    dd_maj$insee <- ifelse(dd_maj$insee != 0,dd_maj$insee,NA)
-    dd$maj$departement <- as.character(dd_maj$departement)
-    ## suppression des coordonnee trop au sud
-    dd$longitude_wgs84[dd$latitude_wgs84<38] <- NA
-    dd$latitude_wgs84[dd$latitude_wgs84<38] <- NA
-    dd$longitude_wgs84[dd$longitude_wgs84>11] <- NA
-    dd$latitude_wgs84[dd$longitude_wgs84>11] <- NA
-
-    dd_med <- aggregate(subset(dd,select=c("altitude","latitude_wgs84","longitude_wgs84")), list(pk_point=dd$pk_point), function(x) median(x) )
-    dd_point <- unique(subset(dd,select=c("pk_point","id_carre","nom_point","num_point")))
-
-    dd <- merge(dd_point,dd_maj,by="pk_point")
-    dd <- merge(dd,dd_med,by="pk_point")
-
-
-
-    dd <- data.frame(pk_point=dd$pk_point,
-                     id_carre = dd$id_carre,
-                     commune = NA,
-                     insee = dd$insee,
-                     site = NA,
-                     departement = dd$departement,
-                     nom_point = dd$nom_point,
-                     num_point = dd$num_point,
-                     altitude = round(dd$altitude),
-                     longitude_wgs84 = dd$longitude_wgs84,
-                     latitude_wgs84 = dd$latitude_wgs84,
-                     db = "FNat",date_export=dateExport)
-
-
-   filename <- paste0(repOut,"point_FNat_",dateExport,".csv")
+    filename <- paste0(repOut,"point_FNat_",dateExport,".csv")
     write.csv(dd,filename,row.names=FALSE)
-    cat("  (->",filename,")\n")
+    cat("  (-> ",filename,")\n",sep="")
 
     if(output) return(dd)
 }
@@ -1210,7 +1253,7 @@ FNat2point <- function(d,dateExport,repOut="",output=TRUE) {
 
 FNat2carre <- function(d,dateExport,repOut="",output=FALSE) {
     library(rgdal)
-    ## d = dFNat;dateExport=dateExportFNat;output=FALSE
+     d = dFNat;dateExport=dateExportFNat;output=FALSE;repOut=""
     dcarrenat <- read.csv("data_generic/carrenat.csv",encoding="UTF-8")
     dcarrenat$pk_carre <- sprintf("%06d",    dcarrenat$pk_carre)
 

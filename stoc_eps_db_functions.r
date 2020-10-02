@@ -2,7 +2,7 @@
 ##
 ##                     Fonctions d'utilisation de la base de données STOC_eps
 ##  R. Lorrilliere
-######################################################################################
+######################################################################f################
 
 
 
@@ -84,7 +84,7 @@ prepaData <- function(dateExportVP,nomFileVP,nomFileVP_ONF,
     f_prepaData(dateExportVP=dateExportVP,nomFileVP=nomFileVP,
                 nomFileVP_ONF=nomFileVP_ONF,
                 dateExportFNat=dateExportFNat, importACCESS=importACCESS,
-                nomFileFNat=nomFileFNat,nomDBFNat=nomDBFNat,
+                nomFileFNat=nomFileFNat,nomDBFNat=nomDBFNat,fun
                 importationDataBrut=importationDataBrut,
                 constructionPoint=constructionPoint,constructionCarre=constructionCarre,
                 constructionInventaire=constructionInventaire,
@@ -109,4 +109,19 @@ prepaData <- function(dateExportVP,nomFileVP,nomFileVP_ONF,
 
 
 
+prepare_carrenat <- function() {
+
+carrenat <- st_read("data_sig/carrenat.shp")
+
+    library(ggplot2)
+    gg <- ggplot(carrenat) + geom_sf(aes(fill=NUMNAT),colour=NA)
+    gg
+
+    centroid <- st_centroid(carrenat)
+
+    st_transform(carrenat,crs=4326)
+
+    centroid <- st_centroid(carrenat)
+
+}
 

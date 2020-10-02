@@ -1,5 +1,5 @@
 
-vecPackage=c("RODBC","dplyr","data.table","rgdal","lubridate","RPostgreSQL","doBy","reshape2","sf","maptools","maps","animation","dplyr")
+install_pack <- function(vecPackage=c("RODBC","dplyr","data.table","rgdal","lubridate","RPostgreSQL","doBy","reshape2","sf","maptools","maps","animation","dplyr","data.table")) {
 ip <- installed.packages()[,1]
 
 for(p in vecPackage){
@@ -8,6 +8,7 @@ for(p in vecPackage){
     require(p,character.only=TRUE)
 }
 
+}
 
 
 

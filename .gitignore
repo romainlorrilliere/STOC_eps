@@ -6,6 +6,7 @@ output_import/
 output/
 export/
 sig/
+data_sig/
 
 .Rproj.user
 .Rhistory
@@ -35,3 +36,9 @@ my*
 
 .#my_stoc_eps_db.r
 functions/.#fun_create_stoc_eps_db.r
+
+#*#
+library_sql/#postgres_createTableBBS.sql#
+
+toDo.org~
+library/abbrev_carre.~csv

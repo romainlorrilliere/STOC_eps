@@ -84,7 +84,7 @@ prepaData <- function(dateExportVP,nomFileVP,nomFileVP_ONF,
     f_prepaData(dateExportVP=dateExportVP,nomFileVP=nomFileVP,
                 nomFileVP_ONF=nomFileVP_ONF,
                 dateExportFNat=dateExportFNat, importACCESS=importACCESS,
-                nomFileFNat=nomFileFNat,nomDBFNat=nomDBFNat,fun
+                nomFileFNat=nomFileFNat,nomDBFNat=nomDBFNat,
                 importationDataBrut=importationDataBrut,
                 constructionPoint=constructionPoint,constructionCarre=constructionCarre,
                 constructionInventaire=constructionInventaire,

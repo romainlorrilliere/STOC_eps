@@ -34,20 +34,20 @@ if("STOC_eps_database" %in% dir()) setwd("STOC_eps_database")
 
 
 f_prepaData <- function(dateExportVP="2019-01-10",nomFileVP="export_stoc_10012019.txt",
-                      nomFileVP_ONF="export_stoc_ONF_10012019.txt",
-                      dateExportFNat="2017-01-04", importACCESS=FALSE,
-                      nomFileFNat="FNat_plat_2017-01-04.csv",nomDBFNat="Base FNat2000.MDB",
-                      importationDataBrut=TRUE,
-                      constructionPoint=TRUE,constructionCarre=TRUE,
-                      constructionInventaire=TRUE,
-                      constructionObservation = TRUE, constructionHabitat = TRUE,
-                      dateConstruction=NULL,postgresql_import=TRUE,nomDBpostgresql=NULL,
-                      postgresql_createAll=TRUE,postgresUser="postgres",
-                      postgresPassword="postgres",
-                      postGIS_initiation=TRUE,import_shape=FALSE,repertoire=NULL,
-                      postgresql_abondanceSeuil=TRUE,seuilAbondance = .99,
-                      historiqueCarre=TRUE,
-                      pointCarreAnnee=TRUE,importPointCarreAnnee=TRUE,fileTemp=FALSE)
+                        nomFileVP_ONF="export_stoc_ONF_10012019.txt",
+                        dateExportFNat="2017-01-04", importACCESS=FALSE,
+                        nomFileFNat="FNat_plat_2017-01-04.csv",nomDBFNat="Base FNat2000.MDB",
+                        importationDataBrut=TRUE,
+                        constructionPoint=TRUE,constructionCarre=TRUE,
+                        constructionInventaire=TRUE,
+                        constructionObservation = TRUE, constructionHabitat = TRUE,
+                        dateConstruction=NULL,postgresql_import=TRUE,nomDBpostgresql=NULL,
+                        postgresql_createAll=TRUE,postgresUser="postgres",
+                        postgresPassword="postgres",
+                        postGIS_initiation=TRUE,import_shape=FALSE,repertoire=NULL,
+                        postgresql_abondanceSeuil=TRUE,seuilAbondance = .99,
+                        historiqueCarre=TRUE,
+                        pointCarreAnnee=TRUE,importPointCarreAnnee=TRUE,fileTemp=FALSE)
 {
     library(RODBC)
     library(reshape)
@@ -72,9 +72,9 @@ f_prepaData <- function(dateExportVP="2019-01-10",nomFileVP="export_stoc_1001201
 
 
 
-  dateExportVP=c("2019-11-25","2019-12-03");nomFileVP=c("export_stoc_25112019.txt","export_stoc_onf_03122019.txt");
-  dateExportFNat="2017-01-04"; importACCESS=FALSE;
-  nomFileFNat="FNat_plat_2017-01-04.csv";nomDBFNat="Base FNat2000.MDB";importationDataBrut=TRUE;
+    dateExportVP=c("2019-11-25","2019-12-03");nomFileVP=c("export_stoc_25112019.txt","export_stoc_onf_03122019.txt");
+    dateExportFNat="2017-01-04"; importACCESS=FALSE;
+    nomFileFNat="FNat_plat_2017-01-04.csv";nomDBFNat="Base FNat2000.MDB";importationDataBrut_FNat=TRUE;importationDataBrut_VP=TRUE;
     constructionPoint=TRUE;constructionCarre=TRUE;constructionInventaire=TRUE;
     constructionObservation = TRUE; constructionHabitat = TRUE;
     dateConstruction=NULL;postgresql_import=TRUE;nomDBpostgresql=NULL;seuilAbondance = .99
@@ -82,8 +82,8 @@ f_prepaData <- function(dateExportVP="2019-01-10",nomFileVP="export_stoc_1001201
     postgresql_createAll=TRUE;postgresUser="romain";
     postGIS_initiation=TRUE;import_shape=FALSE;repertoire=NULL;postgresql_abondanceSeuil=TRUE;historiqueCarre=TRUE;
     pointCarreAnnee=TRUE;importPointCarreAnnee=TRUE;fileTemp=FALSE
-##
-## ##    postgresPassword = "xxxxxx"
+    ##
+    ##    postgresPassword = "xxxxxx"
 
 
     start <- Sys.time() ## heure de demarage est utiliser comme identifiant par defaut
@@ -94,12 +94,12 @@ f_prepaData <- function(dateExportVP="2019-01-10",nomFileVP="export_stoc_1001201
 
     cat("\n     # Debut du process:",format(start, "%Y-%m-%d %H:%M\n"))
 
-##    nomFileVP=paste0("data_raw/",nomFileVP)
-##    nomFileVPonf=paste0("data_raw/",nomFileVP_ONF)
-##
-##    nomDBFNat=paste0("data_raw/",nomDBFNat)
-##    nomFileFNat=paste0("data_raw/",nomFileFNat)
-##
+    ##    nomFileVP=paste0("data_raw/",nomFileVP)
+    ##    nomFileVPonf=paste0("data_raw/",nomFileVP_ONF)
+    ##
+    ##    nomDBFNat=paste0("data_raw/",nomDBFNat)
+    ##    nomFileFNat=paste0("data_raw/",nomFileFNat)
+    ##
 
 
     cat("\n\n   Les paramètres:\n---------------------\n\n")
@@ -110,7 +110,8 @@ f_prepaData <- function(dateExportVP="2019-01-10",nomFileVP="export_stoc_1001201
     cat("importACCESS: ",importACCESS,"\n")
     cat("nomFileFNat: ",nomFileFNat,"\n")
     cat("nomDBFNat: ",nomDBFNat,"\n")
-    cat("importationDataBrut: ",importationDataBrut,"\n")
+    cat("importationDataBrut_FNat: ",importationDataBrut_FNat,"\n")
+    cat("importationDataBrut_VP: ",importationDataBrut_VP,"\n")
     cat("constructionPoint: ",constructionPoint,"\n")
     cat("constructionCarre: ",constructionCarre,"\n")
     cat("constructionInventaire: ",constructionInventaire,"\n")
@@ -136,13 +137,133 @@ f_prepaData <- function(dateExportVP="2019-01-10",nomFileVP="export_stoc_1001201
     cat("\n\n repertoire output import:",repOut,"\n")
 
 
+### I) Importation et preparation des données récente Vigie-Plume
+    cat("\n\n I) Importation et preparation des données récente Vigie-Plume \n=================================\n")
+
+
+    ## 1) Importation et preparation
     cat("\n\n 1) Importation et preparation \n----------------------\n")
-    if(importationDataBrut) {
+    if(importationDataBrut_VP) {
 
         cat("\n - VigiePlume\n <-- Fichier a plat:",nomFileVP,"\n")
         flush.console()
 
-      dVP <- vp_importation(nomFileVP,dateExportVP,repImport="data_raw/",repOut=repOut)
+        dVP <- vp_importation(nomFileVP,dateExportVP,repImport="data_raw/",repOut=repOut)
+
+    } else { cat(" ---> SKIP\n") }
+
+    ## 2) Table points
+    cat("\n\n 2) Table points\n----------------------\n")
+    flush.console()
+
+    if(constructionPoint) {
+        cat("\n - VigiePlume: ")
+        flush.console()
+
+        if(importationDataBrut_VP) {
+            cat(" construction -> ")
+            ddVP.point <- vp2point(dVP,dateConstruction,repOut,TRUE)
+        } else {
+            filename <- paste0(repOut,"point_VP_",dateConstruction,".csv")
+            cat(" importation \n",filename," -> ")
+            ddVP.point <- fread(filename)
+        }
+        cat(nrow(ddVP.point)," lignes \n")
+        flush.console()
+
+
+    } else { cat(" ---> SKIP\n") }
+
+    ## 3) Table carres
+    cat("\n\n 3) Table carres\n----------------------\n")
+    flush.console()
+
+    if(constructionCarre) {
+        cat("\n - VigiePlume: ")
+        flush.console()
+        if(importationDataBrut_VP) {
+            cat(" construction -> ")
+            ddVP.carre <- vp2carre(dVP,dateConstruction,repOut,TRUE)
+        } else {
+            filename <- paste0(repOut,"carre_VP_",dateExport,".csv")
+            cat(" importation \n",filename," -> ")
+            ddVP.carre <- fread(filename)
+        }
+        cat(nrow(ddVP.carre)," lignes \n")
+
+
+    } else { cat(" ---> SKIP\n") }
+
+    ## 4) Table inventaires
+    cat("\n\n4) Table inventaires\n----------------------\n")
+    flush.console()
+
+    if(constructionInventaire | constructionObservation) {
+        cat("\n - VigiePlume: ")
+        flush.console()
+
+        if(importationDataBrut_VP) {
+            cat(" construction -> ")
+            ddVP.inv <- vp2inventaire(dVP,dateExportVP,version,dateConstruction,repOut,TRUE)
+        } else {
+            filename <- paste0(repOut,"inventaire_VP_",dateConstruction,".csv")
+            cat(" importation  \n",filename," -> ")
+            ddVP.inv <- fread(filename)
+        }
+        cat(nrow(ddVP.inv)," lignes \n")
+
+    } else { cat(" ---> SKIP\n") }
+
+    ## 5) Table observations
+    cat("\n\n 5) Table observations\n----------------------\n")
+    flush.console()
+
+    if(constructionObservation) {
+        cat("\n - VigiePlume: ")
+        flush.console()
+
+        if(importationDataBrut_VP) {
+            cat(" construction -> ")
+            ddVP.obs <- vp2observation(dVP,dateExportVP,dateConstruction,repOut,TRUE)
+        } else {
+            filename <- paste0(repOut,"observation_VP_",dateConstruction,".csv")
+            cat(" importation \n",filename," -> ")
+            ddVP.obs <- fread(filename)
+        }
+        cat(nrow(ddVP.obs)," lignes \n")
+
+    } else { cat(" ---> SKIP\n") }
+
+    ##  6) Table habitats
+    cat("\n\n 6) Table habitats\n----------------------\n")
+    flush.console()
+
+    if(constructionHabitat) {
+        cat("\n - VigiePlume: ")
+
+        if(importationDataBrut_VP) {
+            cat(" construction -> ")
+            ddVP.hab <- vp2habitat(dVP,dateExportVP,repOut,TRUE)
+        } else {
+            filename <- paste0(repOut,"habitat_VP_",dateExport,".csv")
+            cat(" importation \n",filename," -> ")
+            ddVP.inv <- fread(filename)
+        }
+        cat(nrow(ddVP.hab)," lignes \n")
+
+    } else { cat(" ---> SKIP\n") }
+
+
+
+
+
+###  II) Importation et preparation des données historique FNat
+    cat("\n\n II) Importation et preparation des données historique FNat \n=================================\n")
+
+
+    ## 1) Importation et preparation
+    cat("\n\n 1) Importation et preparation \n----------------------\n")
+    if(importationDataBrut_FNat) {
 
         cat("\n - FNat\n")
         if(importACCESS) {
@@ -165,22 +286,122 @@ f_prepaData <- function(dateExportVP="2019-01-10",nomFileVP="export_stoc_1001201
 
     } else { cat(" ---> SKIP\n") }
 
-
-    cat("\n\n 2) Table point\n----------------------\n")
+    ## 2) Table points
+    cat("\n\n 2) Table points\n----------------------\n")
     flush.console()
 
     if(constructionPoint) {
-        cat("\n - VigiePlume: ")
-        flush.console()
-        ddVP.point <- vp2point(dVP,dateConstruction,repOut,TRUE)
-        cat(nrow(ddVP.point)," lignes \n")
-        flush.console()
 
         cat("\n - FNat: ")
         flush.console()
-        ddFNat.point <- FNat2point(dFNat,dateExportFNat,repOut,TRUE)
+        if(importationDataBrut_FNat) {
+            ddFNat.point <- FNat2point(dFNat,dateExportFNat,repOut,TRUE)
+        } else {
+            filename <- paste0(repOut,"point_FNat_",dateConstruction,".csv")
+            cat(" importation \n",filename," -> ")
+            ddFNat.point <- fread(filename)
+        }
         cat(nrow(ddFNat.point)," lignes \n")
 
+    } else { cat(" ---> SKIP\n") }
+
+    ## 3) Table carres
+    cat("\n\n 3) Table carres\n----------------------\n")
+    flush.console()
+
+    if(constructionCarre) {
+
+        cat("\n - FNat: ")
+        flush.console()
+        if(importationDataBrut_FNat) {
+            ddFNat.carre <- FNat2carre(dFNat,dateExportFNat,repOut,TRUE)
+
+        } else {
+            filename <- paste0(repOut,"carre_FNat_",dateConstruction,".csv")
+            cat(" importation \n",filename," -> ")
+            ddFNat.carre <- fread(filename)
+        }
+        cat(nrow(ddFNat.carre)," lignes \n")
+
+    } else { cat(" ---> SKIP\n") }
+
+    ## 4) Table inventaires
+    cat("\n\n4) Table inventaires\n----------------------\n")
+    flush.console()
+
+    if(constructionInventaire | constructionObservation) {
+        cat("\n - FNat: ")
+        flush.console()
+        if(importationDataBrut_FNat) {
+            ddFNat.inv <- FNat2inventaire(dFNat,dateExportFNat,version,dateConstruction,repOut,TRUE)
+
+        } else {
+            filename <- paste0(repOut,"inventaire_FNat_",dateConstruction,".csv")
+            cat(" importation \n",filename," -> ")
+            ddFNat.inv <- fread(filename)
+        }
+        cat(nrow(ddFNat.inv)," lignes \n")
+
+    } else { cat(" ---> SKIP\n") }
+
+    ## 5) Table observations
+    cat("\n\n 5) Table observations\n----------------------\n")
+    flush.console()
+
+    if(constructionObservation) {
+
+
+        cat("\n - FNat: ")
+        flush.console()
+        if(importationDataBrut_FNat) {
+            cat("\n",  nrow(subset(dFNat,!(unique_inventaire %in% ddFNat.inv$unique_inventaire_fnat)))," lignes exclues !!\n")
+            dFNat <- subset(dFNat,unique_inventaire %in% ddFNat.inv$unique_inventaire_fnat)
+
+            ddFNat.obs <- FNat2observation(dFNat,dateExportFNat,dateConstruction,repOut,TRUE)
+
+            ddFNat.obs <- subset(ddFNat.obs,!(id_inventaire %in% ddFNat.inv$pk_inventaire))
+        } else {
+            filename <- paste0(repOut,"observation_FNat_",dateConstruction,".csv")
+            cat(" importation \n",filename," -> ")
+            ddFNat.obs <- fread(filename)
+        }
+        cat(nrow(ddFNat.obs)," lignes \n")
+
+    } else { cat(" ---> SKIP\n") }
+
+    ##  6) Table habitats
+    cat("\n\n 6) Table habitats\n----------------------\n")
+    flush.console()
+
+    if(constructionHabitat) {
+        cat("\n - FNat: ")
+        flush.console()
+        if(importationDataBrut_FNat) {
+            ddFNat.hab <- FNat2habitat(dFNat,dateExportFNat,repOut,TRUE)
+        } else {
+            filename <- paste0(repOut,"habitat_FNat_",dateConstruction,".csv")
+            cat(" importation \n",filename," -> ")
+            ddFNat.hab <- fread(filename)
+        }
+        cat(nrow(ddFNat.hab)," lignes \n")
+
+    } else { cat(" ---> SKIP\n") }
+
+
+
+
+### III) Union des deux jeux de données
+    cat("\n\n III) Union des deux jeux de données \n=================================\n")
+
+
+    ## 1) Importation et preparation
+    cat("\n\n 1) Importation et preparation \n DONE !\n")
+
+    ## 2) Table points
+    cat("\n\n 2) Table points\n----------------------\n")
+    flush.console()
+
+    if(constructionPoint) {
         cat("\n  -> union: ")
         dd.point <- union.point(ddVP.point,ddFNat.point)
         cat(nrow(dd.point)," lignes \n")
@@ -191,21 +412,11 @@ f_prepaData <- function(dateExportVP="2019-01-10",nomFileVP="export_stoc_1001201
 
     } else { cat(" ---> SKIP\n") }
 
-
-    cat("\n\n 3) Table carre\n----------------------\n")
+    ## 3) Table carres
+    cat("\n\n 3) Table carres\n----------------------\n")
     flush.console()
 
     if(constructionCarre) {
-        cat("\n - VigiePlume: ")
-        flush.console()
-        ddVP.carre <- vp2carre(dVP,dateExportVP,repOut,TRUE)
-        cat(nrow(ddVP.carre)," lignes \n")
-
-        cat("\n - FNat: ")
-        flush.console()
-        ddFNat.carre <- FNat2carre(dFNat,dateExportFNat,repOut,TRUE)
-        cat(nrow(ddFNat.carre)," lignes \n")
-
         cat("\n  -> union: ")
         dd.carre <- union.carre(ddVP.carre,ddFNat.carre)
         cat(nrow(dd.carre)," lignes \n")
@@ -216,21 +427,11 @@ f_prepaData <- function(dateExportVP="2019-01-10",nomFileVP="export_stoc_1001201
 
     } else { cat(" ---> SKIP\n") }
 
-
-    cat("\n\n4) Table inventaire\n----------------------\n")
+    ## 4) Table inventaires
+    cat("\n\n4) Table inventaires\n----------------------\n")
     flush.console()
 
     if(constructionInventaire | constructionObservation) {
-        cat("\n - VigiePlume: ")
-        flush.console()
-        ddVP.inv <- vp2inventaire(dVP,dateExportVP,version,dateConstruction,repOut,TRUE)
-        cat(nrow(ddVP.inv)," lignes \n")
-
-        cat("\n - FNat: ")
-        flush.console()
-        ddFNat.inv <- FNat2inventaire(dFNat,dateExportFNat,version,dateConstruction,repOut,TRUE)
-        cat(nrow(ddFNat.inv)," lignes \n")
-
         cat("\n  -> union: ")
         dd.inv <- union.inventaire(ddFNat.inv,ddVP.inv,dateConstruction,repOut)
         cat(nrow(dd.inv)," lignes \n")
@@ -241,26 +442,11 @@ f_prepaData <- function(dateExportVP="2019-01-10",nomFileVP="export_stoc_1001201
 
     } else { cat(" ---> SKIP\n") }
 
-
-    cat("\n\n 5) Table observation\n----------------------\n")
+    ## 5) Table observations
+    cat("\n\n 5) Table observations\n----------------------\n")
     flush.console()
 
     if(constructionObservation) {
-        cat("\n - VigiePlume: ")
-        flush.console()
-        ddVP.obs <- vp2observation(dVP,dateExportVP,dateConstruction,repOut,TRUE)
-        cat(nrow(ddVP.obs)," lignes \n")
-
-        cat("\n - FNat: ")
-        flush.console()
-        cat("\n",  nrow(subset(dFNat,!(unique_inventaire %in% ddFNat.inv$unique_inventaire_fnat)))," lignes exclues !!\n")
-        dFNat <- subset(dFNat,unique_inventaire %in% ddFNat.inv$unique_inventaire_fnat)
-
-        ddFNat.obs <- FNat2observation(dFNat,dateExportFNat,dateConstruction,repOut,TRUE)
-
-        ddFNat.obs <- subset(ddFNat.obs,!(id_inventaire %in% ddVP.inv$pk_inventaire))
-        cat(nrow(ddFNat.obs)," lignes \n")
-
         cat("\n  -> union: ")
         dd.obs <- union.observation(ddFNat.obs,ddVP.obs,dateConstruction,repOut)
         cat(nrow(dd.obs)," lignes \n")
@@ -270,20 +456,11 @@ f_prepaData <- function(dateExportVP="2019-01-10",nomFileVP="export_stoc_1001201
         write.table(dd.obs,file,row.names=FALSE,na = "",quote=TRUE, sep=";",dec=".",fileEncoding ="UTF-8")
     } else { cat(" ---> SKIP\n") }
 
-
-    cat("\n\n 6) Table habitat\n----------------------\n")
+    ##  6) Table habitats
+    cat("\n\n 6) Table habitats\n----------------------\n")
     flush.console()
 
     if(constructionHabitat) {
-        cat("\n - VigiePlume: ")
-        ddVP.hab <- vp2habitat(dVP,dateExportVP,repOut,TRUE)
-        cat(nrow(ddVP.hab)," lignes \n")
-
-        cat("\n - FNat: ")
-        flush.console()
-        ddFNat.hab <- FNat2habitat(dFNat,dateExportFNat,repOut,TRUE)
-        cat(nrow(ddFNat.hab)," lignes \n")
-
         cat("\n  -> union: ")
         dd.hab <- union.habitat(ddFNat.hab,ddVP.hab,dateConstruction,repOut)
         cat(nrow(dd.hab)," lignes \n")
@@ -295,25 +472,32 @@ f_prepaData <- function(dateExportVP="2019-01-10",nomFileVP="export_stoc_1001201
     } else { cat(" ---> SKIP\n") }
 
 
-    cat("\n\n 7) Base de Donnees\n----------------------\n")
+
+
+
+
+### IV) Base de Donnees
+
+    cat("\n\n IV) Base de Donnees\n=================================\n")
     flush.console()
 
+    ## Creation de la base de donnees PostGreSQL
     if(postgresql_import) {
-        cat("\n - Creation de la base de donnees PostGreSQL :\n")
+        cat("\n 1) Creation de la base de donnees PostGreSQL :\n")
         createDB_postgres(dateConstruction,nomDBpostgresql,postgresUser,postgresPassword,postgresql_createAll,postGIS_initiation,postgresql_abondanceSeuil,seuilAbondance,repertoire,repOut=repOut,fileTemp)
         cat("\n    -> OK\n")
     } else { cat(" ---> SKIP\n") }
 
-
-    cat("\n\n 9) Point et Carrees Annee\n----------------------\n")
+    ## Point et Carrees Annee
+    cat("\n\n 2) Point et Carrees Annee\n----------------------\n")
     flush.console()
     if(pointCarreAnnee) {
         point_carre_annee(dateConstruction=dateConstruction,version=version,con=NULL,importation=importPointCarreAnnee,repertoire=repertoire,nomDBpostgresql=nomDBpostgresql,postgresUser=postgresUser,postgresPassword=postgresPassword)
     } else { cat(" ---> SKIP\n") }
 
 
-
-    cat("\n\n 10) Historic des Carrees\n----------------------\n")
+    ## Historic des Carrees
+    cat("\n\n 3) Historic des Carrees\n----------------------\n")
     flush.console()
     if(historiqueCarre & postgresql_import) {
         historicCarre(nomDBpostgresql=nomDBpostgresql,postgresUser=postgresUser,postgresPassword=postgresPassword)
@@ -581,7 +765,7 @@ vp2point <- function(d,dateConstruction,repOut="",output=FALSE) {
                   latitude_wgs84_sd = sd(latitude_wgs84),
                   longitude_wgs84_sd = sd(longitude_wgs84),
                   date_export = max(date_export)),
-             by=id_point]
+              by=id_point]
 
     dd <- unique(d[,.(id_point,id_carre,num_point)])
     dd[,db := "vigieplume"]
@@ -590,7 +774,7 @@ vp2point <- function(d,dateConstruction,repOut="",output=FALSE) {
     setkey(dd,"id_point")
 
     dd <- dd[dagg]
-   setnames(dd,old=c("id_point"),new=c("pk_point"))
+    setnames(dd,old=c("id_point"),new=c("pk_point"))
 
     colorder <- c("pk_point","id_carre","commune","site","insee","departement","nom_point","num_point","altitude","longitude_wgs84","latitude_wgs84","longitude_wgs84_sd","latitude_wgs84_sd","db","date_export")
     setcolorder(dd,colorder)
@@ -603,7 +787,7 @@ vp2point <- function(d,dateConstruction,repOut="",output=FALSE) {
     if(output) return(dd)
 }
 
-vp2carre <- function(d,dateExport,repOut="",output=FALSE) {
+vp2carre <- function(d,dateConstruction,repOut="",output=FALSE) {
     ## d <- dVP; dateExport = dateExportVP; output=FALSE; repOut=""
 
 ###dcarrenat <- read.csv("data_generic/carrenat.csv",encoding="UTF-8")
@@ -615,11 +799,13 @@ vp2carre <- function(d,dateExport,repOut="",output=FALSE) {
 
     setkey(dcarrenat,"pk_carre")
 
+    dcarrenat <- dcarrenat[,.(pk_carre,lat_WGS84,lon_WGS84)]
+    setnames(dcarrenat, old= c("lat_WGS84","lon_WGS84"),new=c("latitude_grid_wgs84","longitude_grid_wgs84"))
 
 
     ##  d_col <- c("id_carre","Commune","Site","INSEE","Département","N..Carré.EPS","nom_carre_fnat","EXPORT_STOC_TEXT_EPS_POINT","num_point","Altitude","Longitude","Latitude","db","date_export")
-   ## dd <- d[,d_col,with=FALSE]
-## changement des noms de colonnes
+    ## dd <- d[,d_col,with=FALSE]
+    ## changement des noms de colonnes
 
     dd <- d[, .(commune = get_mode(commune),
                 site = get_mode(site),
@@ -628,9 +814,9 @@ vp2carre <- function(d,dateExport,repOut="",output=FALSE) {
                 nom_carre = get_mode(nom_carre),
                 nom_carre_fnat = NA,
                 departement = get_mode(departement),
-                altitude = median(altitude),
-                latitude_wgs84 = median(latitude_wgs84),
-                longitude_wgs84 = median(longitude_wgs84),
+                altitude_median = median(altitude),
+                latitude_median_wgs84 = median(latitude_wgs84),
+                longitude_median_wgs84 = median(longitude_wgs84),
                 date_export = max(date_export)),
             by=id_carre]
 
@@ -638,15 +824,19 @@ vp2carre <- function(d,dateExport,repOut="",output=FALSE) {
     dd[,db := "vigieplume"]
     setnames(dd,old=c("id_carre"),new=c("pk_carre"))
 
+  ##
     setkey(dd,"pk_carre")
-    dd <- dd[dcarrenat]
+
+    dd <- merge(dd,dcarrenat,by="pk_carre",all.x=TRUE)
+   ### dd <- dd[dcarrenat]
 
 
-    colorder <- c("pk_carre","commune","site","etude","insee","departement","nom_carre","nom_carre_fnat,","altitude","latitude_wgs84","longitude_wgs84","latitude_grid_wgs84","longitude_grid_wgs84","db","date_export")
+    colorder <- c("pk_carre","commune","site","etude","insee","departement","nom_carre","nom_carre_fnat","altitude_median","latitude_median_wgs84","longitude_median_wgs84","latitude_grid_wgs84","longitude_grid_wgs84","db","date_export")
+
 
     dd <- dd[,colorder,with=FALSE]
 
-    filename <- paste0(repOut,"carre_VP_",dateExport,".csv")
+    filename <- paste0(repOut,"carre_VP_",dateConstruction,".csv")
     write.csv(dd,filename,row.names=FALSE)
     cat("  (->",filename,")\n")
 
@@ -656,180 +846,169 @@ vp2carre <- function(d,dateExport,repOut="",output=FALSE) {
 
 vp2inventaire <- function(d,dateExport,version = "V.1",dateConstruction="",repOut="",output=FALSE) {
 
-   ## dateExport=dateExportVP
-   ## d=dVP
+    ## dateExport=dateExportVP
+    ## d=dVP
 
-    the_date <- as.Date(d$Date,format="%d.%m.%Y")
-    carre <-  substring(d$N..Carré.EPS,9,nchar(d$N..Carré.EPS))
-    point <- substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1,nchar(d$EXPORT_STOC_TEXT_EPS_POINT))
-    id_point = paste0(carre,"P",point)
+    require(maptools)
 
-    ddbrut <- data.frame(pk_inventaire = paste0(format(the_date,"%Y%m%d"),id_point),
-                            unique_inventaire_fnat=NA,
-                            etude = d$Etude,
-                            id_point = paste0(carre,"P",point),
-                            id_carre =  carre,
-                            num_point = as.numeric(point),
-                            date = the_date,
-                            jour_julien = as.numeric(format(the_date,"%j")),
-                            annee= year(the_date),
-                            passage = d$N..Passage,
-                            info_passage=NA,
-                            passage_stoc=NA,
-                            heure_debut = d$Heure,
-                            heure_fin = d$Heure.fin,
-                            duree_minute = as.numeric(difftime(strptime(d$Heure.fin,"%H:%M"),strptime(d$Heure,"%H:%M"))),
-                            observateur = d$Observateur,
-                            email = d$Email,
-                            nuage = d$EPS.Nuage,
-                            pluie = d$EPS.Pluie,
-                            vent = d$EPS.Vent,
-                            visibilite = d$EPS.Visibilité,
-                            neige = d$EPS.Neige,
-                            db = "vigieplume",date_export=dateExport,altitude=d$Altitude,version=version)
+    dd <- dVP[,.(unique_inventaire_fnat=NA,
+               etude = etude,
+               id_point = id_point,
+               id_carre = id_carre,
+               num_point = num_point,
+               date = date,
+               jour_julien = jour_julien,
+               annee= annee,
+               passage_observateur = passage_observateur,
+               heure_debut = heure,
+               heure_fin = NA,
+               duree_minute = duree_minute,
+               observateur = observateur,
+               email = email,
+               nuage = nuage,
+               pluie = pluie,
+               vent = vent,
+               visibilite = visibilite,
+               neige = neige,
+               altitude = get_mode(altitude),
+               latitude_wgs84 = median(latitude_wgs84),
+               longitude_wgs84 = median(longitude_wgs84),
+               db = "vigieplume",
+               date_export=date_export,version=version), by = id_inventaire]
 
-    dd <- unique(ddbrut)
-
-
-
-    aa <- table(dd$pk_inventaire)
-
+    dd <- unique(dd)
+    aa <- table(dd$id_inventaire)
     aa_unique <- names(aa)[aa==1]
     aa_doublon <- names(aa)[aa>1]
 
     if(length(aa_doublon)>0) {
 
+        cat(" ! WARNING: gestion de ",length(aa_doublon)," doublon(s) dans les inventaires !\n")
+        dd_unique <- dd[id_inventaire %in% aa_unique,]
 
-        dd_unique <- subset(dd,pk_inventaire %in% aa_unique)
+        dd_doub <- dd[id_inventaire %in% aa_doublon,]
 
-        dd_doub <- subset(ddbrut,pk_inventaire %in% aa_doublon)
+        dd_doub <- unique(dd_doub[,.(unique_inventaire_fnat=NA,
+               etude = get_mode(etude),
+               id_point = get_mode(id_point),
+               id_carre = get_mode(id_carre),
+               num_point = get_mode(num_point),
+               date = get_mode(date),
+               jour_julien = get_mode(jour_julien),
+               annee= get_mode(annee),
+               passage_observateur = get_mode(passage_observateur),
+               heure_debut = get_mode(heure_debut),
+               heure_fin = NA,
+               duree_minute = get_mode(duree_minute),
+               observateur = concat_value(observateur),
+               email = concat_value(email),
+               nuage = get_mode(nuage),
+               pluie = get_mode(pluie),
+               vent = get_mode(vent),
+               visibilite = get_mode(visibilite),
+               neige = get_mode(neige),
+               altitude = get_mode(altitude),
+               latitude_wgs84 = median(latitude_wgs84),
+               longitude_wgs84 = median(longitude_wgs84),
+               db = "vigieplume",
+               date_export=get_mode(date_export),version=version), by = id_inventaire])
 
-
-
-        col_num2char <- c("unique_inventaire_fnat","passage",
-                          "duree_minute","nuage","pluie","vent","visibilite","neige","altitude")
-        col_as.factor <- c("unique_inventaire_fnat","passage",
-                           "heure_debut","heure_fin","duree_minute",
-                           "observateur","email",
-                           "nuage","pluie","vent","visibilite","neige","altitude")
-
-        for(col in col_num2char){
-            dd_doub[,col] <- as.character(dd_doub[,col])
-            dd_doub[,col] <- ifelse(is.na(dd_doub[,col]),"-99999",dd_doub[,col])
-
-        }
-
-
-
-        for(col in col_as.factor){
-            dd_doub[,col] <- as.factor(dd_doub[,col])
-        }
-
-
-        dd_inv <- unique(subset(dd_doub,select =c("pk_inventaire","id_point",
-                                                  "id_carre","num_point","date","jour_julien",
-                                                  "annee")))
-
-        dd_maj <- aggregate(subset(dd_doub,select=c("passage",
-                                                    "heure_debut","heure_fin","etude",
-                                                    "observateur","email",
-                                                    "nuage","pluie","vent","visibilite","neige","altitude")),
-                            list(pk_inventaire=dd_doub$pk_inventaire),
-                            function(x) levels(x)[which.max(table(x))])
-
-
-        ddd <- merge(dd_inv,dd_maj,by="pk_inventaire")
-
-        ddd <- data.frame(pk_inventaire=ddd$pk_inventaire,unique_inventaire_fnat=NA,etude=ddd$etude,
-                          id_point=ddd$id_point,id_carre=ddd$id_carre,num_point=ddd$num_point,
-                          date=ddd$date,jour_julien=ddd$jour_julien,annee=ddd$annee,
-                          passage=ddd$passage,info_passage=NA,passage_stoc = NA,
-                          heure_debut=ddd$heure_debut,heure_fin=ddd$heure_fin,duree_minute=NA,
-                          observateur=ddd$observateur,email=ddd$email,
-                          nuage=ddd$nuage,pluie=ddd$pluie,vent=ddd$vent,visibilite=ddd$visibilite,neige=ddd$neige,
-                          db="vigieplume",date_export=dateExport,altitude=ddd$altitude,version=version)
-
-
-        for(col in col_num2char){
-            ddd[,col] <-  as.numeric(as.character(ddd[,col]))
-            ddd[,col] <- ifelse(ddd[,col] == -99999,NA,ddd[,col])
-        }
-
-
-        dd <- rbind(dd_unique,ddd)
+        dd <- rbind(dd_unique,dd_doub)
+        setDT(dd)
+        setorder(dd,id_inventaire)
     }
-    dd <- dd[order(as.character(dd$pk_inventaire)),]
 
-    dd$duree_minute <- as.numeric(difftime(strptime(dd$heure_fin,"%H:%M"),strptime(dd$heure_debut,"%H:%M")))
+    setnames(dd,"id_inventaire","pk_inventaire")
+     dd[,heure_fin := format(as.POSIXct(heure_debut,format="%H:%M")+ duree_minute*60,"%H:%M")]
 
+    dd[,datetime := paste(date,heure_debut)]
 
+    dd[,periode_passage := ""]
+    dd[jour_julien < 61 ,periode_passage:= "winter_end"]
+    dd[,passage_stoc := 999]
 
+    ## precoce
+    dd[jour_julien > 60 & jour_julien <= 91 , passage_stoc :=  0] # 01/03 -> 31/03
 
-    dd$info_passage[dd$jour_julien<90] <- "precoce"
-    dd$passage_stoc[dd$jour_julien>=90 & dd$jour_julien<=130 & dd$altitude < 800] <- 1
-    dd$passage_stoc[dd$jour_julien>=90 & dd$jour_julien<=137 & dd$altitude >= 800] <- 1 ## pour les STOC en altitude
-    dd$passage_stoc[dd$jour_julien>=131 & dd$jour_julien<=175 & dd$altitude < 800] <- 2
-    dd$passage_stoc[dd$jour_julien>=138 & dd$jour_julien<=175 & dd$altitude >= 800] <- 2 ## pour les STOC en altitude
-    dd$info_passage[dd$passage_stoc==2 | dd$passage_stoc==1] <- "normal"
-    dd$info_passage[dd$jour_julien>175] <- "tardif"
+    ## en plaine
+    dd[jour_julien > 91 & jour_julien <= 130 & altitude < 800,passage_stoc :=  1] #01/04 -> 08/05
+    dd[jour_julien >= 131 & jour_julien <= 167 & altitude < 800,passage_stoc :=  2] #09/05 -> 15/06
 
-    dd$id_ancar <- paste(dd$id_point,dd$annee,sep="_")
+    ## en altitude
+    dd[jour_julien > 91 & jour_julien <= 135 & altitude >= 800,passage_stoc :=  1] #01/04 -> 14/0
+    dd[jour_julien >= 136 & jour_julien <= 167 & altitude >= 800,passage_stoc :=  2] #15/05 -> 15/06
+    ## tardif
+    dd[jour_julien > 167 & jour_julien <= 197 , passage_stoc :=  3] # 16/06 -> 15/07
 
-    ddNB <- unique(subset(dd, select=c("id_ancar","jour_julien")))
-    tcont <-  data.frame(table(ddNB$id_ancar))
-    colnames(tcont) <- c("id_ancar","nombre_de_passage")
-    dd <- merge(dd,tcont,by="id_ancar",all=TRUE)
+    dd[passage_stoc == 0 , periode_passage := "early"]
+    dd[passage_stoc == 1 , periode_passage := "first"]
+    dd[passage_stoc == 2 , periode_passage := "second"]
+    dd[passage_stoc == 3, periode_passage :=  "late"]
+    dd[jour_julien > 197 ,periode_passage:= "year_end"]
+    dd[passage_stoc == 999, passage_stoc := NA]
 
+ dd[,datetime_UTC := as.POSIXct(datetime,format="%Y-%m-%d %H:%M")]
 
-
-    ddunique <- unique(subset(dd, dd$info_passage == "normal", select=c("id_ancar","jour_julien")))
-    tcont <-  table(ddunique$id_ancar)
-    passageUnique <-  names(tcont)[tcont==1]
-    dd$info_passage[dd$id_ancar %in% passageUnique] <- "passage_unique"
-
-    dd1 <- unique(subset(dd,passage_stoc==1,select=c("id_ancar","jour_julien","passage_stoc")))
-    tdd1 <- table(dd1$id_ancar)
-    passageEnTrop <-  names(tdd1)[tdd1>1]
-    dd$info_passage[dd$id_ancar %in% passageEnTrop & dd$passage_stoc == 1] <- "plusieurs_passage_1"
-
-    ddpp1 <- subset(dd,info_passage=="plusieurs_passage_1")
-    maxP1 <- aggregate(jour_julien~id_ancar,data=ddpp1,max)
-    maxP1$id_ancar_valide <- paste(maxP1$id_ancar,maxP1$jour_julien,sep="_")
-    dd$info_passage[paste(dd$id_ancar,dd$jour_julien,sep="_") %in% maxP1$id_ancar_valide & dd$passage_stoc == 1] <- "dernier_passage_1"
-    dd$passage_stoc[!(paste(dd$id_ancar,dd$jour_julien,sep="_") %in% maxP1$id_ancar_valide) & dd$info_passage == "plusieurs_passage_1" & dd$passage_stoc == 1] <- NA
+    dd_sun <- dd[!is.na(date) & !is.na(datetime) & !is.na(longitude_wgs84) & !is.na(latitude_wgs84),]
+    dd_sun[,date_UTC := as.POSIXct(date,tz = "GMT")]
 
 
+    cat(nrow(dd_sun),"samples with valid date and time and location\n")
+    coordinates(dd_sun) <- c("longitude_wgs84", "latitude_wgs84")
+    lonlat <- SpatialPoints(coordinates(dd_sun),proj4string=CRS("+proj=longlat +datum=WGS84"))
 
-    dd2 <- unique(subset(dd,passage_stoc==2,select=c("id_ancar","jour_julien","passage_stoc")))
-    tdd2 <- table(dd2$id_ancar)
-    passageEnTrop <-  names(tdd2)[tdd2>1]
-    dd$info_passage[dd$id_ancar %in% passageEnTrop  & dd$passage_stoc == 2] <- "plusieurs_passage_2"
+    cat("calculating sunrise...")
+    dd_sun$sunrise <- sunriset(crds = lonlat, dateTime = dd_sun$date_UTC, direction="sunrise", POSIXct=TRUE)$time
+    cat("Done !\n")
 
-    ddpp2 <- subset(dd,info_passage=="plusieurs_passage_2")
-    maxP2 <- aggregate(jour_julien~id_ancar,data=ddpp2,max)
-    maxP2$id_ancar_valide <- paste(maxP2$id_ancar,maxP2$jour_julien,sep="_")
-    dd$info_passage[paste(dd$id_ancar,dd$jour_julien,sep="_") %in% maxP2$id_ancar_valide & dd$passage_stoc == 2] <- "dernier_passage_2"
-    dd$passage_stoc[!(paste(dd$id_ancar,dd$jour_julien,sep="_") %in% maxP2$id_ancar_valide) & dd$info_passage == "plusieurs_passage_2" & dd$passage_stoc == 2] <- NA
+     cat("calculating civil dawn...")
+    dd_sun$dawn_civil <- crepuscule(crds = lonlat, dateTime = dd_sun$date_UTC,solarDep=6, direction="dawn", POSIXct=TRUE)$time
+    cat("Done !\n")
 
+    dd_sun <- as.data.table(dd_sun)
 
-    ddNorm <- unique(subset(dd,info_passage=="normal" & (passage_stoc==1 | passage_stoc==2),select=c("id_ancar","jour_julien","passage_stoc")))
-    ddNormW <- reshape(ddNorm
-                      ,v.names="jour_julien"
-                      ,idvar=c("id_ancar")
-                      ,timevar="passage_stoc"
-                      ,direction="wide")
+    dd_sun[,diff_sunrise_h := round(as.numeric(difftime(datetime_UTC,sunrise,units = "hours")),2)]
+    dd_sun[,diff_dawn_h := round(as.numeric(difftime(datetime_UTC,dawn_civil,units = "hours")),2)]
+    dd_sun[,info_heure_debut := ifelse(diff_dawn_h < 1, "too_early",ifelse(diff_sunrise_h < 1, "early",ifelse(diff_sunrise_h > 4, "late","OK")))]
 
-    ddNormW$temps_entre_passage = abs(ddNormW[,3] - ddNormW[,2])
+    dd_sun <- dd_sun[,.(pk_inventaire,diff_sunrise_h,diff_dawn_h,info_heure_debut)]
 
-    ddNormW <- subset(ddNormW,select=c("id_ancar","temps_entre_passage"))
-
-    dd <- merge(dd,ddNormW,by="id_ancar",all=TRUE)
-    dd$info_entre_passage<- "normal"
-    dd$info_entre_passage[dd$temps_entre_passage<28] <- "passages_rapproche"
-    dd$info_entre_passage[dd$temps_entre_passage>42] <- "passages_eloigne"
+    dd <- merge(dd,dd_sun,by="pk_inventaire",all.x=TRUE)
 
 
-    dd<-dd[,c("pk_inventaire","unique_inventaire_fnat","id_carre","id_point","num_point","etude","annee","date","jour_julien","passage","info_passage","passage_stoc","nombre_de_passage","temps_entre_passage","info_entre_passage","heure_debut","heure_fin","duree_minute","observateur","email","nuage","pluie","vent","visibilite","neige","db","date_export","version")]
+    dd[,nombre_passage_annee := .N ,by=.(id_point,annee)]
+    dd[,nombre_passage_stoc_annee := length(unique(passage_stoc)) ,by=.(id_point,annee)]
+
+    dd[,repetition_passage := .N ,by=.(id_point,annee,passage_stoc)]
+    dd[,inc_passage := 1:.N ,by=.(id_point,annee,passage_stoc)]
+    dd[,heure_ok := info_heure_debut %in% c("early","OK")]
+
+  ##  dd[,repetition_passage_heure_ok := .N ,by=.(id_point,annee,passage_stoc,heure_ok)]
+  ##  dd[,inc_passage_heure_OK := 1:.N ,by=.(id_point,annee,passage_stoc,heure_ok)]
+
+    dd[repetition_passage != inc_passage ,passage_stoc := NA]
+    dd[,info_passage_an := ifelse(1 %in% passage_stoc & 2 %in% passage_stoc,"OK_1_and_2",ifelse(1 %in% passage_stoc, "only_1",ifelse(2 %in% passage_stoc,"only_2",""))),by = .(id_point,annee)]
+
+    dd[,info_passage := ifelse(repetition_passage == 1,"unique",ifelse(is.na(passage_stoc),"sample_not_selected","last_sample_selected"))]
+
+
+
+    dd[info_passage_an == "OK_1_and_2",nb_sem_entre_passage := round(as.numeric(difftime(max(datetime_UTC),min(datetime_UTC), units = "weeks")),1),by = .(id_point,annee)]
+    dd[,nb_sem_entre_passage := as.numeric(nb_sem_entre_passage)]
+
+    ## recommendation 4 -> 6 semaines
+    dd[,info_temps_entre_passage := ifelse(!is.na(nb_sem_entre_passage),ifelse(round(nb_sem_entre_passage) < 4, "inf_4",ifelse(round(nb_sem_entre_passage) > 6, "sup_6","OK")),"")]
+
+
+    the_col <- c("pk_inventaire","unique_inventaire_fnat","etude","id_point","id_carre","num_point",
+                 "date","jour_julien","annee","passage_observateur","heure_debut","heure_fin","duree_minute","datetime",
+                 "periode_passage","passage_stoc","repetition_passage","inc_passage",
+                 "diff_sunrise_h","diff_dawn_h","info_heure_debut",
+                 "nombre_passage_annee","nombre_passage_stoc_annee","info_passage_an","info_passage",
+                 "nb_sem_entre_passage","info_temps_entre_passage",
+                 "observateur","email","nuage","pluie","vent","visibilite","neige","db","date_export","version")
+
+    dd<-dd[,the_col,with=FALSE]
 
 
     filename <- paste0(repOut,"inventaire_VP_",dateConstruction,".csv")
@@ -844,59 +1023,41 @@ vp2inventaire <- function(d,dateExport,version = "V.1",dateConstruction="",repOu
 
 vp2observation <- function(d,dateExport,dateConstruction="",repOut="",output=FALSE) {
 
-    dd <- data.frame(pk_observation= paste0(format(as.Date(d$Date,format="%d.%m.%Y"),"%Y%m%d"),substring(d$N..Carré.EPS,9),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1)),
-                     id_fnat_unique_citation = NA,
-                     id_inventaire =paste0(format(as.Date(d$Date,format="%d.%m.%Y"),"%Y%m%d"),substring(d$N..Carré.EPS,9),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1)),
-                     id_point = paste0(substring(d$N..Carré.EPS,9,nchar(d$N..Carré.EPS)),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1,nchar(d$EXPORT_STOC_TEXT_EPS_POINT))),
-                     id_carre =  substring(d$N..Carré.EPS,9,nchar(d$N..Carré.EPS)),
-                     num_point = as.numeric(substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1,nchar(d$EXPORT_STOC_TEXT_EPS_POINT))),
-                     passage = d$N..Passage,
-                     date = as.character(as.Date(d$Date,format="%d.%m.%Y")),
-                     annee=as.numeric(substring(d$Date,7,10)),
-                     classe=d$Classe,
-                     espece = toupper(d$Espèce),
-                     code_sp = substring(toupper(d$Espèce),1,6),
-                     abondance = as.numeric(as.character(d$Nombre)),
-                     distance_contact=d$Distance.de.contact,
-                     db = "vigieplume",date_export=dateExport,
-                     id_data=paste(format(as.Date(d$Date,format="%d.%m.%Y"),"%Y%m%d"),"-",substring(d$N..Carré.EPS,9,nchar(d$N..Carré.EPS)),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)),substring(d$Espèce,1,6),"-",d$Distance.de.contact)
-                     )
+    d[,id_fnat_unique_citation := NA]
+    dd <- d[,.(id_observation,id_fnat_unique_citation ,id_inventaire,id_point,id_carre, num_point,date,annee,classe,id_data,espece,code_sp,abondance,distance_contact,db,date_export)]
 
-    dd <- dd[order(dd$id_inventaire,dd$espece,dd$distance_contact),]
-    iFirst_id_inventaire <- setNames(match(unique(dd$id_inventaire),dd$id_inventaire),unique(dd$id_inventaire))
-    dd$pk_observation <- paste0(dd$pk_observation,sprintf("%02d",(1:nrow(dd))-iFirst_id_inventaire[as.character(dd$id_inventaire)]+1))
+    dd <- unique(dd)
+    setorder(dd,id_data)
+    setnames(dd,"id_observation","pk_observation")
 
     contDoublon <- table(dd$id_data)
     doublon <- names(contDoublon)[contDoublon>1]
+
     if(length(doublon)>0) {
-        tDoublon <- subset(dd,id_data %in% doublon)
-        tDoublon <- tDoublon[order(tDoublon$id_data),]
+        tDoublon <- dd[id_data %in% doublon,]
+
         file <- paste0(repOut,"_doublonObservationVigiePlume_",dateConstruction,".csv")
         cat("  \n !!! Doublon saisies \n c est a dire plusieurs lignes pour un inventaire une espece et une distance\n Ceci concerne ", nrow(tDoublon)," lignes\n")
         cat("  Toutes lignes sont présenté dans le fichier: \n  --> ",file,"\n")
-        write.csv(tDoublon[,-ncol(tDoublon)],file,row.names=FALSE)
+        fwrite(tDoublon,file)
 
         cat(" \n Pour chaque doublon nous conservons la valeur maximum\n")
 
+        tDoublon <- setorder(tDoublon,id_data, -abondance)
+        tDoublon[,conservee := !duplicated(id_data)]
 
-
-        tDoublon <- tDoublon[order(tDoublon$id_data, -tDoublon$abondance),]
-        tDoublon$conservee <- !duplicated(tDoublon$id_data)
-
-        dataExclues <- subset(tDoublon,!conservee)
-        dataEclues <-subset(dataExclues,select=c("pk_observation","id_fnat_unique_citation","id_inventaire","id_point","id_carre","num_point","passage","date","annee","classe","espece","code_sp","distance_contact","abondance","db","date_export"))
+        dataExclues <- tDoublon[conservee == FALSE,]
+        col <- c("pk_observation","id_fnat_unique_citation","id_inventaire","id_point","id_carre","num_point","date","annee","classe","espece","code_sp","distance_contact","abondance","db","date_export")
+        dataEclues <-dataExclues[,col,with=FALSE]
 
         file <- paste0(repOut,"_doublonObservationVigiePlume_Exclu_",dateConstruction,".csv")
         cat("  \n !!! Doublon exclue enregistre dans le fichier \n --> ",file,"\n")
         write.csv(tDoublon[,-ncol(tDoublon)],file,row.names=FALSE)
 
-        dd <- subset(dd,!(pk_observation %in% tDoublon$pk_observation[!tDoublon$conservee]))
+        dd <- dd[!(pk_observation %in% dataExclues[,pk_observation]),]
 
-        dd <- dd[order(dd$id_inventaire,dd$espece,dd$distance_contact),]
+        setorder(dd,id_inventaire)
     }
-
-    dd <- dd[,-ncol(dd)]
-
 
     filename <- paste0(repOut,"observation_VP_",dateConstruction,".csv")
     write.csv(dd,filename,row.names=FALSE)
@@ -909,48 +1070,128 @@ vp2observation <- function(d,dateExport,dateConstruction="",repOut="",output=FAL
 
 vp2habitat <- function(d,dateExport,repOut="",output=FALSE) {
 
-    dd <- unique(data.frame(pk_habitat=paste0(format(as.Date(d$Date,format="%d.%m.%Y"),"%Y%m%d"),
-                                             substring(d$N..Carré.EPS,9,nchar(d$N..Carré.EPS)),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1,nchar(d$EXPORT_STOC_TEXT_EPS_POINT))),
-                            id_point = paste0(substring(d$N..Carré.EPS,9,nchar(d$N..Carré.EPS)),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1,nchar(d$EXPORT_STOC_TEXT_EPS_POINT))),
-                            passage = d$N..Passage,
-                            date = as.character(as.Date(d$Date,format="%d.%m.%Y")),
-                            annee=as.numeric(substring(d$Date,7,10)),
-                            p_milieu=toupper(ifelse(d$EPS.P.Milieu=="",NA,d$EPS.P.Milieu)),
-                            p_type=ifelse(d$EPS.P.Type=="",NA,d$EPS.P.Type),
-                            p_cat1=ifelse(d$EPS.P.Cat1=="",NA,d$EPS.P.Cat1),
-                            p_cat2 = ifelse(d$EPS.P.Cat2=="",NA,d$EPS.P.Cat2),
-                            s_milieu=toupper(ifelse(d$EPS.S.Milieu=="",NA,d$EPS.S.Milieu)),
-                            s_type=ifelse(d$EPS.S.Type=="",NA,d$EPS.S.Type),
-                            s_cat1=ifelse(d$EPS.S.Cat1=="",NA,d$EPS.S.Cat1),
-                            s_cat2 = ifelse(d$EPS.S.Cat2=="",NA,d$EPS.S.Cat2),
-                            db = "vigieplume",date_export=dateExport ))
+         d[,`:=`(p_habitat = NA,s_habitat = NA)]
 
-    aa <- table(dd$pk_habitat)
 
-    aa_unique <- names(aa)[aa==1]
-    aa_doublon <- names(aa)[aa>1]
+    dd <- unique(d[,.(id_inventaire, id_point,date,annee,
+                      p_habitat,p_milieu,p_type,p_cat1,p_cat2,
+                      s_habitat,s_milieu,s_type,s_cat1,s_cat2,
+                     db,date_export)])
+    setnames(dd, "id_inventaire","pk_habitat")
+
+ ##   aa <- table(dd[,pk_habitat])
+ ##
+ ##   aa_unique <- names(aa)[aa==1]
+ ##   aa_doublon <- names(aa)[aa>1]
+
+   ## suppression des valeur d habitat abberante
+    habitatPossible <- LETTERS[1:7]
+    dd[,`:=`(p_milieu = toupper(p_milieu),s_milieu = toupper(s_milieu))]
+    dd[!(p_milieu %in% habitatPossible),p_milieu := NA ]
+    dd[!(s_milieu %in% habitatPossible), s_milieu := NA ]
+
+############################################
+####### ICI pour correction d'habitat
+############################################
+
+    ## ## Habitat principal
+    dp<- d[,.(pk_point_annee,id_point,annee,passage_stoc,p_habitat,p_milieu,p_type)]
+
+    ## on ne garde que les deux passages STOC donc on vire passage_stoc == NA et on vire aussi les habitat non renseigne
+    dp <- dp[!(is.na(p_habitat)),]
+
+    dp <- dp[,!("passage_stoc"),with=FALSE]
+    udp <- unique(dp,by=colnames(dp))
+    ## recherche les lignes dubliquees
+    i.dup.dp <- which(duplicated(udp[,.(pk_point_annee,id_point,annee)]))
+    ## table des duplications
+    dup.dp <- udp[i.dup.dp,.(pk_point_annee,id_point,annee)]
+    ## les habitats non dupliques
+    uniq.dp <- udp[!(udp$pk_point_annee %in% dup.dp$pk_point_annee),]
+    did[uniq.dp$pk_point_annee,"p_milieu"] <- uniq.dp$p_milieu
+
+
+    ## gestion des conflits
+    for(i in 1:length(dup.dp)) {
+        dpi <- subset(dp,id_point == dup.dp$id_point[i] & annee >= (dup.dp$annee[i]-1) & annee <= (dup.dp$annee[i]+2) )
+        ## ic indice du conflit
+        ics <- sort(which(dpi$annee == dup.dp$annee[i]))
+                                        # print(dpi)
+        ihab <- NA
+        if(nrow(dpi) %in% ics) {
+            ## si derniere annee on choisi le 2eme passage
+            ihab <- dpi$p_milieu[nrow(dpi)]
+        } else {
+            if(1 %in% ics) {
+                ## si 1er annee on choisi 1er passage si hab[1] == hab[3] sinon 2eme passage
+                if(dpi$p_milieu[1] == dpi$p_milieu[3]) ihab <- dpi$p_milieu[3] else ihab <- dpi$p_milieu[2]
+            } else  {
+                ## 1er passage si hab[1] == hab[3] et hab[2] != hab[-1] sion 2eme passage
+                if(dpi$p_milieu[ics[1]] == dpi$p_milieu[ics[1]+2])
+                    ihab <- dpi$p_milieu[ics[1]]
+                if(dpi$p_milieu[ics[2]] == dpi$p_milieu[ics[2]-2])
+                    ihab <-dpi$p_milieu[ics[2]]
+                if(is.na(ihab))
+                    ihab <-dpi$p_milieu[ics[2]]
+            }
+        }
+
+        did[dup.dp$pk_point_annee[i],"p_milieu"] <- ihab
+    }
+
+
+    ## on rempli les NA en prolongeant les habitats
+
+
+    idpointNA <- unique(subset(did,is.na(p_milieu))$id_point)
+    for(ip in idpointNA) {
+        dpi <- subset(did,id_point==ip)
+        iips <- which(did$id_point == ip)
+        iNAs <- which(is.na(did$"p_milieu") & did$id_point == ip)
+        for(iNA in iNAs) {
+            if(iNA == iips[1]) {
+                ihabPossible <- which(!(is.na(did$"p_milieu")) & did$id_point == ip)
+                if(length(ihabPossible)>0) {
+                    did$p_milieu[iNA] <- did$p_milieu[min(which(!(is.na(did$"p_milieu")) & did$id_point == ip))]
+                    did$p_dernier_descri[iNA] <- 1000
+                } else {
+                    did$p_milieu[iNA] <- NA
+                    did$p_dernier_descri[iNA] <- 1000
+                }
+
+            } else {
+                did$p_milieu[iNA] <- did$p_milieu[iNA-1]
+                did$p_dernier_descri[iNA] <- did$p_dernier_descri[iNA-1]+1
+            }
+
+        }
+
+    }
+
+
+
 
     if(length(aa_doublon)>0) {
 
+        dd_unique <- dd[pk_habitat %in% aa_unique,]
+        dd_doublon <- dd[pk_habitat %in% aa_doublon,]
 
-        dd_unique <- subset(dd,pk_habitat %in% aa_unique)
+        dd_doublon <- unique(dd_doublon[,.(id_point = get_mode(id_point),
+                                           annee = get_mode(annee),
+                                           p_habitat = get_mode(p_habitat),
+                                           p_milieu = get_mode(p_milieu),
+                                           p_type = get_mode(p_type),
+                                           p_cat1 = get_mode(p_cat1),
+                                           p_cat2 = get_mode(p_cat2),
+                                           s_habitat = get_mode(s_habitat),
+                                           s_milieu = get_mode(s_milieu),
+                                           s_type = get_mode(s_type),
+                                           s_cat1 = get_mode(s_cat1),
+                                           s_cat2 = get_mode(s_cat2),
+                                           db = get_mode(db),
+                                           date_export = get_mode(date_export)),by=pk_habitat])
 
-        ddbrut <- data.frame(pk_habitat=paste0(format(as.Date(d$Date,format="%d.%m.%Y"),"%Y%m%d"),
-                                              substring(d$N..Carré.EPS,9,nchar(d$N..Carré.EPS)),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1,nchar(d$EXPORT_STOC_TEXT_EPS_POINT))),
-                             id_point = paste0(substring(d$N..Carré.EPS,9,nchar(d$N..Carré.EPS)),"P",substring(d$EXPORT_STOC_TEXT_EPS_POINT,nchar(d$EXPORT_STOC_TEXT_EPS_POINT)-1,nchar(d$EXPORT_STOC_TEXT_EPS_POINT))),
-                             passage = d$N..Passage,
-                             date = as.character(as.Date(d$Date,format="%d.%m.%Y")),
-                             annee=as.numeric(substring(d$Date,7,10)),
-                             p_milieu=toupper(ifelse(d$EPS.P.Milieu=="",NA,d$EPS.P.Milieu)),
-                             p_type=ifelse(d$EPS.P.Type=="",NA,d$EPS.P.Type),
-                             p_cat1=ifelse(d$EPS.P.Cat1=="",NA,d$EPS.P.Cat1),
-                             p_cat2 = ifelse(d$EPS.P.Cat2=="",NA,d$EPS.P.Cat2),
-                             s_milieu=toupper(ifelse(d$EPS.S.Milieu=="",NA,d$EPS.S.Milieu)),
-                             s_type=ifelse(d$EPS.S.Type=="",NA,d$EPS.S.Type),
-                             s_cat1=ifelse(d$EPS.S.Cat1=="",NA,d$EPS.S.Cat1),
-                             s_cat2 = ifelse(d$EPS.S.Cat2=="",NA,d$EPS.S.Cat2),
-                             db = "vigieplume",date_export=dateExport )
-        dd_doub <- subset(ddbrut,pk_habitat %in% aa_doublon)
+
 
 
 
@@ -983,6 +1224,13 @@ vp2habitat <- function(d,dateExport,repOut="",output=FALSE) {
                             function(x) levels(x)[which.max(table(x))])
 
 
+
+
+        d[,`:=`(p_habitat = paste0(p_milieu,p_type),s_habitat = paste0(s_milieu,s_type))]
+        d[,p_habitat := gsub("NA","",p_habitat)][p_habitat == "", p_habitat := NA]
+        d[,s_habitat := gsub("NA","",s_habitat)][s_habitat == "", s_habitat := NA]
+
+
         ddd <- merge(dd_inv,dd_maj,by="pk_habitat")
 
         ddd <- data.frame(pk_habitat= ddd$pk_habitat,
@@ -1013,7 +1261,7 @@ vp2habitat <- function(d,dateExport,repOut="",output=FALSE) {
 
 
 
-   filename <- paste0(repOut,"habitat_VP_",dateExport,".csv")
+    filename <- paste0(repOut,"habitat_VP_",dateExport,".csv")
     write.csv(dd,filename,row.names=FALSE)
     cat("  (->",filename,")\n")
 
@@ -1120,7 +1368,7 @@ FNat_importation <- function(nomFileFNat,dateExportFNat,repImport="data_raw/",re
     colnames(dCarreONF) <- c("nom_carre","departement","id_carre_onf")
     dCarreONF[,departement := sprintf("%02d", departement)]
 
-      d[dCarreONF,on = .(nom_carre,departement),id_carre_onf := id_carre_onf]
+    d[dCarreONF,on = .(nom_carre,departement),id_carre_onf := id_carre_onf]
 ##################
 
     d_abbrev <- fread("library/abbrev_carre.csv")
@@ -1166,7 +1414,7 @@ FNat_importation <- function(nomFileFNat,dateExportFNat,repImport="data_raw/",re
     d[,heure_fin :=  format(heure+as.difftime(paste0("00:",sprintf("%02d", duree_minute)),"%H:%M"),"%H:%M")]
     d[,heure :=  format(heure,"%H:%M")]
 
-     d[,id_data := paste0(id_inventaire,"_",substring(espece,1,6),"_",distance_contact)]
+    d[,id_data := paste0(id_inventaire,"_",substring(espece,1,6),"_",distance_contact)]
     setorder(d, id_inventaire,espece,distance_contact)
     d <- d[,inventaire_inc := 1:.N,by=id_inventaire]
     d <- d[,inventaire_inc :=sprintf("%02d",inventaire_inc)]
@@ -1253,7 +1501,7 @@ FNat2point <- function(d,dateExport,repOut="",output=TRUE) {
 
 FNat2carre <- function(d,dateExport,repOut="",output=FALSE) {
     library(rgdal)
-     d = dFNat;dateExport=dateExportFNat;output=FALSE;repOut=""
+    d = dFNat;dateExport=dateExportFNat;output=FALSE;repOut=""
     dcarrenat <- read.csv("data_generic/carrenat.csv",encoding="UTF-8")
     dcarrenat$pk_carre <- sprintf("%06d",    dcarrenat$pk_carre)
 
@@ -1280,7 +1528,7 @@ FNat2carre <- function(d,dateExport,repOut="",output=FALSE) {
 
     dd <- merge(dd,dcarrenat,by="pk_carre",all.x=TRUE)
 
-     dd_etude <- unique(data.frame(pk_carre=dd$pk_carre,etude=as.character("STOC_EPS"),stringsAsFactors=FALSE))
+    dd_etude <- unique(data.frame(pk_carre=dd$pk_carre,etude=as.character("STOC_EPS"),stringsAsFactors=FALSE))
     dd_etude$etude[which(dd_etude$pk_carre %in% as.character(unique(subset(dd,etude=="STOC_ONF")$pk_carre)))] <- "STOC_ONF"
 
     dd_maj <- aggregate(subset(dd,select=c("commune","insee","departement")), list(pk_carre=dd$pk_carre), function(x) levels(x)[which.max(table(x))])
@@ -1327,7 +1575,7 @@ FNat2carre <- function(d,dateExport,repOut="",output=FALSE) {
 
 
 
-   filename <- paste0(repOut,"carre_FNat_",dateExport,".csv")
+    filename <- paste0(repOut,"carre_FNat_",dateExport,".csv")
     write.csv(dd,filename,row.names=FALSE)
     cat("  (->",filename,")\n")
 
@@ -1344,7 +1592,7 @@ FNat2carre <- function(d,dateExport,repOut="",output=FALSE) {
 FNat2inventaire <-  function(d,dateExport,version = "V.1",dateConstruction="",repOut="",output=FALSE) {
     library(lubridate)
 
-    #d = dFNat; dateExport = dateExportFNat ;verion = "VV";output=FALSE
+                                        #d = dFNat; dateExport = dateExportFNat ;verion = "VV";output=FALSE
     the_date <- as.Date(as.character(d$dateobs),format="%Y%m%j")
     carre <-  d$id_carre
     point <- substring(d$section_cadastrale,nchar(d$section_cadastrale)-1)
@@ -1353,27 +1601,27 @@ FNat2inventaire <-  function(d,dateExport,version = "V.1",dateConstruction="",re
 
 
     ddbrut <- data.frame(pk_inventaire = paste0(format(the_date,"%Y%m%d"),id_point),
-                            unique_inventaire_fnat=d$unique_inventaire,
-                            etude = d$etude,
-                            id_point = id_point,
-                            id_carre =  d$id_carre,
-                            num_point = as.numeric(point),
-                            date = the_date,
-                            jour_julien =  as.numeric(format(the_date,"%j")),
-                            annee=year(the_date),
-                            passage = d$nbr_echantillon,
-                            info_passage=NA,
-                            heure_debut = format(heure,"%H:%M"),
-                            heure_fin = format(heure+as.difftime(paste0("00:",sprintf("%02d", d$duree)),"%H:%M"),"%H:%M"),
-                            duree_minute = d$duree,
-                            observateur = d$nom,
-                            email = d$email,
-                            nuage = d$nuage,
-                            pluie = d$pluie,
-                            vent = d$vent,
-                            visibilite = d$visibilite,
-                            neige = NA,
-                            db = "FNat",date_export=dateExport,altitude = d$altitude,version=version)
+                         unique_inventaire_fnat=d$unique_inventaire,
+                         etude = d$etude,
+                         id_point = id_point,
+                         id_carre =  d$id_carre,
+                         num_point = as.numeric(point),
+                         date = the_date,
+                         jour_julien =  as.numeric(format(the_date,"%j")),
+                         annee=year(the_date),
+                         passage = d$nbr_echantillon,
+                         info_passage=NA,
+                         heure_debut = format(heure,"%H:%M"),
+                         heure_fin = format(heure+as.difftime(paste0("00:",sprintf("%02d", d$duree)),"%H:%M"),"%H:%M"),
+                         duree_minute = d$duree,
+                         observateur = d$nom,
+                         email = d$email,
+                         nuage = d$nuage,
+                         pluie = d$pluie,
+                         vent = d$vent,
+                         visibilite = d$visibilite,
+                         neige = NA,
+                         db = "FNat",date_export=dateExport,altitude = d$altitude,version=version)
     dd <- unique(ddbrut)
 
 
@@ -1522,7 +1770,7 @@ FNat2inventaire <-  function(d,dateExport,version = "V.1",dateConstruction="",re
 
 
 
-   filename <- paste0(repOut,"inventaire_FNat_",dateConstruction,".csv")
+    filename <- paste0(repOut,"inventaire_FNat_",dateConstruction,".csv")
     write.csv(dd,filename,row.names=FALSE)
     cat("  (->",filename,")\n")
 
@@ -1537,7 +1785,7 @@ FNat2inventaire <-  function(d,dateExport,version = "V.1",dateConstruction="",re
 
 FNat2observation <- function(d,dateExport,dateConstruction="",repOut="",output=FALSE) {
     library(doBy)
-  ##  d = dFNat; dateExport = dateExportFNat ;verion = "VV";output=FALSE
+    ##  d = dFNat; dateExport = dateExportFNat ;verion = "VV";output=FALSE
     dd <- data.frame(pk_observation= paste0(d$dateobs,d$id_carre,"P",substring(d$section_cadastrale,nchar(d$section_cadastrale)-1)),
                      id_fnat_unique_citation = d$unique_citation,
                      id_inventaire =  paste0(d$dateobs,d$id_carre,"P",substring(d$section_cadastrale,nchar(d$section_cadastrale)-1)),
@@ -1724,7 +1972,7 @@ FNat2habitat <- function(d,dateExport,repOut="",output=FALSE) {
 
 
 
-  filename <- paste0(repOut,"habitat_FNat_",dateExport,".csv")
+    filename <- paste0(repOut,"habitat_FNat_",dateExport,".csv")
     write.csv(dd,filename,row.names=FALSE)
     cat("  (->",filename,")\n")
 
@@ -1867,12 +2115,12 @@ createDB_postgres <- function(dateConstruction,nomDBpostgresql=NULL,postgresUser
 
 
     cmd_import <- paste0("psql -U ",postgresUser," ",nomDBpostgresql," < ",repertoire,"library_sql/_sqlR_importationData.sql")
-   # commande <- paste0("psql -U ",postgresUser," ",nomDBpostgresql," -f ",repertoire,"library_sql/_sqlR_importationData.sql")
+                                        # commande <- paste0("psql -U ",postgresUser," ",nomDBpostgresql," -f ",repertoire,"library_sql/_sqlR_importationData.sql")
     myshell(cmd_import)
 
 
-       cmd_import <- paste0("psql -U ",postgresUser," ",nomDBpostgresql," < ",repertoire,"library_sql/postgres_createIndexBBS.sql")
-   # commande <- paste0("psql -U ",postgresUser," ",nomDBpostgresql," -f ",repertoire,"library_sql/postgres_createIndexBBS.sql")
+    cmd_import <- paste0("psql -U ",postgresUser," ",nomDBpostgresql," < ",repertoire,"library_sql/postgres_createIndexBBS.sql")
+                                        # commande <- paste0("psql -U ",postgresUser," ",nomDBpostgresql," -f ",repertoire,"library_sql/postgres_createIndexBBS.sql")
     myshell(cmd_import)
 
     if(postgresql_abondanceSeuil) makeAbondanceTrunc(dateConstruction,seuilAbondance,repertoire,nomDBpostgresql,postgresUser,postgresPassword,repOut=repOut,fileTemp)
@@ -1902,7 +2150,7 @@ createDB_postgres <- function(dateConstruction,nomDBpostgresql=NULL,postgresUser
 
 
 
-  openDB.PSQL <- function(user=NULL,pw=NULL,DBname=NULL){
+openDB.PSQL <- function(user=NULL,pw=NULL,DBname=NULL){
     ## --- initializing parameters for debugging ----
                                         #DBname=NULL;
                                         #user="romain" # windows
@@ -1918,11 +2166,11 @@ createDB_postgres <- function(dateConstruction,nomDBpostgresql=NULL,postgresUser
     }
 
     cat(DBname,user,ifelse(is.null(pw),"","****"),"\n")
-                                         # about when I use windows a have to define the user
-      if(is.null(user)) {
-         con <- dbConnect(drv, dbname=DBname)
-      } else {
-          con <- dbConnect(drv, dbname=DBname,user=user, password=pw)
+                                        # about when I use windows a have to define the user
+    if(is.null(user)) {
+        con <- dbConnect(drv, dbname=DBname)
+    } else {
+        con <- dbConnect(drv, dbname=DBname,user=user, password=pw)
     }
 
     return(con)
@@ -1970,7 +2218,7 @@ maketableGenerique <- function(repertoire=NULL,nomDBpostgresql=NULL,postgresUser
         " with (format csv, header, delimiter ';')\n",sep="",
         file=paste0(repertoire,"library_sql/_sqlR_importationDataTableGenerique.sql"),append=TRUE)
 
-   cat(" \\copy habitat_cat FROM ",repertoire,
+    cat(" \\copy habitat_cat FROM ",repertoire,
         "data_generic/habitat_cat.csv",
         " with (format csv, header, delimiter ';')\n",sep="",
         file=paste0(repertoire,"library_sql/_sqlR_importationDataTableGenerique.sql"),append=TRUE)
@@ -1990,8 +2238,8 @@ maketableGenerique <- function(repertoire=NULL,nomDBpostgresql=NULL,postgresUser
         cat("REMOVE FILE TEMP\n")
         rmfile <- paste0(repertoire,"library_sql/_sqlR_importationDataTableGenerique.sql")
         file.remove(rmfile)
-        #commande <- paste0("rm  ",repertoire,"library_sql/_sqlR_importationDataTableGenerique.sql")
-        #myshell(commande)
+                                        #commande <- paste0("rm  ",repertoire,"library_sql/_sqlR_importationDataTableGenerique.sql")
+                                        #myshell(commande)
     }
 
 
@@ -2042,7 +2290,7 @@ where i.pk_inventaire = o.id_inventaire and (i.passage_stoc = 1 or i.passage_sto
     ##tseuil200 <- data.frame(as.character(aggAbond[,1]),aggAbond[,2][,1],stringsAsFactors=FALSE)
     colnames(tseuil200) <- c("pk_species",paste0("abond200_seuil",seuilAbondanceTxt))
 
-cat("           * All\n")
+    cat("           * All\n")
     tAbondSumAll <- aggregate(abondance~code_sp+id_inventaire,data=tAbond,sum)
     tseuilAll <- aggregate(abondance~code_sp,data=tAbondSumAll,FUN = function(X) ceiling(quantile(X,seuilAbondance))+1)
 
@@ -2168,7 +2416,7 @@ file_seuil,
 point_carre_annee <- function(dateConstruction=NULL,version="V.1",con=NULL,importation=TRUE,repertoire=NULL,nomDBpostgresql=NULL,postgresUser="romain",postgresPassword=NULL) {
 
     require(data.table)
-   dateConstruction=NULL;version="V.1";con=NULL;importation=TRUE;repertoire=NULL;nomDBpostgresql=NULL;postgresUser="romain"
+    dateConstruction=NULL;version="V.1";con=NULL;importation=TRUE;repertoire=NULL;nomDBpostgresql=NULL;postgresUser="romain"
     start <- Sys.time()
     dateExport <- format(start,"%Y-%m-%d")
 
@@ -2367,158 +2615,158 @@ GROUP BY pk_point_annee;"
     ggsave(repOut,"habitatPoint.png",gg)
 
 
-        did$foret_p <- ifelse(did$p_milieu %in% c("A","B"),TRUE,FALSE)
-        did$ouvert_p <- ifelse(did$p_milieu %in% c("C","G"),TRUE,FALSE)
-        did$agri_p <- ifelse(did$p_milieu %in% c("C","D") ,TRUE,FALSE)
-        did$urbain_p <- ifelse(did$p_milieu %in% "E" ,TRUE,FALSE)
+    did$foret_p <- ifelse(did$p_milieu %in% c("A","B"),TRUE,FALSE)
+    did$ouvert_p <- ifelse(did$p_milieu %in% c("C","G"),TRUE,FALSE)
+    did$agri_p <- ifelse(did$p_milieu %in% c("C","D") ,TRUE,FALSE)
+    did$urbain_p <- ifelse(did$p_milieu %in% "E" ,TRUE,FALSE)
 
-        did$foret_ps <- ifelse(did$p_milieu %in% c("A","B") | did$s_milieu %in% c("A","B"),TRUE,FALSE)
-        did$ouvert_ps <- ifelse(did$p_milieu %in% c("C","G") | did$s_milieu %in% c("C","G"),TRUE,FALSE)
-        did$agri_ps <- ifelse(did$p_milieu %in% c("C","D") | did$s_milieu %in% c("C","D") ,TRUE,FALSE)
-        did$urbain_ps <- ifelse(did$p_milieu %in% "E" | did$s_milieu %in% "E" ,TRUE,FALSE)
-
-
-
-
-        ggdid <- melt(subset(did,select=c("id_point","annee","foret_p","ouvert_p","agri_p","urbain_p","foret_ps","ouvert_ps","agri_ps","urbain_ps")),c("id_point","annee"))
-        colnames(ggdid) <- c("id_point","annee","habitat_cat","value")
-        ggdid$value <- as.numeric(ggdid$value)
-
-        tradHabitat1 <- c(foret_p = "foret",ouvert_p = "ouvert",agri_p = "agri",urbain_p = "urbain",
-                          foret_ps = "foret",ouvert_ps = "ouvert",agri_ps = "agri",urbain_ps = "urbain")
-
-        tradHabitat2 <- c(foret_p = "principal",ouvert_p = "principal",agri_p = "principal",urbain_p = "principal",
-                          foret_ps = "secondaire",ouvert_ps = "secondaire",agri_ps = "secondaire",urbain_ps = "secondaire")
+    did$foret_ps <- ifelse(did$p_milieu %in% c("A","B") | did$s_milieu %in% c("A","B"),TRUE,FALSE)
+    did$ouvert_ps <- ifelse(did$p_milieu %in% c("C","G") | did$s_milieu %in% c("C","G"),TRUE,FALSE)
+    did$agri_ps <- ifelse(did$p_milieu %in% c("C","D") | did$s_milieu %in% c("C","D") ,TRUE,FALSE)
+    did$urbain_ps <- ifelse(did$p_milieu %in% "E" | did$s_milieu %in% "E" ,TRUE,FALSE)
 
 
 
-        ggdid$habitat <- tradHabitat1[ggdid$habitat_cat]
+
+    ggdid <- melt(subset(did,select=c("id_point","annee","foret_p","ouvert_p","agri_p","urbain_p","foret_ps","ouvert_ps","agri_ps","urbain_ps")),c("id_point","annee"))
+    colnames(ggdid) <- c("id_point","annee","habitat_cat","value")
+    ggdid$value <- as.numeric(ggdid$value)
+
+    tradHabitat1 <- c(foret_p = "foret",ouvert_p = "ouvert",agri_p = "agri",urbain_p = "urbain",
+                      foret_ps = "foret",ouvert_ps = "ouvert",agri_ps = "agri",urbain_ps = "urbain")
+
+    tradHabitat2 <- c(foret_p = "principal",ouvert_p = "principal",agri_p = "principal",urbain_p = "principal",
+                      foret_ps = "secondaire",ouvert_ps = "secondaire",agri_ps = "secondaire",urbain_ps = "secondaire")
+
+
+
+    ggdid$habitat <- tradHabitat1[ggdid$habitat_cat]
     ggdid$cat <- tradHabitat2[ggdid$habitat_cat]
 
     ggdid <- subset(ggdid,annee > 2000)
 
-        ggdid <- aggregate(value ~ annee + habitat + cat, ggdid, sum)
+    ggdid <- aggregate(value ~ annee + habitat + cat, ggdid, sum)
 
-        tminmax <- c(min(ggdid$annee),max(ggdid$annee))
-        vecLegend <- c(foret="Milieux forestiers",ouvert="Milieux ouverts", agri="Milieux agricoles",urbain="Milieux urbains")
-        vecCouleur <- c(foret="#276325",ouvert="#69e566", agri="#f0db30",urbain="#c0122a")
+    tminmax <- c(min(ggdid$annee),max(ggdid$annee))
+    vecLegend <- c(foret="Milieux forestiers",ouvert="Milieux ouverts", agri="Milieux agricoles",urbain="Milieux urbains")
+    vecCouleur <- c(foret="#276325",ouvert="#69e566", agri="#f0db30",urbain="#c0122a")
 
-        vecLine <- c(principal=1,secondaire=3)
-        vecLineLegend <- c(principal="Habitat principale",secondaire="Habitat principale\nou secondaire")
+    vecLine <- c(principal=1,secondaire=3)
+    vecLineLegend <- c(principal="Habitat principale",secondaire="Habitat principale\nou secondaire")
 
-        gg <- ggplot(ggdid,aes(x=annee,y=value,colour=habitat,linetype=cat)) + geom_line(size=1.1,alpha = .8) + geom_point(size=1.5,alpha=.8)
-        gg <- gg + scale_x_continuous(limits=tminmax)
-        gg <- gg + scale_colour_manual(values=vecCouleur,labels=vecLegend,name="Habitat")
-        gg <- gg + scale_linetype_manual(values=vecLine,labels=vecLineLegend,name="")
-        gg <- gg + labs(title="Nombre de points STOC-EPS par grand type d'habitat",x="",y="")
-        ggsave(repOut,"habitatNbPoint.png",gg)
+    gg <- ggplot(ggdid,aes(x=annee,y=value,colour=habitat,linetype=cat)) + geom_line(size=1.1,alpha = .8) + geom_point(size=1.5,alpha=.8)
+    gg <- gg + scale_x_continuous(limits=tminmax)
+    gg <- gg + scale_colour_manual(values=vecCouleur,labels=vecLegend,name="Habitat")
+    gg <- gg + scale_linetype_manual(values=vecLine,labels=vecLineLegend,name="")
+    gg <- gg + labs(title="Nombre de points STOC-EPS par grand type d'habitat",x="",y="")
+    ggsave(repOut,"habitatNbPoint.png",gg)
 
-        did$id_carre <- substr(did$id_point,1,6)
-
-
+    did$id_carre <- substr(did$id_point,1,6)
 
 
-        did <- did[,c("pk_point_annee","id_point","id_carre","annee","qualite_inventaire_stoc","p_milieu","s_milieu","p_dernier_descri","foret_p","ouvert_p","agri_p","urbain_p","foret_ps","ouvert_ps","agri_ps","urbain_ps")]
-
-        did$date_export <- dateExport
-        did$version <- version
-        write.table(did,paste0("data_DB_import/point_annee.csv"),row.names=FALSE,na = "",quote=TRUE, sep=";",dec=".",fileEncoding="UTF-8")
 
 
-        ## table carre
-        cat("     2- construction table carre_annee\n")
+    did <- did[,c("pk_point_annee","id_point","id_carre","annee","qualite_inventaire_stoc","p_milieu","s_milieu","p_dernier_descri","foret_p","ouvert_p","agri_p","urbain_p","foret_ps","ouvert_ps","agri_ps","urbain_ps")]
+
+    did$date_export <- dateExport
+    did$version <- version
+    write.table(did,paste0("data_DB_import/point_annee.csv"),row.names=FALSE,na = "",quote=TRUE, sep=";",dec=".",fileEncoding="UTF-8")
 
 
-        did$id_carre <- substr(did$id_point,1,6)
+    ## table carre
+    cat("     2- construction table carre_annee\n")
 
-        dcarre <- aggregate(did[,c("qualite_inventaire_stoc","foret_p","ouvert_p","agri_p","urbain_p","foret_ps","ouvert_ps","agri_ps","urbain_ps")],list(did$id_carre ,did$annee), FUN = function(x) sum(as.numeric(x)))
 
-        colnames(dcarre) <-c("id_carre","annee","qualite_inventaire_stoc",paste0("nbp_",c("foret_p","ouvert_p","agri_p","urbain_p","foret_ps","ouvert_ps","agri_ps","urbain_ps")))
+    did$id_carre <- substr(did$id_point,1,6)
 
-        dcarre$qualite_inventaire_stoc <- dcarre$qualite_inventaire_stoc/10
-        dcarre$foret_p <- dcarre$nbp_foret_p >= 5
-        dcarre$foret_ps <- dcarre$nbp_foret_ps >= 5
-        dcarre$ouvert_p <- dcarre$nbp_ouvert_p >= 5
-        dcarre$ouvert_ps <- dcarre$nbp_ouvert_ps >= 5
-        dcarre$agri_p <- dcarre$nbp_agri_p >= 5
-        dcarre$agri_ps <- dcarre$nbp_agri_ps >= 5
-        dcarre$urbain_p <- dcarre$nbp_urbain_p >= 5
-        dcarre$urbain_ps <- dcarre$nbp_urbain_ps >= 5
+    dcarre <- aggregate(did[,c("qualite_inventaire_stoc","foret_p","ouvert_p","agri_p","urbain_p","foret_ps","ouvert_ps","agri_ps","urbain_ps")],list(did$id_carre ,did$annee), FUN = function(x) sum(as.numeric(x)))
+
+    colnames(dcarre) <-c("id_carre","annee","qualite_inventaire_stoc",paste0("nbp_",c("foret_p","ouvert_p","agri_p","urbain_p","foret_ps","ouvert_ps","agri_ps","urbain_ps")))
+
+    dcarre$qualite_inventaire_stoc <- dcarre$qualite_inventaire_stoc/10
+    dcarre$foret_p <- dcarre$nbp_foret_p >= 5
+    dcarre$foret_ps <- dcarre$nbp_foret_ps >= 5
+    dcarre$ouvert_p <- dcarre$nbp_ouvert_p >= 5
+    dcarre$ouvert_ps <- dcarre$nbp_ouvert_ps >= 5
+    dcarre$agri_p <- dcarre$nbp_agri_p >= 5
+    dcarre$agri_ps <- dcarre$nbp_agri_ps >= 5
+    dcarre$urbain_p <- dcarre$nbp_urbain_p >= 5
+    dcarre$urbain_ps <- dcarre$nbp_urbain_ps >= 5
 
 
     dcarre2 <- subset(dcarre,annee>2000 & qualite_inventaire_stoc > 0)
 
-        ggdid <- melt(subset(dcarre2,select=c("id_carre","annee","foret_p","ouvert_p","agri_p","urbain_p","foret_ps","ouvert_ps","agri_ps","urbain_ps")),c("id_carre","annee"))
-        colnames(ggdid) <- c("id_point","annee","habitat_cat","value")
-        ggdid$value <- as.numeric(ggdid$value)
+    ggdid <- melt(subset(dcarre2,select=c("id_carre","annee","foret_p","ouvert_p","agri_p","urbain_p","foret_ps","ouvert_ps","agri_ps","urbain_ps")),c("id_carre","annee"))
+    colnames(ggdid) <- c("id_point","annee","habitat_cat","value")
+    ggdid$value <- as.numeric(ggdid$value)
 
-        tradHabitat1 <- c(foret_p = "foret",ouvert_p = "ouvert",agri_p = "agri",urbain_p = "urbain",
-                          foret_ps = "foret",ouvert_ps = "ouvert",agri_ps = "agri",urbain_ps = "urbain")
+    tradHabitat1 <- c(foret_p = "foret",ouvert_p = "ouvert",agri_p = "agri",urbain_p = "urbain",
+                      foret_ps = "foret",ouvert_ps = "ouvert",agri_ps = "agri",urbain_ps = "urbain")
 
-        tradHabitat2 <- c(foret_p = "principal",ouvert_p = "principal",agri_p = "principal",urbain_p = "principal",
-                          foret_ps = "secondaire",ouvert_ps = "secondaire",agri_ps = "secondaire",urbain_ps = "secondaire")
-
-
-
-        ggdid$habitat <- tradHabitat1[ggdid$habitat_cat]
-        ggdid$cat <- tradHabitat2[ggdid$habitat_cat]
-
-
-        ggdid <- aggregate(value ~ annee + habitat + cat, ggdid, sum)
-
-        tminmax <- c(min(ggdid$annee),max(ggdid$annee)-1)
-        vecLegend <- c(foret="Milieux forestiers",ouvert="Milieux ouverts", agri="Milieux agricoles",urbain="Milieux urbains")
-        vecCouleur <- c(foret="#276325",ouvert="#69e566", agri="#f0db30",urbain="#c0122a")
-
-        vecLine <- c(principal=1,secondaire=3)
-        vecLineLegend <- c(principal="Habitat principale",secondaire="Habitat principale\nou secondaire")
-
-        gg <- ggplot(ggdid,aes(x=annee,y=value,colour=habitat,linetype=cat)) + geom_line(size=1.1,alpha=.8)+ geom_point(size=1.5,alpha=.8)
-        gg <- gg + scale_x_continuous(limits=tminmax)
-        gg <- gg + scale_colour_manual(values=vecCouleur,labels=vecLegend,name="Habitat")
-        gg <- gg + scale_linetype_manual(values=vecLine,labels=vecLineLegend,name="")
-        gg <- gg + labs(title="Nombre de carrés STOC-EPS par grand type d'habitat",subtitle="au moins 5 points de l'habitat",x="",y="")
-        ggsave(repOut,"habitatNbCarre.png",gg)
+    tradHabitat2 <- c(foret_p = "principal",ouvert_p = "principal",agri_p = "principal",urbain_p = "principal",
+                      foret_ps = "secondaire",ouvert_ps = "secondaire",agri_ps = "secondaire",urbain_ps = "secondaire")
 
 
 
-        dcarre$pk_carre_annee <- paste0(dcarre$annee,dcarre$id_carre)
-
-        dcarre <- dcarre[,c("pk_carre_annee","id_carre","annee","qualite_inventaire_stoc","foret_p","ouvert_p","agri_p","urbain_p","foret_ps","ouvert_ps","agri_ps","urbain_ps",paste0("nbp_",c("foret_p","ouvert_p","agri_p","urbain_p","foret_ps","ouvert_ps","agri_ps","urbain_ps")))]
-
-        dcarre$date_export <- dateExport
-        dcarre$version <- version
-
-        write.table(dcarre,paste0("data_DB_import/carre_annee.csv"),row.names=FALSE,na = "",quote=TRUE, sep=";",dec=".",fileEncoding="UTF-8")
+    ggdid$habitat <- tradHabitat1[ggdid$habitat_cat]
+    ggdid$cat <- tradHabitat2[ggdid$habitat_cat]
 
 
-        if(importation) {
-            cat("     3- Importation des tables\n")
+    ggdid <- aggregate(value ~ annee + habitat + cat, ggdid, sum)
 
-            cat("\n -- RUN SQL --\n")
-            commande <- paste0("psql -U ",postgresUser," ",nomDBpostgresql," < ",repertoire,"library_sql/postgres_point_carre_annee.sql")
-            myshell(commande)
+    tminmax <- c(min(ggdid$annee),max(ggdid$annee)-1)
+    vecLegend <- c(foret="Milieux forestiers",ouvert="Milieux ouverts", agri="Milieux agricoles",urbain="Milieux urbains")
+    vecCouleur <- c(foret="#276325",ouvert="#69e566", agri="#f0db30",urbain="#c0122a")
 
+    vecLine <- c(principal=1,secondaire=3)
+    vecLineLegend <- c(principal="Habitat principale",secondaire="Habitat principale\nou secondaire")
 
-
-            cat(" \\copy point_annee FROM ",repertoire,
-                "data_DB_import/point_annee.csv",
-                " with (format csv, header, delimiter ';')\n",sep="",
-                file=paste0(repertoire,"library_sql/_sqlR_importationData_point_carre_annee.sql"),append=FALSE)
-            cat(" \\copy carre_annee FROM ",repertoire,
-                "data_DB_import/carre_annee.csv",
-                " with (format csv, header, delimiter ';')\n",sep="",
-                file=paste0(repertoire,"library_sql/_sqlR_importationData_point_carre_annee.sql"),append=TRUE)
-
-      commande <- paste0("psql -U ",postgresUser," ",nomDBpostgresql," < ",repertoire,"library_sql/_sqlR_importationData_point_carre_annee.sql")
-            myshell(commande)
+    gg <- ggplot(ggdid,aes(x=annee,y=value,colour=habitat,linetype=cat)) + geom_line(size=1.1,alpha=.8)+ geom_point(size=1.5,alpha=.8)
+    gg <- gg + scale_x_continuous(limits=tminmax)
+    gg <- gg + scale_colour_manual(values=vecCouleur,labels=vecLegend,name="Habitat")
+    gg <- gg + scale_linetype_manual(values=vecLine,labels=vecLineLegend,name="")
+    gg <- gg + labs(title="Nombre de carrés STOC-EPS par grand type d'habitat",subtitle="au moins 5 points de l'habitat",x="",y="")
+    ggsave(repOut,"habitatNbCarre.png",gg)
 
 
-        }
 
+    dcarre$pk_carre_annee <- paste0(dcarre$annee,dcarre$id_carre)
+
+    dcarre <- dcarre[,c("pk_carre_annee","id_carre","annee","qualite_inventaire_stoc","foret_p","ouvert_p","agri_p","urbain_p","foret_ps","ouvert_ps","agri_ps","urbain_ps",paste0("nbp_",c("foret_p","ouvert_p","agri_p","urbain_p","foret_ps","ouvert_ps","agri_ps","urbain_ps")))]
+
+    dcarre$date_export <- dateExport
+    dcarre$version <- version
+
+    write.table(dcarre,paste0("data_DB_import/carre_annee.csv"),row.names=FALSE,na = "",quote=TRUE, sep=";",dec=".",fileEncoding="UTF-8")
+
+
+    if(importation) {
+        cat("     3- Importation des tables\n")
+
+        cat("\n -- RUN SQL --\n")
+        commande <- paste0("psql -U ",postgresUser," ",nomDBpostgresql," < ",repertoire,"library_sql/postgres_point_carre_annee.sql")
+        myshell(commande)
+
+
+
+        cat(" \\copy point_annee FROM ",repertoire,
+            "data_DB_import/point_annee.csv",
+            " with (format csv, header, delimiter ';')\n",sep="",
+            file=paste0(repertoire,"library_sql/_sqlR_importationData_point_carre_annee.sql"),append=FALSE)
+        cat(" \\copy carre_annee FROM ",repertoire,
+            "data_DB_import/carre_annee.csv",
+            " with (format csv, header, delimiter ';')\n",sep="",
+            file=paste0(repertoire,"library_sql/_sqlR_importationData_point_carre_annee.sql"),append=TRUE)
+
+        commande <- paste0("psql -U ",postgresUser," ",nomDBpostgresql," < ",repertoire,"library_sql/_sqlR_importationData_point_carre_annee.sql")
+        myshell(commande)
 
 
     }
+
+
+
+}
 
 
 
@@ -2724,12 +2972,12 @@ import_shape <- function(vecShape=c("pra_93","L93_10x10_TerreMer"),vecNameTable=
 
 
                                         # require(ggplot2)
-## vecShape=c("pra_93","L93_10x10_TerreMer");vecNameTable=c("pra","maille_atlas");vecEPSG = NULL
-##    repertoire=NULL;savePostgres=TRUE;nomDBpostgresql=NULL;postgresUser="romain"; fileTemp=FALSE;
+    ## vecShape=c("pra_93","L93_10x10_TerreMer");vecNameTable=c("pra","maille_atlas");vecEPSG = NULL
+    ##    repertoire=NULL;savePostgres=TRUE;nomDBpostgresql=NULL;postgresUser="romain"; fileTemp=FALSE;
 
 
     cat("\n  Importation des shapes files \n   ------------------------------------\n")
-cat(vecShape)
+    cat(vecShape)
 
 
     if(is.null(repertoire)) repertoire <- paste0(getwd(),"/")
@@ -2761,7 +3009,7 @@ cat(vecShape)
 
 ### HERE !!!
 
-            cmd <- paste0("psql -U ",postgresUser," -d ",nomDBpostgresql," < ",fsql)
+        cmd <- paste0("psql -U ",postgresUser," -d ",nomDBpostgresql," < ",fsql)
         ## \copy species_list_indicator FROM c:/git/BirdLab/generic_data/espece_list_indicateur.csv with (format csv, header, delimiter ',')
         myshell(cmd,invisible=TRUE)
 

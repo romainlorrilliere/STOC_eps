@@ -1,10 +1,10 @@
 
-install_pack <- function(vecPackage=c("RODBC","dplyr","data.table","rgdal","lubridate","RPostgreSQL","doBy","reshape2","sf","maptools","maps","animation","dplyr","data.table")) {
+install_pack <- function(vecPackage=c("RODBC","dplyr","data.table","rgdal","lubridate","RPostgreSQL","doBy","reshape2","sf","maptools","maps","dplyr","data.table")) {
 ip <- installed.packages()[,1]
 
 for(p in vecPackage){
     if (!(p %in% ip))
-        install.packages(pkgs=p,repos = "http://cran.univ-paris1.fr/",dependencies=TRUE)
+        install.packages(pkgs=p,repos = "https://pbil.univ-lyon1.fr/CRAN/",dependencies=TRUE)
     require(p,character.only=TRUE)
 }
 
@@ -95,6 +95,12 @@ trad_fr2eng <- function(d) {
 
 
  get_mode <- function(x) {
-        ux <- unique(x)
-        ux[which.max(tabulate(match(x, ux)))]
+        ux <- unique(na.omit(x))
+        ux[which.max(tabulate(match(x, ux)))][1]
+    }
+
+
+concat_value <- function(x) {
+     ux <- unique(na.omit(x))
+      return(paste(ux,collapse=" | "))
     }

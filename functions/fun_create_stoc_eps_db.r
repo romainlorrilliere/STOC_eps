@@ -1118,6 +1118,7 @@ vp2habitat <- function(d,dateExport,repOut="",output=FALSE) {
     dd[is.na(s_habitat_sug), s_habitat_sug := s_habitat]
     dd[,s_habitat_consistent := s_habitat == s_habitat_sug]
 
+ ##   dd[,habitat_point_id := paste0(id_point,p_habitat_sug,s_habitat_sug)]
 
 
 

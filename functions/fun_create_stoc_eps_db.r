@@ -1070,10 +1070,9 @@ vp2observation <- function(d,dateExport,dateConstruction="",repOut="",output=FAL
 
 vp2habitat <- function(d,dateExport,repOut="",output=FALSE) {
 
- ##    d <- dVP
+  ##  d <- dVP
 
-         d[,`:=`(p_habitat = NA,s_habitat = NA)]
-
+    d[,`:=`(p_habitat = NA,s_habitat = NA)]
 
     dd <- unique(d[,.(id_inventaire, id_point,date,annee,
                       p_habitat,p_milieu,p_type,p_cat1,p_cat2,
@@ -1092,11 +1091,9 @@ vp2habitat <- function(d,dateExport,repOut="",output=FALSE) {
     dd[!(p_milieu %in% milieuPossible),p_milieu := NA ]
     dd[!(s_milieu %in% milieuPossible), s_milieu := NA ]
 
-
     dd[,`:=`(p_habitat = paste0(p_milieu,p_type),s_habitat = paste0(s_milieu,s_type))]
     dd[,p_habitat := gsub("NA","",p_habitat)][p_habitat == "", p_habitat := NA]
     dd[,s_habitat := gsub("NA","",s_habitat)][s_habitat == "", s_habitat := NA]
-
 
     setorder(dd, date,id_point,p_habitat,s_habitat)
     ## ## Habitat principal
@@ -1118,8 +1115,32 @@ vp2habitat <- function(d,dateExport,repOut="",output=FALSE) {
     dd[is.na(s_habitat_sug), s_habitat_sug := s_habitat]
     dd[,s_habitat_consistent := s_habitat == s_habitat_sug]
 
- ##   dd[,habitat_point_id := paste0(id_point,p_habitat_sug,s_habitat_sug)]
+    dd[,habitat_point_id := paste0(id_point,p_habitat_sug,s_habitat_sug)]
+    setorder(dd, date,id_point,p_habitat,s_habitat)
+    dd[,inc_habitat_point := 1:.N,by = habitat_point_id]
+    setorder(dd,id_point,inc_point,inc_habitat_point)
 
+    inc_decal <- c(0,dd[1:(nrow(dd)-1),inc_habitat_point])
+    dd[,habitat_point_inc_id := 1+ cumsum(as.numeric(inc_habitat_point <= inc_decal))]
+
+    dd_habitat_inc_pre <- unique( dd[,.(id_point,p_habitat_sug, s_habitat_sug,last_date=max(date)),by = habitat_point_inc_id])
+
+    setnames(dd_habitat_inc_pre,c("p_habitat_sug","s_habitat_sug","last_date"),paste0(c("p_habitat_sug","s_habitat_sug","last_date"),"_pre"))
+      dd_habitat_inc_pre[, habitat_point_inc_id_pre :=  habitat_point_inc_id ]
+    dd_habitat_inc_pre[, habitat_point_inc_id :=  habitat_point_inc_id +1]
+
+
+    dd <- merge(dd,dd_habitat_inc_pre,by=c("habitat_point_inc_id","id_point"),all.x=TRUE)
+
+
+  dd_habitat_inc_post <- unique( dd[,.(id_point,p_habitat_sug, s_habitat_sug,first_date = min(date)),by = habitat_point_inc_id])
+
+    setnames(dd_habitat_inc_post,c("p_habitat_sug","s_habitat_sug","first_date"),paste0(c("p_habitat_sug","s_habitat_sug","first_date"),"_post"))
+      dd_habitat_inc_post[, habitat_point_inc_id_post :=  habitat_point_inc_id ]
+    dd_habitat_inc_post[, habitat_point_inc_id :=  habitat_point_inc_id -1]
+
+
+    dd <- merge(dd,dd_habitat_inc_post,by=c("habitat_point_inc_id","id_point"),all.x=TRUE)
 
 
 ############################################

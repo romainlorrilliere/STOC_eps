@@ -75,9 +75,9 @@ f_prepaData <- function(dateExportVP="2019-01-10",nomFileVP="export_stoc_1001201
     dateExportVP=c("2019-11-25","2019-12-03");nomFileVP=c("export_stoc_25112019.txt","export_stoc_onf_03122019.txt");
     dateExportFNat="2017-01-04"; importACCESS=FALSE;
     nomFileFNat="FNat_plat_2017-01-04.csv";nomDBFNat="Base FNat2000.MDB";importationDataBrut_FNat=TRUE;importationDataBrut_VP=TRUE;
-    constructionPoint=TRUE;constructionCarre=TRUE;constructionInventaire=TRUE;
-    constructionObservation = TRUE; constructionHabitat = TRUE;
-    dateConstruction=NULL;postgresql_import=TRUE;nomDBpostgresql=NULL;seuilAbondance = .99
+    constructionPoint=FALSE;constructionCarre=FALSE;constructionInventaire=FALSE;
+    constructionObservation = FALSE; constructionHabitat = TRUE;
+    dateConstruction="2022-01-19";postgresql_import=TRUE;nomDBpostgresql=NULL;seuilAbondance = .99
     nomDBpostgresql="stoc_eps";
     postgresql_createAll=TRUE;postgresUser="romain";
     postGIS_initiation=TRUE;import_shape=FALSE;repertoire=NULL;postgresql_abondanceSeuil=TRUE;historiqueCarre=TRUE;
@@ -1070,6 +1070,8 @@ vp2observation <- function(d,dateExport,dateConstruction="",repOut="",output=FAL
 
 vp2habitat <- function(d,dateExport,repOut="",output=FALSE) {
 
+ ##    d <- dVP
+
          d[,`:=`(p_habitat = NA,s_habitat = NA)]
 
 
@@ -1085,16 +1087,45 @@ vp2habitat <- function(d,dateExport,repOut="",output=FALSE) {
  ##   aa_doublon <- names(aa)[aa>1]
 
    ## suppression des valeur d habitat abberante
-    habitatPossible <- LETTERS[1:7]
+    milieuPossible <- LETTERS[1:7]
     dd[,`:=`(p_milieu = toupper(p_milieu),s_milieu = toupper(s_milieu))]
-    dd[!(p_milieu %in% habitatPossible),p_milieu := NA ]
-    dd[!(s_milieu %in% habitatPossible), s_milieu := NA ]
+    dd[!(p_milieu %in% milieuPossible),p_milieu := NA ]
+    dd[!(s_milieu %in% milieuPossible), s_milieu := NA ]
+
+
+    dd[,`:=`(p_habitat = paste0(p_milieu,p_type),s_habitat = paste0(s_milieu,s_type))]
+    dd[,p_habitat := gsub("NA","",p_habitat)][p_habitat == "", p_habitat := NA]
+    dd[,s_habitat := gsub("NA","",s_habitat)][s_habitat == "", s_habitat := NA]
+
+
+    setorder(dd, date,id_point,p_habitat,s_habitat)
+    ## ## Habitat principal
+    dd[,inc_point := 1:.N,by = id_point]
+    dd_pre <- dd[,.(id_point,inc_point, p_habitat,s_habitat)]
+    dd_pre[,inc_point := inc_point + 1]
+    setnames(dd_pre,c("p_habitat","s_habitat"),c("p_habitat_pre","s_habitat_pre"))
+       dd_post <- dd[,.(id_point,inc_point, p_habitat,s_habitat)]
+    dd_post[,inc_point := inc_point - 1]
+    setnames(dd_post,c("p_habitat","s_habitat"),c("p_habitat_post","s_habitat_post"))
+
+    dd <- merge(dd,dd_pre,by=c("id_point","inc_point"),all.x=TRUE)
+    dd <- merge(dd,dd_post,by=c("id_point","inc_point"),all.x=TRUE)
+
+    dd[,p_habitat_sug := ifelse(p_habitat_pre == p_habitat_post,p_habitat_pre,NA)]
+    dd[is.na(p_habitat_sug), p_habitat_sug := p_habitat]
+    dd[,p_habitat_consistent := p_habitat == p_habitat_sug ]
+    dd[,s_habitat_sug := ifelse(s_habitat_pre == s_habitat_post,s_habitat_pre,NA)]
+    dd[is.na(s_habitat_sug), s_habitat_sug := s_habitat]
+    dd[,s_habitat_consistent := s_habitat == s_habitat_sug]
+
+
+
 
 ############################################
 ####### ICI pour correction d'habitat
 ############################################
 
-    ## ## Habitat principal
+
     dp<- d[,.(pk_point_annee,id_point,annee,passage_stoc,p_habitat,p_milieu,p_type)]
 
     ## on ne garde que les deux passages STOC donc on vire passage_stoc == NA et on vire aussi les habitat non renseigne

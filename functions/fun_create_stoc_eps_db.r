@@ -243,9 +243,9 @@ f_prepaData <- function(dateExportVP="2019-01-10",nomFileVP="export_stoc_1001201
 
         if(importationDataBrut_VP) {
             cat(" construction -> ")
-            ddVP.hab <- vp2habitat(dVP,dateExportVP,repOut,TRUE)
+            ddVP.hab <- vp2habitat(dVP,dateExportVP,dateConstruction,repOut,TRUE)
         } else {
-            filename <- paste0(repOut,"habitat_VP_",dateExport,".csv")
+            filename <- paste0(repOut,"habitat_VP_",dateConstruction,".csv")
             cat(" importation \n",filename," -> ")
             ddVP.inv <- fread(filename)
         }
@@ -1070,7 +1070,7 @@ vp2observation <- function(d,dateExport,dateConstruction="",repOut="",output=FAL
 
 vp2habitat <- function(d,dateExport,repOut="",output=FALSE) {
 
-  ##  d <- dVP
+    d <- dVP
 
     d[,`:=`(p_habitat = NA,s_habitat = NA)]
 
@@ -1096,18 +1096,23 @@ vp2habitat <- function(d,dateExport,repOut="",output=FALSE) {
     dd[,s_habitat := gsub("NA","",s_habitat)][s_habitat == "", s_habitat := NA]
 
     setorder(dd, date,id_point,p_habitat,s_habitat)
-    ## ## Habitat principal
+    ## construction de la suggestion de correction en fonction des habitats saisis pour les inventaire precedent et suivant
+
+    ## inventaire precedent
     dd[,inc_point := 1:.N,by = id_point]
-    dd_pre <- dd[,.(id_point,inc_point, p_habitat,s_habitat)]
+    dd_pre <- dd[,.(id_point,inc_point, p_habitat,s_habitat,date)]
     dd_pre[,inc_point := inc_point + 1]
-    setnames(dd_pre,c("p_habitat","s_habitat"),c("p_habitat_pre","s_habitat_pre"))
-       dd_post <- dd[,.(id_point,inc_point, p_habitat,s_habitat)]
+    setnames(dd_pre,c("p_habitat","s_habitat","date"),c("p_habitat_pre","s_habitat_pre","date_pre"))
+
+    ## inventaire suivent
+    dd_post <- dd[,.(id_point,inc_point, p_habitat,s_habitat,date)]
     dd_post[,inc_point := inc_point - 1]
-    setnames(dd_post,c("p_habitat","s_habitat"),c("p_habitat_post","s_habitat_post"))
+    setnames(dd_post,c("p_habitat","s_habitat","date"),c("p_habitat_post","s_habitat_post","date_post"))
 
     dd <- merge(dd,dd_pre,by=c("id_point","inc_point"),all.x=TRUE)
     dd <- merge(dd,dd_post,by=c("id_point","inc_point"),all.x=TRUE)
 
+    ## suggestion
     dd[,p_habitat_sug := ifelse(p_habitat_pre == p_habitat_post,p_habitat_pre,NA)]
     dd[is.na(p_habitat_sug), p_habitat_sug := p_habitat]
     dd[,p_habitat_consistent := p_habitat == p_habitat_sug ]
@@ -1120,199 +1125,47 @@ vp2habitat <- function(d,dateExport,repOut="",output=FALSE) {
     dd[,inc_habitat_point := 1:.N,by = habitat_point_id]
     setorder(dd,id_point,inc_point,inc_habitat_point)
 
+    ## construction de suggestion pour les p_habitat NA en fonction des saisie precedentes et suivante
+
+    ## creation d'un indentifiant de serie temporel d'habitat constant
     inc_decal <- c(0,dd[1:(nrow(dd)-1),inc_habitat_point])
     dd[,habitat_point_inc_id := 1+ cumsum(as.numeric(inc_habitat_point <= inc_decal))]
 
+    ## table des saisies précedentes
     dd_habitat_inc_pre <- unique( dd[,.(id_point,p_habitat_sug, s_habitat_sug,last_date=max(date)),by = habitat_point_inc_id])
 
     setnames(dd_habitat_inc_pre,c("p_habitat_sug","s_habitat_sug","last_date"),paste0(c("p_habitat_sug","s_habitat_sug","last_date"),"_pre"))
-      dd_habitat_inc_pre[, habitat_point_inc_id_pre :=  habitat_point_inc_id ]
+    dd_habitat_inc_pre[, habitat_point_inc_id_pre :=  habitat_point_inc_id ]
     dd_habitat_inc_pre[, habitat_point_inc_id :=  habitat_point_inc_id +1]
 
 
     dd <- merge(dd,dd_habitat_inc_pre,by=c("habitat_point_inc_id","id_point"),all.x=TRUE)
 
-
-  dd_habitat_inc_post <- unique( dd[,.(id_point,p_habitat_sug, s_habitat_sug,first_date = min(date)),by = habitat_point_inc_id])
+    ## table des saisies suivante
+    dd_habitat_inc_post <- unique( dd[,.(id_point,p_habitat_sug, s_habitat_sug,first_date = min(date)),by = habitat_point_inc_id])
 
     setnames(dd_habitat_inc_post,c("p_habitat_sug","s_habitat_sug","first_date"),paste0(c("p_habitat_sug","s_habitat_sug","first_date"),"_post"))
-      dd_habitat_inc_post[, habitat_point_inc_id_post :=  habitat_point_inc_id ]
+    dd_habitat_inc_post[, habitat_point_inc_id_post :=  habitat_point_inc_id ]
     dd_habitat_inc_post[, habitat_point_inc_id :=  habitat_point_inc_id -1]
+
 
 
     dd <- merge(dd,dd_habitat_inc_post,by=c("habitat_point_inc_id","id_point"),all.x=TRUE)
 
+    ## suggestion si p_habitat_sug est NA
+    dd[,time_last_declaration_sug_j := ifelse(p_habitat_consistent==TRUE,0,ifelse(!is.na(p_habitat_sug),difftime(as.Date(date),as.Date(date_pre),units="days"),NA))]
+    dd[is.na(p_habitat_sug) & !(is.na( p_habitat_sug_pre)),time_last_declaration_sug_j :=difftime(as.Date(date),as.Date(last_date_pre),units="days") ]
+    dd[is.na(p_habitat_sug) & !(is.na( p_habitat_sug_pre)),p_habitat_sug := p_habitat_sug_pre ]
+    dd[is.na(p_habitat_sug) & !(is.na( p_habitat_sug_pre)),s_habitat_sug := s_habitat_sug_pre ]
+    dd[is.na(p_habitat_sug) & !(is.na( p_habitat_sug_pre)),p_habitat_consistent := FALSE ]
 
-############################################
-####### ICI pour correction d'habitat
-############################################
+    ## suggestion si p_habitat_sug est encore NA
+    dd[is.na(p_habitat_sug) & !(is.na( p_habitat_sug_post)),time_last_declaration_sug_j :=difftime(as.Date(date),as.Date(first_date_post),units="days") ]
+    dd[is.na(p_habitat_sug) & !(is.na( p_habitat_sug_post)),p_habitat_sug := p_habitat_sug_post ]
+    dd[is.na(p_habitat_sug) & !(is.na( p_habitat_sug_post)),s_habitat_sug := s_habitat_sug_post ]
+    dd[is.na(p_habitat_sug) & !(is.na( p_habitat_sug_post)),p_habitat_consistent := FALSE ]
 
-
-    dp<- d[,.(pk_point_annee,id_point,annee,passage_stoc,p_habitat,p_milieu,p_type)]
-
-    ## on ne garde que les deux passages STOC donc on vire passage_stoc == NA et on vire aussi les habitat non renseigne
-    dp <- dp[!(is.na(p_habitat)),]
-
-    dp <- dp[,!("passage_stoc"),with=FALSE]
-    udp <- unique(dp,by=colnames(dp))
-    ## recherche les lignes dubliquees
-    i.dup.dp <- which(duplicated(udp[,.(pk_point_annee,id_point,annee)]))
-    ## table des duplications
-    dup.dp <- udp[i.dup.dp,.(pk_point_annee,id_point,annee)]
-    ## les habitats non dupliques
-    uniq.dp <- udp[!(udp$pk_point_annee %in% dup.dp$pk_point_annee),]
-    did[uniq.dp$pk_point_annee,"p_milieu"] <- uniq.dp$p_milieu
-
-
-    ## gestion des conflits
-    for(i in 1:length(dup.dp)) {
-        dpi <- subset(dp,id_point == dup.dp$id_point[i] & annee >= (dup.dp$annee[i]-1) & annee <= (dup.dp$annee[i]+2) )
-        ## ic indice du conflit
-        ics <- sort(which(dpi$annee == dup.dp$annee[i]))
-                                        # print(dpi)
-        ihab <- NA
-        if(nrow(dpi) %in% ics) {
-            ## si derniere annee on choisi le 2eme passage
-            ihab <- dpi$p_milieu[nrow(dpi)]
-        } else {
-            if(1 %in% ics) {
-                ## si 1er annee on choisi 1er passage si hab[1] == hab[3] sinon 2eme passage
-                if(dpi$p_milieu[1] == dpi$p_milieu[3]) ihab <- dpi$p_milieu[3] else ihab <- dpi$p_milieu[2]
-            } else  {
-                ## 1er passage si hab[1] == hab[3] et hab[2] != hab[-1] sion 2eme passage
-                if(dpi$p_milieu[ics[1]] == dpi$p_milieu[ics[1]+2])
-                    ihab <- dpi$p_milieu[ics[1]]
-                if(dpi$p_milieu[ics[2]] == dpi$p_milieu[ics[2]-2])
-                    ihab <-dpi$p_milieu[ics[2]]
-                if(is.na(ihab))
-                    ihab <-dpi$p_milieu[ics[2]]
-            }
-        }
-
-        did[dup.dp$pk_point_annee[i],"p_milieu"] <- ihab
-    }
-
-
-    ## on rempli les NA en prolongeant les habitats
-
-
-    idpointNA <- unique(subset(did,is.na(p_milieu))$id_point)
-    for(ip in idpointNA) {
-        dpi <- subset(did,id_point==ip)
-        iips <- which(did$id_point == ip)
-        iNAs <- which(is.na(did$"p_milieu") & did$id_point == ip)
-        for(iNA in iNAs) {
-            if(iNA == iips[1]) {
-                ihabPossible <- which(!(is.na(did$"p_milieu")) & did$id_point == ip)
-                if(length(ihabPossible)>0) {
-                    did$p_milieu[iNA] <- did$p_milieu[min(which(!(is.na(did$"p_milieu")) & did$id_point == ip))]
-                    did$p_dernier_descri[iNA] <- 1000
-                } else {
-                    did$p_milieu[iNA] <- NA
-                    did$p_dernier_descri[iNA] <- 1000
-                }
-
-            } else {
-                did$p_milieu[iNA] <- did$p_milieu[iNA-1]
-                did$p_dernier_descri[iNA] <- did$p_dernier_descri[iNA-1]+1
-            }
-
-        }
-
-    }
-
-
-
-
-    if(length(aa_doublon)>0) {
-
-        dd_unique <- dd[pk_habitat %in% aa_unique,]
-        dd_doublon <- dd[pk_habitat %in% aa_doublon,]
-
-        dd_doublon <- unique(dd_doublon[,.(id_point = get_mode(id_point),
-                                           annee = get_mode(annee),
-                                           p_habitat = get_mode(p_habitat),
-                                           p_milieu = get_mode(p_milieu),
-                                           p_type = get_mode(p_type),
-                                           p_cat1 = get_mode(p_cat1),
-                                           p_cat2 = get_mode(p_cat2),
-                                           s_habitat = get_mode(s_habitat),
-                                           s_milieu = get_mode(s_milieu),
-                                           s_type = get_mode(s_type),
-                                           s_cat1 = get_mode(s_cat1),
-                                           s_cat2 = get_mode(s_cat2),
-                                           db = get_mode(db),
-                                           date_export = get_mode(date_export)),by=pk_habitat])
-
-
-
-
-
-        col_num2char <- c("passage","p_type","p_cat1","p_cat2",
-                          "s_type","s_cat1","s_cat2")
-        col_as.factor <- c("passage",
-                           "p_type","p_cat1","p_cat2",
-                           "s_type","s_cat1","s_cat2",
-                           "p_milieu","s_milieu")
-
-        for(col in col_num2char){
-            dd_doub[,col] <- as.character(dd_doub[,col])
-            dd_doub[,col] <- ifelse(is.na(dd_doub[,col]),"-99999",dd_doub[,col])
-
-        }
-
-
-
-        for(col in col_as.factor){
-            dd_doub[,col] <- as.factor(dd_doub[,col])
-        }
-
-
-        dd_inv <- unique(subset(dd_doub,select =c("pk_habitat","id_point","date","annee")))
-
-        dd_maj <- aggregate(subset(dd_doub,select=c("passage","p_type","p_cat1","p_cat2",
-                                                    "s_type","s_cat1","s_cat2",
-                                                    "p_milieu","s_milieu")),
-                            list(pk_habitat=dd_doub$pk_habitat),
-                            function(x) levels(x)[which.max(table(x))])
-
-
-
-
-        d[,`:=`(p_habitat = paste0(p_milieu,p_type),s_habitat = paste0(s_milieu,s_type))]
-        d[,p_habitat := gsub("NA","",p_habitat)][p_habitat == "", p_habitat := NA]
-        d[,s_habitat := gsub("NA","",s_habitat)][s_habitat == "", s_habitat := NA]
-
-
-        ddd <- merge(dd_inv,dd_maj,by="pk_habitat")
-
-        ddd <- data.frame(pk_habitat= ddd$pk_habitat,
-                          id_point = ddd$id_point,
-                          passage = ddd$passage,
-                          date = ddd$date,
-                          annee= ddd$annee,
-                          p_milieu=ddd$p_milieu,
-                          p_type=ddd$p_type,
-                          p_cat1=ddd$p_cat1,
-                          p_cat2 = ddd$p_cat2,
-                          s_milieu=ddd$s_milieu,
-                          s_type=ddd$s_type,
-                          s_cat1=ddd$s_cat1,
-                          s_cat2 = ddd$s_cat2,
-                          db = "vigieplume",date_export=dateExport)
-
-
-        for(col in col_num2char){
-            ddd[,col] <-  as.numeric(as.character(ddd[,col]))
-            ddd[,col] <- ifelse(ddd[,col] == -99999,NA,ddd[,col])
-        }
-
-
-        dd <- rbind(dd_unique,ddd)
-    }
-    dd <- dd[order(as.character(dd$pk_habitat)),]
-
-
+    dd <- dd[,.(pk_habitat, id_point, date,annee,p_habitat_sug,p_habitat,p_habitat_consistent,p_milieu,p_type,p_cat1, p_cat2, s_habitat_sug,s_habitat,s_habitat_consistent, s_milieu, s_type, s_cat1, s_cat2 ,time_last_declaration_sug_j, db ,date_export)]
 
     filename <- paste0(repOut,"habitat_VP_",dateExport,".csv")
     write.csv(dd,filename,row.names=FALSE)
@@ -2109,7 +1962,7 @@ union.observation <- function(ddFNat.obs,ddVP.obs,dateConstruction,repOut="") {
 
 union.habitat <- function(ddFNat.hab,ddVP.hab,dateConstruction,repOut="") {
     dd.hab <- rbind(ddVP.hab,subset(ddFNat.hab,!(pk_habitat %in% unique(ddVP.hab$pk_habitat))))
-    dd.hab <- dd.hab[order(as.character(dd.hab$pk_habitat)),]
+    dd.hab <- dd.hab[order(as.character(dd.hab$pk_abitat)),]
     dd.habDoublon <- subset(ddFNat.hab,(pk_habitat %in% unique(ddVP.hab$pk_habitat)))
     if(nrow(dd.habDoublon)>0) {
         file <- paste0(repOut,"_doublonHabitatExclu_",dateConstruction,".csv")

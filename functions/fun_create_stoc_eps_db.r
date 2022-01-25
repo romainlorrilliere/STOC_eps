@@ -1068,9 +1068,9 @@ vp2observation <- function(d,dateExport,dateConstruction="",repOut="",output=FAL
 }
 
 
-vp2habitat <- function(d,dateExport,repOut="",output=FALSE) {
+vp2habitat <- function(d,dateExport,dateConstruction="",repOut="",output=FALSE) {
 
-    d <- dVP
+##    d <- dVP
 
     d[,`:=`(p_habitat = NA,s_habitat = NA)]
 
@@ -1167,7 +1167,7 @@ vp2habitat <- function(d,dateExport,repOut="",output=FALSE) {
 
     dd <- dd[,.(pk_habitat, id_point, date,annee,p_habitat_sug,p_habitat,p_habitat_consistent,p_milieu,p_type,p_cat1, p_cat2, s_habitat_sug,s_habitat,s_habitat_consistent, s_milieu, s_type, s_cat1, s_cat2 ,time_last_declaration_sug_j, db ,date_export)]
 
-    filename <- paste0(repOut,"habitat_VP_",dateExport,".csv")
+    filename <- paste0(repOut,"habitat_VP_",dateConstruction,".csv")
     write.csv(dd,filename,row.names=FALSE)
     cat("  (->",filename,")\n")
 
@@ -1225,7 +1225,7 @@ FNat_importation <- function(nomFileFNat,dateExportFNat,repImport="data_raw/",re
 
 
         } else {
-
+            ## renome les colonnes
             di <- setnames(di,old=d_nom[,old],new=d_nom[,new])
             cat("  DONE ! \n")
 
@@ -1233,7 +1233,6 @@ FNat_importation <- function(nomFileFNat,dateExportFNat,repImport="data_raw/",re
             d <- rbind(d,di)
         }
     }
-    ## renome les colonnes
 
 
 
@@ -1275,7 +1274,7 @@ FNat_importation <- function(nomFileFNat,dateExportFNat,repImport="data_raw/",re
     dCarreONF[,departement := sprintf("%02d", departement)]
 
     d[dCarreONF,on = .(nom_carre,departement),id_carre_onf := id_carre_onf]
-##################
+
 
     d_abbrev <- fread("library/abbrev_carre.csv")
     d_abbrev_l <- d_abbrev[lower == TRUE ,]
@@ -1303,8 +1302,11 @@ FNat_importation <- function(nomFileFNat,dateExportFNat,repImport="data_raw/",re
     d[etude == "STOC_SITE" & nchar(gsub(' ','',id_carre)) > 10, id_carre := gsub(" ","",paste0(substr(id_carre,1,3),substr(id_carre,nchar(id_carre)-2,nchar(id_carre)),nchar(id_carre),nchar(gsub("[^aeiouy]","",id_carre, ignore.case = TRUE))))]
 
 
-    d[etude == "STOC_EPS",id_carre := substring(nom_carre,13,nchar(nom_carre))]
+    d[etude == "STOC_EPS"|substring(nom_carre,1,9)=="Carré EPS" ,id_carre := substring(nom_carre,13,nchar(nom_carre))]
     d[, id_carre:= paste0(departement,id_carre)]
+
+##################
+
     d[etude == "STOC_SITE", id_carre := paste0("S",toupper(id_carre))]
 
     d[,id_carre := ifelse(is.na(id_carre_onf),id_carre,id_carre_onf)]
@@ -1331,6 +1333,8 @@ FNat_importation <- function(nomFileFNat,dateExportFNat,repImport="data_raw/",re
 
 
     d[,db:="fnat"]
+    d[,commune := NA]
+
     d[,info_passage := NA]
     d[,passage_stoc := NA]
     d[,espece := toupper(espece)]
@@ -1370,6 +1374,36 @@ FNat2point <- function(d,dateExport,repOut="",output=TRUE) {
                                         #   d <- dFNat
                                         #   dateExport <- dateExportFNat
                                         #    output=TRUE
+
+d <- dFNat
+
+    dagg <- d[, .(commune = get_mode(commune),
+                  site = get_mode(site),
+                  insee = get_mode(insee),
+                  nom_point = get_mode(nom_point),
+                  departement = get_mode(departement),
+                  altitude = median(altitude),
+                  latitude_wgs84 = median(latitude_wgs84),
+                  longitude_wgs84 = median(longitude_wgs84),
+                  latitude_wgs84_sd = sd(latitude_wgs84),
+                  longitude_wgs84_sd = sd(longitude_wgs84),
+                  date_export = max(date_export)),
+              by=id_point]
+
+    dd <- unique(d[,.(id_point,id_carre,num_point)])
+    dd[,db := "vigieplume"]
+
+    setkey(dagg,"id_point")
+    setkey(dd,"id_point")
+
+    dd <- dd[dagg]
+    setnames(dd,old=c("id_point"),new=c("pk_point"))
+
+    colorder <- c("pk_point","id_carre","commune","site","insee","departement","nom_point","num_point","altitude","longitude_wgs84","latitude_wgs84","longitude_wgs84_sd","latitude_wgs84_sd","db","date_export")
+    setcolorder(dd,colorder)
+
+
+
 
 
     dagg <- d[, .(insee = get_mode(insee),

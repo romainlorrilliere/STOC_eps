@@ -931,12 +931,12 @@ vp2inventaire <- function(d,dateExport,version = "V.1",dateConstruction="",repOu
     dd[jour_julien > 60 & jour_julien <= 91 , passage_stoc :=  0] # 01/03 -> 31/03
 
     ## en plaine
-    dd[jour_julien > 91 & jour_julien <= 130 & altitude < 800,passage_stoc :=  1] #01/04 -> 08/05
-    dd[jour_julien >= 131 & jour_julien <= 167 & altitude < 800,passage_stoc :=  2] #09/05 -> 15/06
+    dd[jour_julien > 91 & jour_julien <= 128 & altitude < 800,passage_stoc :=  1] #01/04 -> 08/05
+    dd[jour_julien >= 129 & jour_julien <= 167 & altitude < 800,passage_stoc :=  2] #09/05 -> 15/06
 
     ## en altitude
-    dd[jour_julien > 91 & jour_julien <= 135 & altitude >= 800,passage_stoc :=  1] #01/04 -> 14/0
-    dd[jour_julien >= 136 & jour_julien <= 167 & altitude >= 800,passage_stoc :=  2] #15/05 -> 15/06
+    dd[jour_julien > 91 & jour_julien <= 134 & altitude >= 800,passage_stoc :=  1] #01/04 -> 14/05
+    dd[jour_julien >= 135 & jour_julien <= 167 & altitude >= 800,passage_stoc :=  2] #15/05 -> 15/06
     ## tardif
     dd[jour_julien > 167 & jour_julien <= 197 , passage_stoc :=  3] # 16/06 -> 15/07
 

@@ -102,7 +102,7 @@ f_prepaData <- function(dateExportVP="2019-01-10",nomFileVP="export_stoc_1001201
     ##
 
 
-    cat("\n\n   Les paramètres:\n---------------------\n\n")
+    cat("\n\n   Les parametres:\n---------------------\n\n")
 
     cat("dateExportVP: ",dateExportVP,"\n")
     cat("nomFileVP: ",nomFileVP,"\n")

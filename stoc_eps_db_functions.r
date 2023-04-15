@@ -9,7 +9,7 @@
 if(!("stoc_eps_db_functions.r" %in% dir())) stop("ERREUR !!! \n Changer le repertoire de travail \n STOC_eps/\n\n")
 
 
-source("functions/fun_create_stoc_eps_db.r")
+source("functions/fun_create_stoc_eps_db_utf8.r")
 
 
 
@@ -111,7 +111,7 @@ prepaData <- function(dateExportVP,nomFileVP,nomFileVP_ONF,
 
 prepare_carrenat <- function() {
 
-carrenat <- st_read("data_sig/carrenat.shp")
+    carrenat <- st_read("data_sig/carrenat.shp")
 
     library(ggplot2)
     gg <- ggplot(carrenat) + geom_sf(aes(fill=NUMNAT),colour=NA)

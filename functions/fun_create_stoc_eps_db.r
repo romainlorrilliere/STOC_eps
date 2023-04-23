@@ -205,7 +205,7 @@ f_prepaData <- function(dateExportVP="2019-01-10",nomFileVP="export_stoc_1001201
         if(importationDataBrut_VP) {
             cat(" construction -> ")
             ddVP.inv <- vp2inventaire(dVP,dateExportVP,version,dateConstruction,repOut,TRUE)
-        } else {
+         } else {
             filename <- paste0(repOut,"inventaire_VP_",dateConstruction,".csv")
             cat(" importation  \n",filename," -> ")
             ddVP.inv <- fread(filename)
@@ -846,10 +846,10 @@ vp2carre <- function(d,dateConstruction,repOut="",output=FALSE) {
 
 vp2inventaire <- function(d,dateExport,version = "V.1",dateConstruction="",repOut="",output=FALSE) {
 
-    ## dateExport=dateExportVP
-    ## d=dVP
+     dateExport=dateExportVP
+     d=dVP
 
-    require(maptools)
+    #require(maptools)
 
     dd <- dVP[,.(unique_inventaire_fnat=NA,
                etude = etude,
@@ -1188,10 +1188,12 @@ vp2habitat <- function(d,dateExport,dateConstruction="",repOut="",output=FALSE) 
 
 FNat_importation <- function(nomFileFNat,dateExportFNat,repImport="data_raw/",repOut) {
 
-    ## file=nomDBFNat;fichierAPlat=nomFileFNat;output=TRUE;repImport="data_raw/"
+    file=nomDBFNat;fichierAPlat=nomFileFNat;output=TRUE;repImport="data_raw/"
 
     require(data.table)
     require(sf)
+    require(stringi)
+    require(stringr)
 
     d_nom <- data.table(old=c("unique_inventaire","unique_citation","numobs","etude","unique_localite","section_cadastrale","lieudit","pays","dept","insee","dateobs","heure","duree","nbr_echantillon","nom","email","altitude","classe","espece","nbr_ind","classe_dist","longitude_lambert_93","latitude_lambert_93","nuage","pluie","vent","visibilite","hab_p_milieu","hab_p_type_milieu","hab_p_cat_1","hab_p_cat_2","hab_p_sous_cat_1","hab_p_sous_cat_2","hab_s_milieu","hab_s_type_milieu","hab_s_cat_1","hab_s_cat_2","hab_s_sous_cat_1","hab_s_sous_cat_2"),new=c("id_inventaire_fnat","id_fnat_unique_citation","numobs","etude","unique_localite","nom_point","nom_carre","pays","departement","insee","date","heure","duree_minute","passage_observateur","observateur","email","altitude","classe","espece","abondance","distance_contact","longitude_lambert_93","latitude_lambert_93","nuage","pluie","vent","visibilite","p_milieu","p_type","p_cat1","p_cat2","p_sous_cat1","p_sous_cat2","s_milieu","s_type","s_cat1","s_cat2","s_sous_cat1","s_sous_cat2"))
 
@@ -1210,7 +1212,7 @@ FNat_importation <- function(nomFileFNat,dateExportFNat,repImport="data_raw/",re
         di <- read.csv(nomFileFNati,h=TRUE,fileEncoding="iso-8859-1",stringsAsFactors=FALSE)
         cat("  DONE ! \n")
         flush.console()
-        di <- data.table(di)
+        setDT(di)
         cat(" vérification colonnes\n")
 
         col_abs <- setdiff(d_nom[,old],colnames(di))
@@ -1290,24 +1292,36 @@ FNat_importation <- function(nomFileFNat,dateExportFNat,repImport="data_raw/",re
 
     d[etude == "STOC_SITE", id_carre := toupper(id_carre)]
 
-    vec <- c("LE ","LA ","LES ","DE ","A ","AU ","L'","DU ","DES ","D'","& ")
+    vec <- c("LE ","LA ","LES ","DE ","A ","AU ","L'","DU ","DES ","D'","& ","ET ")
     d[etude == "STOC_SITE",id_carre := mgsub(vec,"",id_carre)]
+
+
     pat <- c(d_abbrev_u[,txt])
     repl <-  c(d_abbrev_u[,abbrev])
     d[etude == "STOC_SITE",id_carre := mgsub(pat,repl,id_carre)]
     vec <- c("(",")","_","-",".",",")
     d[etude == "STOC_SITE",id_carre := mgsub(vec," ",id_carre)]
 
-    d[etude == "STOC_SITE" & nchar(gsub(' ','',id_carre)) <= 10 ,id_carre := gsub(' ','',id_carre)]
-    d[etude == "STOC_SITE" & nchar(gsub(' ','',id_carre)) > 10, id_carre := gsub(" ","",paste0(substr(id_carre,1,3),substr(id_carre,nchar(id_carre)-2,nchar(id_carre)),nchar(id_carre),nchar(gsub("[^aeiouy]","",id_carre, ignore.case = TRUE))))]
+     d[etude == "STOC_SITE", id_carre := str_to_title(id_carre)]
+
+    d[etude == "STOC_SITE",`:=`(flag = TRUE,n_char =  nchar(gsub(' ','',id_carre)), n_word = stri_count_words(id_carre))]
+
+    d[flag == TRUE & n_char <= 8 ,`:=`(id_carre = paste0("S",departement,gsub(' ','',id_carre)),flag = FALSE)]
+    d[flag == TRUE & n_word <= 2 ,`:=`(id_carre = paste0("S",departement,gsub("(\\b([A-z0-9]{1,4}))|.", "\\1", string, perl=TRUE)),flag = FALSE)]
+    d[flag == TRUE & n_word <= 4 ,`:=`(id_carre = paste0("S",departement,gsub("(\\b([A-z0-9]{1,2}))|.", "\\1", string, perl=TRUE)),flag = FALSE)]
+    d[flag == TRUE & n_word <= 8 ,`:=`(id_carre = paste0("S",departement,gsub("(\\b([A-z0-9]{1}))|.", "\\1", string, perl=TRUE)),flag = FALSE)]
+    d[flag == TRUE & n_word <= 8 ,`:=`(id_carre = paste0("S",departement,substr(gsub("(\\b([A-z0-9]{1}))|.", "\\1", string, perl=TRUE),1,8)),flag = FALSE)]
+
+  d[,`:=`(flag = NULL,n_char =  NULL, n_word = NULL)]
 
 
-    d[etude == "STOC_EPS"|substring(nom_carre,1,9)=="Carré EPS" ,id_carre := substring(nom_carre,13,nchar(nom_carre))]
-    d[, id_carre:= paste0(departement,id_carre)]
+
+    d[etude == "STOC_EPS"|substring(nom_carre,1,9)=="Carré EPS" ,id_carre := paste0(departement,substring(nom_carre,13,nchar(nom_carre)))]
+
 
 ##################
 
-    d[etude == "STOC_SITE", id_carre := paste0("S",toupper(id_carre))]
+
 
     d[,id_carre := ifelse(is.na(id_carre_onf),id_carre,id_carre_onf)]
 

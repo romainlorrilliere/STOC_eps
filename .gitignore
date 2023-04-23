@@ -2,6 +2,9 @@ data_raw/
 data/
 *archive/
 data_DB_import/
+data_DB_import_FNat/
+data_DB_import_VigiePlume_V1/
+data_DB_import_VigiePlume_V2/
 output_import/
 output/
 export/
@@ -42,3 +45,4 @@ library_sql/#postgres_createTableBBS.sql#
 
 toDo.org~
 library/abbrev_carre.~csv
+*Copie*

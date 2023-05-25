@@ -1,6 +1,6 @@
 old;new
-id;id_obs_org
-code_inventaire;code_inventaire_org
+id;id_raw_observation
+code_inventaire;id_raw_inventaire
 etude;etude
 site;site
 insee;insee
@@ -35,5 +35,3 @@ eps_s_cat1;s_cat1
 eps_s_cat2;s_cat2
 eps_s_ss_cat1;s_sous_cat1
 eps_s_ss_cat2;s_sous_cat2
-id_obs_org;id_raw_observation
-code_inventaire_org;id_raw_inventaire

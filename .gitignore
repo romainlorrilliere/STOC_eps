@@ -1,5 +1,9 @@
 data_raw/
 data/
+data_Faune/
+!data_Faune/.gitkeep
+data_FNat/
+data_VP/
 *archive/
 data_DB_import/
 data_DB_import_FNat/

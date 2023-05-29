@@ -1,5 +1,10 @@
 
 
+    require(data.table)
+    require(sf)
+    require(stringi)
+    require(stringr)
+
 
 #####################################################
 ##  Les fonctions d'importation
@@ -136,6 +141,8 @@ faune_importation <- function(nomFileFaune,dateExportFaune,repImport="data_faune
     d[,jour_julien := as.numeric(format(date,"%j"))]
     d[,annee := as.numeric(format(date,"%Y"))]
     d[,id_inventaire := paste0(format(date,"%Y%m%d"),id_point)]
+    d[,heure := substr(heure,1,5)]
+    d[,heure_fin := substr(heure_fin,1,5)]
     d[,duree_minute := as.numeric(difftime(as.POSIXct(heure_fin,format="%H:%M"),as.POSIXct(heure,format="%H:%M")))]
     d[,distance_contact := gsub("> ","sup_",distance_contact)]
     d[,distance_contact := gsub("< ","inf_",distance_contact)]

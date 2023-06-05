@@ -4,7 +4,7 @@
 
 createDB_postgres <- function(dateConstruction,nomDBpostgresql=NULL,postgresUser="postgres",postgresPassword=NULL,postgresql_createAll = TRUE,postGIS_initiation=TRUE,postgresql_abondanceSeuil=TRUE,seuilAbondance = .99,repertoire=NULL,repOut="",fileTemp=FALSE) {
 
-dateConstruction  ;nomDBpostgresql=NULL;postgresUser="postgres";postgresPassword=NULL;postgresql_createAll = TRUE;postGIS_initiation=TRUE;postgresql_abondanceSeuil=TRUE;seuilAbondance = .99;repertoire=NULL;repOut=repOutData;fileTemp=FALSE
+## dateConstruction  ;nomDBpostgresql=NULL;postgresUser="postgres";postgresPassword=NULL;postgresql_createAll = TRUE;postGIS_initiation=TRUE;postgresql_abondanceSeuil=TRUE;seuilAbondance = .99;repertoire=NULL;repOut=repOutData;fileTemp=FALSE
 
 
     if(is.null(dateConstruction)) dateConstruction = format(start, "%Y-%m-%d")

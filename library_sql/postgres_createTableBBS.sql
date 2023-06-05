@@ -163,7 +163,7 @@ create TABLE habitat
        p_habitat_sug varchar(3),
        p_habitat varchar(3),
        p_habitat_collapse varchar(25),
-       p_milieu_sug varchar(1)
+       p_milieu_sug varchar(1),
        p_milieu varchar(1),
        p_type int,
        p_cat1 int,
@@ -198,7 +198,7 @@ create TABLE point_annee
        habitat_collapse varchar(50),
        p_habitat_collapse varchar(50),
        s_habitat_collapse varchar(50),
-       time_declaration_sug_j int,
+       time_declaration_sug_j double precision,
        foret_p boolean,
        foret_ps boolean,
        ouvert_p boolean,
@@ -214,10 +214,10 @@ create TABLE point_annee
        habitat_consistent_pass1 boolean,
        p_habitat_sug_pass1 varchar(3),
        p_habitat_pass1 varchar(3),
-       p_milieu_pass1 varchar(1),
+       p_milieu_sug_pass1 varchar(1),
        s_habitat_sug_pass1 varchar(3),
        s_habitat_pass1 varchar(3),
-       s_milieu_pass1 varchar(3),
+       s_milieu_sug_pass1 varchar(3),
        info_heure_debut_pass2 varchar(10),
        nb_description_pass2 int,
        habitat_sug_pass2 varchar(7),
@@ -225,10 +225,10 @@ create TABLE point_annee
        habitat_consistent_pass2 boolean,
        p_habitat_sug_pass2 varchar(3),
        p_habitat_pass2 varchar(3),
-       p_milieu_pass2 varchar(1),
+       p_milieu_sug_pass2 varchar(1),
        s_habitat_sug_pass2 varchar(3),
        s_habitat_pass2 varchar(3),
-       s_milieu_pass2 varchar(3));
+       s_milieu_sug_pass2 varchar(3));
 
 
 

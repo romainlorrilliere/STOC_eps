@@ -597,7 +597,8 @@ raw2habitat <- function(d,dateConstruction="",repOutInfo="", repOutData="",outpu
     dd[s_habitat_sug %in% c("__","_"), s_habitat_sug := NA]
     dd[p_habitat %in% c("__","_"), p_habitat := NA]
     dd[s_habitat %in%c("__","_"), s_habitat := NA]
-    dd[,`:=`(p_milieu_sug := substr(p_habitat_sug,1,2),s_milieu_sug := substr(s_habitat_sug,1,2))]
+
+    dd[,`:=`(p_milieu_sug = substr(p_habitat_sug,1,1),s_milieu_sug = substr(s_habitat_sug,1,1))]
 
     dd <- dd[,.(pk_habitat, id_point, date,annee,nb_description,habitat_sug,habitat,habitat_collapse, habitat_consistent,time_declaration_sug_j,p_habitat_sug,p_habitat,p_habitat_collapse,p_milieu_sug,p_milieu,p_type,p_cat1, p_cat2, p_sous_cat1,p_sous_cat2,s_habitat_sug,s_habitat,s_habitat_collapse,s_milieu_sug,s_milieu, s_type, s_cat1, s_cat2 ,s_sous_cat1,s_sous_cat2, db ,date_export)]
 
@@ -662,8 +663,8 @@ setnames(dd.hab2,colonnes, paste0(colonnes,"_pass2"))
     the_col <- c("pk_point_annee","id_point","id_carre","annee",  "qualite_inventaire_stoc","nombre_passage_stoc_annee","info_passage_an",
                  "habitat_collapse","p_habitat_collapse","s_habitat_collapse","time_declaration_sug_j",
                  "foret_p","foret_ps","ouvert_p","ouvert_ps","agri_p","agri_ps","urbain_p","urbain_ps",
-                 "info_heure_debut_pass1","nb_description_pass1","habitat_sug_pass1","habitat_collapse_pass1","habitat_consistent_pass1","p_habitat_sug_pass1","p_habitat_pass1","p_milieu_pass1","s_habitat_sug_pass1","s_habitat_pass1","s_milieu_pass1",
-                 "info_heure_debut_pass2","nb_description_pass2","habitat_sug_pass2","habitat_collapse_pass2","habitat_consistent_pass2","p_habitat_sug_pass2","p_habitat_pass2","p_milieu_pass2","s_habitat_sug_pass2","s_habitat_pass2","s_milieu_pass2")
+                 "info_heure_debut_pass1","nb_description_pass1","habitat_sug_pass1","habitat_collapse_pass1","habitat_consistent_pass1","p_habitat_sug_pass1","p_habitat_pass1","p_milieu_sug_pass1","s_habitat_sug_pass1","s_habitat_pass1","s_milieu_sug_pass1",
+                 "info_heure_debut_pass2","nb_description_pass2","habitat_sug_pass2","habitat_collapse_pass2","habitat_consistent_pass2","p_habitat_sug_pass2","p_habitat_pass2","p_milieu_sug_pass2","s_habitat_sug_pass2","s_habitat_pass2","s_milieu_sug_pass2")
 
 
 
@@ -681,7 +682,7 @@ setnames(dd.hab2,colonnes, paste0(colonnes,"_pass2"))
 
 
 
-point_annee2carre_annee <- function(d.point_annnee,dateConstruction="",repOutInfo="", repOutData="",output=FALSE) {
+point_annee2carre_annee <- function(d.point_annee,dateConstruction="",repOutInfo="", repOutData="",output=FALSE) {
 
     dd.hab <- d.point_annee[,.(
         qualite_inventaire_stoc  = sum(qualite_inventaire_stoc) / 10,

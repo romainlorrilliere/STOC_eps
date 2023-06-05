@@ -26,13 +26,13 @@
 ### 2017-11-14 modification de l'entete de colonne des nom de point de la table vigieplume
 
 
-  library(RODBC)
-    library(reshape)
-    library(data.table)
-    library(rgdal)
-    library(sf)
-    library(dplyr)
-    library(qdap)
+library(RODBC)
+library(reshape)
+library(data.table)
+library(rgdal)
+library(sf)
+library(dplyr)
+library(qdap)
 
 
 if("STOC_eps_database" %in% dir()) setwd("STOC_eps_database")
@@ -48,15 +48,16 @@ f_prepaData <- function(
                         dateExportVP=c("2019-11-25","2019-12-03"),nomFileVP=c("export_stoc_25112019.txt","export_stoc_onf_03122019.txt"),
                         dateExportFNat="2017-01-04",
                         importACCESS=FALSE,
-                        nomFileFNat="FNat_plat_2017-01-04.csv",nomDBFNat="Base FNat2000.MDB",
+                        nomFileFNat="FNat_plat_2017-01-04.csv",nomDBFNat="Base FNat2000.MDB",import_raw = TRUE,
                         importationDataBrut_FNat=TRUE,importationDataBrut_VP=TRUE,importationDataBrut_Faune=TRUE,
+                        construction_tables = TRUE,
                         constructionPoint=TRUE,constructionCarre=TRUE,constructionInventaire=TRUE,
                         constructionObservation = TRUE, constructionSeuil = TRUE, constructionHabitat = TRUE,
-                        constructionPointAnnee = TRUE, constructionCarreAnnee,
+                        constructionPointAnnee = TRUE, constructionCarreAnnee = TRUE,
                         dateConstruction="2023-05-25",postgresql_import=TRUE,
                         nomDBpostgresql="stoc_eps",
-                        postgresql_createAll=TRUE,postgresUser="postgres",
-                        postGIS_initiation=TRUE,import_shape=FALSE,repertoire=NULL,fileTemp=FALSEE)
+                        postgresql_createAll=TRUE,postgresUser="postgres",postgresPassword="postgres",
+                        postGIS_initiation=TRUE,import_shape=FALSE,repertoire=NULL,fileTemp=FALSE)
 {
 
 
@@ -86,7 +87,7 @@ f_prepaData <- function(
 ##    constructionPoint=TRUE;constructionCarre=TRUE;constructionInventaire=TRUE;
 ##    constructionObservation = TRUE; constructionSeuil = TRUE; constructionHabitat = TRUE;
 ##    constructionPointAnnee = TRUE; constructionCarreAnnee;
-##    dateConstruction="2023-05-25";postgresql_import=TRUE;nomDBpostgresql=NULL;seuilAbondance = .99
+## dateConstruction=NULL;postgresql_import=TRUE;nomDBpostgresql=NULL;seuilAbondance = .99
 ##    nomDBpostgresql="stoc_eps";
 ##    postgresql_createAll=TRUE;postgresUser="postgres";
 ##    postGIS_initiation=TRUE;import_shape=FALSE;repertoire=NULL;postgresql_abondanceSeuil=TRUE;historiqueCarre=TRUE;
@@ -126,9 +127,11 @@ f_prepaData <- function(
     cat("importACCESS: ",importACCESS,"\n")
     cat("nomFileFNat: ",nomFileFNat,"\n")
     cat("nomDBFNat: ",nomDBFNat,"\n")
+    cat("import_raw: ",import_raw,"\n")
     cat("importationDataBrut_Faune: ",importationDataBrut_Faune,"\n")
     cat("importationDataBrut_FNat: ",importationDataBrut_FNat,"\n")
     cat("importationDataBrut_VP: ",importationDataBrut_VP,"\n")
+    cat("construction_table: ",construction_tables,"\n")
     cat("constructionPoint: ",constructionPoint,"\n")
     cat("constructionCarre: ",constructionCarre,"\n")
     cat("constructionInventaire: ",constructionInventaire,"\n")
@@ -142,11 +145,6 @@ f_prepaData <- function(
     cat("postGIS_initiation: ",postGIS_initiation,"\n")
     cat("import_shape: ",import_shape,"\n")
     cat("repertoire: ",repertoire,"\n")
-    cat("postgresql_abondanceSeuil: ",postgresql_abondanceSeuil,"\n")
-    cat("seuilAbondance: ",seuilAbondance ,"\n")
-    cat("historiqueCarre: ",historiqueCarre,"\n")
-    cat("pointCarreAnnee: ",pointCarreAnnee,"\n")
-    cat("importPointCarreAnnee: ",importPointCarreAnnee,"\n")
     cat("fileTemp: ",fileTemp,"\n")
 
     cat("\n\ndateConstruction: ",dateConstruction,"\n")
@@ -158,7 +156,7 @@ f_prepaData <- function(
 ### I) Importation et preparation des données récente vigie-plume
     cat("\n\n I) Importation des données brutes \n=================================\n")
 
-
+if(import_raw & construction_tables) {
 
     cat("\n\n 1) Données au format faune-france \n----------------------\n")
     if(importationDataBrut_Faune) {
@@ -218,14 +216,20 @@ f_prepaData <- function(
 
 
     d.all <- union_raw(dFaune,dVP,dFNat,dHist = NULL,dateConstruction,repOutInfo=repOutInfo,repOutData = repOutData,output = TRUE)
+} else {
+    if(construction_tables) {
+       filename <- paste0(repOutData,"alldata_",dateConstruction,".csv")
+            cat(" importation \n",filename," -> ")
+            d.all <- fread(filename)
+       cat(" Table complète: ", nrow(d.all)," lignes et ",ncol(d.all)," colonnes dont ", nrow(d.all[keep == TRUE,])," conservées \n    DONE ! \n")
+    }
 
-    cat(" Table complète: ", nrow(d.all)," lignes et ",ncol(d.all)," colonnes dont ", nrow(d.all[keep == TRUE,])," conservées \n    DONE ! \n")
-
+}
 
 ### III) Fabrication des tables
     cat("\n\n III) Fabrication des tables \n=================================\n")
 
-
+if(construction_tables) {
     ## 1) Table points
     cat("\n\n 1) Table points\n----------------------\n")
     flush.console()
@@ -328,7 +332,7 @@ f_prepaData <- function(
     cat("\n\n 7) Table point_annee\n----------------------\n")
     flush.console()
 
-    if(constructionPoint_annee) {
+    if(constructionPointAnnee) {
             cat(" construction -> ")
             d.point_annee <- hab2point_annee(d.hab,d.inv,dateConstruction,repOutInfo=repOutInfo,repOutData = repOutData,TRUE)
         } else {
@@ -342,10 +346,10 @@ f_prepaData <- function(
 
 
     ##  8) Table carre_annee
-    cat("\n\n 8) Table point_annee\n----------------------\n")
+    cat("\n\n 8) Table carre_annee\n----------------------\n")
     flush.console()
 
-    if(constructionCarre_annee) {
+    if(constructionCarreAnnee) {
             cat(" construction -> ")
             d.carre_annee <- point_annee2carre_annee(d.point_annee,dateConstruction,repOutInfo=repOutInfo,repOutData = repOutData,TRUE)
         } else {
@@ -357,7 +361,9 @@ f_prepaData <- function(
         cat(nrow(d.carre_annee)," lignes \n")
 
 
-
+} else {
+ cat(" ---> SKIP\n")
+    }
 
 ### IV) Base de Donnees
 

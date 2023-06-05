@@ -6,54 +6,53 @@ pk_habitat_cat;habitat_code;habitat_nom;habitat_name;habitat_cat_strict;habitat_
 5;E;Milieux bâtis ou urbanisés ;Built or urbanized environments ;urbain;urban;E;Milieux bâtis ou urbanisés;Built or urban habitats;;;;;;;;;;TRUE;TRUE;;
 6;F;Milieux aquatiques ;Aquatic environments ;aquatique;aquatic;F;Milieux aquatiques;Aquatic environments;;;;;;;;;;;;TRUE;TRUE
 7;G;Rochers terrestres ou côtiers ;Land or coastal rocks ;;;G;Rochers terrestres ou côtiers;Land or coastal rocks;;;;;;;;;;;;;
-8;A1;Forêt de feuillus;Deciduous forest;forêt;forest;A;Foret - Arbres > 5 m;Forest - Trees > 5 m;1;Feuillus;Deciduous trees;TRUE;TRUE;;;;;;;;
-9;A2;Forêt de conifères;Coniferous forest;forêt;forest;A;Foret - Arbres > 5 m;Forest - Trees > 5 m;2;Conifères;Conifers;TRUE;TRUE;;;;;;;;
-10;A3;Forêt mixte;Mixed forest;forêt;forest;A;Foret - Arbres > 5 m;Forest - Trees > 5 m;3;Mixte (> 10% de chaque);Mixed (> 10% of each);TRUE;TRUE;;;;;;;;
-11;B1;Forêt de régénération;Regeneration forest;;;B;Buissons/jeune forêt < 5m;Bushes/young forest < 5m;1;Forêt de régénération;Regeneration forest;;TRUE;;;;;;;;
-12;B2;Buissons calcicoles;Calcicultural bushes;;;B;Buissons/jeune forêt < 5m;Bushes/young forest < 5m;2;Buissons calcicoles;Calcicolous bushes;;;;;;;;;;
-13;B3;Lande;Heath;;;B;Buissons/jeune forêt < 5m;Bushes/young forest < 5m;3;Lande;Heath;;;;TRUE;;;;;;
-14;B4;Jeune taillis;Young coppice;;;B;Buissons/jeune forêt < 5m;Bushes/young forest < 5m;4;Jeune taillis;Young coppice;;TRUE;;;;;;;;
-15;B5;Nouvelle plantation;New plantation;;;B;Buissons/jeune forêt < 5m;Bushes/young forest < 5m;5;Nouvelle plantation;New plantation;;TRUE;;;;;;;;
-16;B6;Coupe « à blanc »;Clear cut;;;B;Buissons/jeune forêt < 5m;Bushes/young forest < 5m;6;Coupe « à blanc »;"Blank"""""""" cut";;TRUE;;TRUE;;;;;;
-17;B7;Divers jeune forêt ou buisson;Various young forest or bush;;;B;Buissons/jeune forêt < 5m;Bushes/young forest < 5m;7;Autres;Others;;TRUE;;;;;;;;
-18;C1;Pelouse calcaire sèche;Dry Limestone Lawn;ouvert_nat;open_nat;C;Pelouses, marais et landes;Lawns, swamps and moors;1;Pelouse calcaire sèche;Dry Limestone Lawn;;;TRUE;TRUE;;;;;;
-19;C2;Lande herbacée;Herbaceous Heath;ouvert_nat;open_nat;C;Pelouses, marais et landes;Lawns, swamps and moors;2;Lande herbacée;Herbaceous Heath;;;TRUE;TRUE;;;;;;
-20;C3;Lande de bruyère;Heather Heath;ouvert_nat;open_nat;C;Pelouses, marais et landes;Lawns, swamps and moors;3;Lande de bruyère;Heather Heath;;;TRUE;TRUE;;;;;;
-21;C4;Pelouse humide naturelle;Natural Wet Lawn;ouvert_nat;open_nat;C;Pelouses, marais et landes;Lawns, swamps and moors;4;Pelouse humide naturelle;Natural moist lawn;;;TRUE;TRUE;;;;;;
-22;C5;Divers pelouses sèches (mur, fossé);Various dry lawns (wall, ditch);ouvert_nat;open_nat;C;Pelouses, marais et landes;Lawns, swamps and moors;5;Autres pelouses sèches (mur, fossé);Other dry lawns (wall, ditch);;;TRUE;TRUE;;;;;;
-23;C6;Pelouse inondée/marais pâturé;Flooded lawn/pastured swamp;ouvert_nat;open_nat;C;Pelouses, marais et landes;Lawns, swamps and moors;6;Pelouse inondée/marais pâturé;Flooded lawn/pastured swamp;;;TRUE;TRUE;;;;;;TRUE
-24;C7;Roselière;Roselière;;;C;Pelouses, marais et landes;Lawns, swamps and moors;7;Roselière;Roselière;;;;;;;;;;TRUE
-25;C8;Divers marais ouverts;Various open marshes;ouvert_nat;open_nat;C;Pelouses, marais et landes;Lawns, swamps and moors;8;Autres marais ouverts;Other open marshes;;;TRUE;TRUE;;;;;;
-26;C9;Marais salants;Salt marshes;ouvert_nat;open_nat;C;Pelouses, marais et landes;Lawns, swamps and moors;9;Marais salants;Salt marshes;;;TRUE;TRUE;;;;;;TRUE
+8;A01;Forêt de feuillus;Deciduous forest;forêt;forest;A;Foret - Arbres > 5 m;Forest - Trees > 5 m;1;Feuillus;Deciduous trees;TRUE;TRUE;;;;;;;;
+9;A02;Forêt de conifères;Coniferous forest;forêt;forest;A;Foret - Arbres > 5 m;Forest - Trees > 5 m;2;Conifères;Conifers;TRUE;TRUE;;;;;;;;
+10;A03;Forêt mixte;Mixed forest;forêt;forest;A;Foret - Arbres > 5 m;Forest - Trees > 5 m;3;Mixte (> 10% de chaque);Mixed (> 10% of each);TRUE;TRUE;;;;;;;;
+11;B01;Forêt de régénération;Regeneration forest;;;B;Buissons/jeune forêt < 5m;Bushes/young forest < 5m;1;Forêt de régénération;Regeneration forest;;TRUE;;;;;;;;
+12;B02;Buissons calcicoles;Calcicultural bushes;;;B;Buissons/jeune forêt < 5m;Bushes/young forest < 5m;2;Buissons calcicoles;Calcicolous bushes;;;;;;;;;;
+13;B03;Lande;Heath;;;B;Buissons/jeune forêt < 5m;Bushes/young forest < 5m;3;Lande;Heath;;;;TRUE;;;;;;
+14;B04;Jeune taillis;Young coppice;;;B;Buissons/jeune forêt < 5m;Bushes/young forest < 5m;4;Jeune taillis;Young coppice;;TRUE;;;;;;;;
+15;B05;Nouvelle plantation;New plantation;;;B;Buissons/jeune forêt < 5m;Bushes/young forest < 5m;5;Nouvelle plantation;New plantation;;TRUE;;;;;;;;
+16;B06;Coupe « à blanc »;Clear cut;;;B;Buissons/jeune forêt < 5m;Bushes/young forest < 5m;6;Coupe « à blanc »;"Blank"""""""" cut";;TRUE;;TRUE;;;;;;
+17;B07;Divers jeune forêt ou buisson;Various young forest or bush;;;B;Buissons/jeune forêt < 5m;Bushes/young forest < 5m;7;Autres;Others;;TRUE;;;;;;;;
+18;C01;Pelouse calcaire sèche;Dry Limestone Lawn;ouvert_nat;open_nat;C;Pelouses, marais et landes;Lawns, swamps and moors;1;Pelouse calcaire sèche;Dry Limestone Lawn;;;TRUE;TRUE;;;;;;
+19;C02;Lande herbacée;Herbaceous Heath;ouvert_nat;open_nat;C;Pelouses, marais et landes;Lawns, swamps and moors;2;Lande herbacée;Herbaceous Heath;;;TRUE;TRUE;;;;;;
+20;C03;Lande de bruyère;Heather Heath;ouvert_nat;open_nat;C;Pelouses, marais et landes;Lawns, swamps and moors;3;Lande de bruyère;Heather Heath;;;TRUE;TRUE;;;;;;
+21;C04;Pelouse humide naturelle;Natural Wet Lawn;ouvert_nat;open_nat;C;Pelouses, marais et landes;Lawns, swamps and moors;4;Pelouse humide naturelle;Natural moist lawn;;;TRUE;TRUE;;;;;;
+22;C05;Divers pelouses sèches (mur, fossé);Various dry lawns (wall, ditch);ouvert_nat;open_nat;C;Pelouses, marais et landes;Lawns, swamps and moors;5;Autres pelouses sèches (mur, fossé);Other dry lawns (wall, ditch);;;TRUE;TRUE;;;;;;
+23;C06;Pelouse inondée/marais pâturé;Flooded lawn/pastured swamp;ouvert_nat;open_nat;C;Pelouses, marais et landes;Lawns, swamps and moors;6;Pelouse inondée/marais pâturé;Flooded lawn/pastured swamp;;;TRUE;TRUE;;;;;;TRUE
+24;C07;Roselière;Roselière;;;C;Pelouses, marais et landes;Lawns, swamps and moors;7;Roselière;Roselière;;;;;;;;;;TRUE
+25;C08;Divers marais ouverts;Various open marshes;ouvert_nat;open_nat;C;Pelouses, marais et landes;Lawns, swamps and moors;8;Autres marais ouverts;Other open marshes;;;TRUE;TRUE;;;;;;
+26;C09;Marais salants;Salt marshes;ouvert_nat;open_nat;C;Pelouses, marais et landes;Lawns, swamps and moors;9;Marais salants;Salt marshes;;;TRUE;TRUE;;;;;;TRUE
 27;C10;Tourbières;Tourbières;ouvert_nat;open_nat;C;Pelouses, marais et landes;Lawns, swamps and moors;10;Tourbières;Peat bogs;;;TRUE;TRUE;;;;;;
 28;C11;Marais salé;Salt marsh;ouvert_nat;open_nat;C;Pelouses, marais et landes;Lawns, swamps and moors;11;Marais salé;Salt marsh;;;TRUE;TRUE;;;;;;
-29;D1;Prairie cultivée;cultivated prairie;agricole;farmland;D;Milieux agricoles;Farmland;1;Prairie cultivée;cultivated prairie;;;;;TRUE;TRUE;;;;
-30;D2;Prairie non cultivée;Uncultivated prairie;agricole;farmland;D;Milieux agricoles;Farmland;2;Prairie non cultivée;Uncultivated prairie;;;;;TRUE;TRUE;;;;
-31;D3;Mixité prairie / cultures;Mixed meadow / crops;agricole;farmland;D;Milieux agricoles;Farmland;3;Mixité prairie / cultures;Mixed meadow / crops;;;;;TRUE;TRUE;;;;
-32;D4;Grandes cultures;Field crops;agricole;farmland;D;Milieux agricoles;Farmland;4;Grandes cultures;Field crops;;;;;TRUE;TRUE;;;;
-33;D5;Verger / vignes / maraîchers (mur, fossé);Orchard / vineyards / market gardeners (wall, ditch);agricole;farmland;D;Milieux agricoles;Farmland;5;Verger / vignes / maraîchers (mur, fossé);Orchard / vineyards / market gardeners (wall, ditch);;;;;TRUE;TRUE;;;;
-34;D6;Divers types de cultures;Various types of crops;agricole;farmland;D;Milieux agricoles;Farmland;6;Autres types de cultures;Other types of crops;;;;;;;;;;
-35;E1;Urbain;Urban;urbain;urban;E;Milieux bâtis ou urbanisés;Built or urban habitats;1;Urbain;Urban;;;;;;;TRUE;TRUE;;
-36;E2;Suburbain;Suburban;urbain;urban;E;Milieux bâtis ou urbanisés;Built or urban habitats;2;Suburbain;Suburban;;;;;;;TRUE;TRUE;;
-37;E3;Bourg rural;Rural town;;;E;Milieux bâtis ou urbanisés;Built or urban habitats;3;Rural;Rural;;;;;;TRUE;;TRUE;;
-38;F1;Mare;Mare;aquatique;aquatic;F;Milieux aquatiques;Aquatic environments;1;Mare (moins de 50 m2);Pond (less than 50 m2);;;;;;;;;TRUE;TRUE
-39;F2;Petit étang;Small pond;aquatique;aquatic;F;Milieux aquatiques;Aquatic environments;2;Petit étang (50 -450 m2);Small pond (50 -450 m2);;;;;;;;;TRUE;TRUE
-40;F3;Lac/réservoir (berges naturelles);Lake/reservoir (natural banks);aquatique;aquatic;F;Milieux aquatiques;Aquatic environments;3;Lac/réservoir (berges naturelles);Lake/reservoir (natural banks);;;;;;;;;TRUE;TRUE
-41;F4;Réservoir (berges non naturelles);Reservoir (unnatural banks);aquatique;aquatic;F;Milieux aquatiques;Aquatic environments;4;Réservoir (berges non naturelles);Reservoir (unnatural banks);;;;;;;;;TRUE;TRUE
-42;F5;Carrière de gravier, de sable;Gravel quarry, sand quarry;aquatique;aquatic;F;Milieux aquatiques;Aquatic environments;5;Carrière de gravier, de sable;Gravel and sand quarry;;;;;;;;;TRUE;TRUE
-43;F6;Ruisseau;Creek;aquatique;aquatic;F;Milieux aquatiques;Aquatic environments;6;Ruisseau -Larg.< 3m;Stream - Width < 3m;;;;;;;;;TRUE;TRUE
-44;F7;Rivière;River;aquatique;aquatic;F;Milieux aquatiques;Aquatic environments;7;Rivière -Larg. 3 à 10m;River -Width 3 to 10m;;;;;;;;;TRUE;TRUE
-45;F8;Fossé inondé;Flooded ditch;aquatique;aquatic;F;Milieux aquatiques;Aquatic environments;8;Fossé inondé -Larg. < 2m;Flooded ditch - Width < 2m;;;;;;;;;TRUE;TRUE
-46;F9;Petit canal;Small channel;aquatique;aquatic;F;Milieux aquatiques;Aquatic environments;9;Petit canal –Larg. 2 à 5m;Small channel -Width 2 to 5m;;;;;;;;;TRUE;TRUE
+29;D01;Prairie cultivée;cultivated prairie;agricole;farmland;D;Milieux agricoles;Farmland;1;Prairie cultivée;cultivated prairie;;;;;TRUE;TRUE;;;;
+30;D02;Prairie non cultivée;Uncultivated prairie;agricole;farmland;D;Milieux agricoles;Farmland;2;Prairie non cultivée;Uncultivated prairie;;;;;TRUE;TRUE;;;;
+31;D03;Mixité prairie / cultures;Mixed meadow / crops;agricole;farmland;D;Milieux agricoles;Farmland;3;Mixité prairie / cultures;Mixed meadow / crops;;;;;TRUE;TRUE;;;;
+32;D04;Grandes cultures;Field crops;agricole;farmland;D;Milieux agricoles;Farmland;4;Grandes cultures;Field crops;;;;;TRUE;TRUE;;;;
+33;D05;Verger / vignes / maraîchers (mur, fossé);Orchard / vineyards / market gardeners (wall, ditch);agricole;farmland;D;Milieux agricoles;Farmland;5;Verger / vignes / maraîchers (mur, fossé);Orchard / vineyards / market gardeners (wall, ditch);;;;;TRUE;TRUE;;;;
+34;D06;Divers types de cultures;Various types of crops;agricole;farmland;D;Milieux agricoles;Farmland;6;Autres types de cultures;Other types of crops;;;;;;;;;;
+35;E01;Urbain;Urban;urbain;urban;E;Milieux bâtis ou urbanisés;Built or urban habitats;1;Urbain;Urban;;;;;;;TRUE;TRUE;;
+36;E02;Suburbain;Suburban;urbain;urban;E;Milieux bâtis ou urbanisés;Built or urban habitats;2;Suburbain;Suburban;;;;;;;TRUE;TRUE;;
+37;E03;Bourg rural;Rural town;;;E;Milieux bâtis ou urbanisés;Built or urban habitats;3;Rural;Rural;;;;;;TRUE;;TRUE;;
+38;F01;Mare;Mare;aquatique;aquatic;F;Milieux aquatiques;Aquatic environments;1;Mare (moins de 50 m2);Pond (less than 50 m2);;;;;;;;;TRUE;TRUE
+39;F02;Petit étang;Small pond;aquatique;aquatic;F;Milieux aquatiques;Aquatic environments;2;Petit étang (50 -450 m2);Small pond (50 -450 m2);;;;;;;;;TRUE;TRUE
+40;F03;Lac/réservoir (berges naturelles);Lake/reservoir (natural banks);aquatique;aquatic;F;Milieux aquatiques;Aquatic environments;3;Lac/réservoir (berges naturelles);Lake/reservoir (natural banks);;;;;;;;;TRUE;TRUE
+41;F04;Réservoir (berges non naturelles);Reservoir (unnatural banks);aquatique;aquatic;F;Milieux aquatiques;Aquatic environments;4;Réservoir (berges non naturelles);Reservoir (unnatural banks);;;;;;;;;TRUE;TRUE
+42;F05;Carrière de gravier, de sable;Gravel quarry, sand quarry;aquatique;aquatic;F;Milieux aquatiques;Aquatic environments;5;Carrière de gravier, de sable;Gravel and sand quarry;;;;;;;;;TRUE;TRUE
+43;F06;Ruisseau;Creek;aquatique;aquatic;F;Milieux aquatiques;Aquatic environments;6;Ruisseau -Larg.< 3m;Stream - Width < 3m;;;;;;;;;TRUE;TRUE
+44;F07;Rivière;River;aquatique;aquatic;F;Milieux aquatiques;Aquatic environments;7;Rivière -Larg. 3 à 10m;River -Width 3 to 10m;;;;;;;;;TRUE;TRUE
+45;F08;Fossé inondé;Flooded ditch;aquatique;aquatic;F;Milieux aquatiques;Aquatic environments;8;Fossé inondé -Larg. < 2m;Flooded ditch - Width < 2m;;;;;;;;;TRUE;TRUE
+46;F09;Petit canal;Small channel;aquatique;aquatic;F;Milieux aquatiques;Aquatic environments;9;Petit canal –Larg. 2 à 5m;Small channel -Width 2 to 5m;;;;;;;;;TRUE;TRUE
 47;F10;Grand canal;Grand Canal;aquatique;aquatic;F;Milieux aquatiques;Aquatic environments;10;Grand canal-Larg. > 5m;Large channel-width > 5m;;;;;;;;;TRUE;TRUE
 48;F11;Eaux saumâtres salins, lagunes;Saline brackish water, lagoons;aquatique;aquatic;F;Milieux aquatiques;Aquatic environments;11;Eaux saumâtres salins, lagunes;Saline brackish water, lagoons;;;;;;;;;TRUE;TRUE
-49;F11;Rives avec falaise;Banks with cliff;aquatique;aquatic;F;Milieux aquatiques;Aquatic environments;11;Rives avec falaise;Banks with cliff;;;;;;;;;TRUE;TRUE
 50;F12;Fleuve, rivière;River, river;aquatique;aquatic;F;Milieux aquatiques;Aquatic environments;12;Fleuve, rivière Larg.> 10m;River, river Larg.> 10m;;;;;;;;;TRUE;TRUE
-51;G1;Falaise;Falaise;;;G;Rochers terrestres ou côtiers;Land or coastal rocks;1;Falaise;Falaise;;;;TRUE;;;;;;
-52;G2;Eboulis, pente rocheuse;Slope, rocky slope;ouvert_nat;open_nat;G;Rochers terrestres ou côtiers;Land or coastal rocks;2;Eboulis, pente rocheuse;Slope, rocky slope;;;TRUE;TRUE;;;;;;
-53;G3;Pavement calcaire;Limestone paving;ouvert_nat;open_nat;G;Rochers terrestres ou côtiers;Land or coastal rocks;3;Pavement calcaire;Limestone paving;;;TRUE;TRUE;;;;;;
-54;G4;Divers sols rocheux;Various rocky soils;ouvert_nat;open_nat;G;Rochers terrestres ou côtiers;Land or coastal rocks;4;Autres sols rocheux;Other rocky soils;;;TRUE;TRUE;;;;;;
-55;G5;Carrière (grimpeurs, promeneurs);Career (climbers, walkers);ouvert_nat;open_nat;G;Rochers terrestres ou côtiers;Land or coastal rocks;5;Carrière (grimpeurs, promeneurs);Career (climbers, walkers);;;TRUE;TRUE;;;;;;
-56;G6;Mine / abîme / terril;Mine / abyss / slag heap;ouvert_nat;open_nat;G;Rochers terrestres ou côtiers;Land or coastal rocks;6;Mine / abîme / terril;Mine / abyss / slag heap;;;TRUE;TRUE;;;;;;
-57;G7;Grotte;Grotto;;;G;Rochers terrestres ou côtiers;Land or coastal rocks;7;Grotte;Grotto;;;;;;;;;;
-58;G8;Dune;Dune;ouvert_nat;open_nat;G;Rochers terrestres ou côtiers;Land or coastal rocks;8;Dune;Dune;;;TRUE;TRUE;;;;;;
+51;G01;Falaise;Falaise;;;G;Rochers terrestres ou côtiers;Land or coastal rocks;1;Falaise;Falaise;;;;TRUE;;;;;;
+52;G02;Eboulis, pente rocheuse;Slope, rocky slope;ouvert_nat;open_nat;G;Rochers terrestres ou côtiers;Land or coastal rocks;2;Eboulis, pente rocheuse;Slope, rocky slope;;;TRUE;TRUE;;;;;;
+53;G03;Pavement calcaire;Limestone paving;ouvert_nat;open_nat;G;Rochers terrestres ou côtiers;Land or coastal rocks;3;Pavement calcaire;Limestone paving;;;TRUE;TRUE;;;;;;
+54;G04;Divers sols rocheux;Various rocky soils;ouvert_nat;open_nat;G;Rochers terrestres ou côtiers;Land or coastal rocks;4;Autres sols rocheux;Other rocky soils;;;TRUE;TRUE;;;;;;
+55;G05;Carrière (grimpeurs, promeneurs);Career (climbers, walkers);ouvert_nat;open_nat;G;Rochers terrestres ou côtiers;Land or coastal rocks;5;Carrière (grimpeurs, promeneurs);Career (climbers, walkers);;;TRUE;TRUE;;;;;;
+56;G06;Mine / abîme / terril;Mine / abyss / slag heap;ouvert_nat;open_nat;G;Rochers terrestres ou côtiers;Land or coastal rocks;6;Mine / abîme / terril;Mine / abyss / slag heap;;;TRUE;TRUE;;;;;;
+57;G07;Grotte;Grotto;;;G;Rochers terrestres ou côtiers;Land or coastal rocks;7;Grotte;Grotto;;;;;;;;;;
+58;G08;Dune;Dune;ouvert_nat;open_nat;G;Rochers terrestres ou côtiers;Land or coastal rocks;8;Dune;Dune;;;TRUE;TRUE;;;;;;

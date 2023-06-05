@@ -1,8 +1,9 @@
-union_raw <- function(dFaune, d_VP, d_FNat) {
+union_raw <- function(dFaune = NULL, dVP = NULL, dFNat = NULL, dHist = NULL,dateConstruction,repOutInfo="", repOutData="",output=FALSE) {
 
     dFaune[,keep := TRUE]
     dVP[,keep := !(id_inventaire %in% dFaune[,id_inventaire])]
     dFNat[,keep := !(id_inventaire %in% c(dFaune[,id_inventaire],dVP[,id_inventaire]))]
+##    dHist[,keep := !(id_inventaire %in% c(dFaune[,id_inventaire],dVP[,id_inventaire],dFNat[,id_inventaire]))]
 
     lesColonnes <- intersect(intersect(colnames(dFaune),colnames(dVP)),colnames(dFNat))
 
@@ -10,8 +11,11 @@ union_raw <- function(dFaune, d_VP, d_FNat) {
 
     setorder(d,date,id_carre)
 
+    filename <- paste0(repOutData,"alldata_",dateConstruction,".csv")
+    write.csv(d,filename,row.names=FALSE,na="")
+    cat("  (->",filename,")\n",sep="")
 
-return(d)
+    if(output) return(d)
 
 }
 
@@ -52,9 +56,26 @@ raw2point <- function(d,dateConstruction,repOutInfo="", repOutData="",output=FAL
 
     dd <- dd[dagg]
     dd[,nom_point := sprintf("%02d",num_point)]
+
+
+    dd_sp <- d[keep == TRUE,.(i=1) ,by=.(id_point,code_sp)][,.(nb_sp = .N),by = id_point]
+    dd_ab <- d[keep == TRUE,.(abondance = sum(abondance)) ,by=.(id_point,id_inventaire,annee)][,.(abondance_mean = mean(abondance)),by = id_point]
+    dd_spmean <- d[keep == TRUE,.(i = 1) ,by=.(id_point,annee,code_sp)][,.(nb_sp = .N),by = .(id_point,annee)][,.(nb_sp_mean = mean(nb_sp)), by= id_point]
+
+
+    setkey(dd,"id_point")
+    setkey(dd_sp,"id_point")
+    setkey(dd_ab,"id_point")
+    setkey(dd_spmean,"id_point")
+
+
+    dd <- dd[dd_sp[dd_spmean[dd_ab]]]
+
+
+
     setnames(dd,old=c("id_point"),new=c("pk_point"))
 
-    colorder <- c("pk_point","id_carre","commune","site","insee","departement","num_point","nom_point","altitude","longitude_wgs84","latitude_wgs84","longitude_wgs84_sd","latitude_wgs84_sd","db","date_export")
+    colorder <- c("pk_point","id_carre","commune","site","insee","departement","num_point","nom_point","altitude","longitude_wgs84","latitude_wgs84","longitude_wgs84_sd","latitude_wgs84_sd","nb_sp","nb_sp_mean","abondance_mean","db","date_export")
     setcolorder(dd,colorder)
 
 
@@ -66,7 +87,7 @@ raw2point <- function(d,dateConstruction,repOutInfo="", repOutData="",output=FAL
 }
 
 raw2carre <- function(d,dateConstruction,repOutInfo="", repOutData="",output=FALSE) {
-   ##  d = copy(d.all); output=FALSE; repOut=""
+    ##  d = copy(d.all); output=FALSE; repOut=""
 
 
     ## la table de l'ensemble des carré de la grille nationale
@@ -89,9 +110,8 @@ raw2carre <- function(d,dateConstruction,repOutInfo="", repOutData="",output=FAL
                 etude = get_mode(etude),
                 etude_detail = get_mode(etude_detail),
                 nom_carre = get_mode(nom_carre),
-                nom_carre_fnat = NA,
                 departement = get_mode(departement),
-                altitude_median = median(altitude),
+                altitude_median = as.integer(median(altitude)),
                 latitude_median_wgs84 = median(latitude_wgs84),
                 longitude_median_wgs84 = median(longitude_wgs84),
                 date_export = max(date_export)),
@@ -104,17 +124,41 @@ raw2carre <- function(d,dateConstruction,repOutInfo="", repOutData="",output=FAL
     dd <- dd[keep == TRUE,]
    dd[,keep := NULL]
 
+    dd_sum <- d[keep == TRUE,.(i=1) ,by=.(id_carre,annee)][,.(first_year = min(annee),last_year = max(annee),duration = max(annee)-min(annee)+1, nb_year = .N),by = id_carre]
+    dd_sp <- d[keep == TRUE,.(i=1) ,by=.(id_carre,code_sp)][,.(nb_sp = .N),by = id_carre]
+    dd_ab <- d[keep == TRUE,.(abondance = sum(abondance)) ,by=.(id_carre,id_point,id_inventaire,annee)][,.(abondance_point_mean = mean(abondance)),by = id_carre]
+    dd_spmean <- d[keep == TRUE,.(i = 1) ,by=.(id_carre,annee,code_sp)][,.(nb_sp = .N),by = .(id_carre,annee)][,.(nb_sp_mean = mean(nb_sp)), by= id_carre]
+    dd_point <- d[keep == TRUE, .(i=1), by = .(id_carre,id_point)][,.(nb_point = .N),by = id_carre]
+
+
+
+    setkey(dd,"id_carre")
+    setkey(dd_sum,"id_carre")
+    setkey(dd_sp,"id_carre")
+    setkey(dd_ab,"id_carre")
+    setkey(dd_spmean,"id_carre")
+    setkey(dd_point,"id_carre")
+
+
+    dd <- dd[dd_sp[dd_spmean[dd_ab[dd_sum[dd_point]]]]]
+
+
+
+
 
     setnames(dd,old=c("id_carre"),new=c("pk_carre"))
 
   ##
-    setkey(dd,"pk_carre")
+
+
+
+
 
     dd <- merge(dd,dcarrenat,by="pk_carre",all.x=TRUE)
    ### dd <- dd[dcarrenat]
 
 
-    colorder <- c("pk_carre","nom_carre","nom_carre_fnat","commune","site","etude","etude_detail","insee","departement","altitude_median","aire","perimetre","latitude_median_wgs84","longitude_median_wgs84","latitude_grid_wgs84","longitude_grid_wgs84","db","date_export")
+    colorder <- c("pk_carre","nom_carre","commune","site","etude","etude_detail","insee","departement","altitude_median","nb_point","aire","perimetre","latitude_median_wgs84","longitude_median_wgs84","latitude_grid_wgs84","longitude_grid_wgs84","first_year","last_year","duration","nb_year","nb_sp","nb_sp_mean","abondance_point_mean","db","date_export")
 
 
     dd <- dd[,colorder,with=FALSE]
@@ -310,7 +354,7 @@ raw2inventaire <- function(d,version = "V.1",dateConstruction="",repOutInfo="", 
 
 
 raw2observation <- function(d,dateConstruction="",repOutInfo="", repOutData="",output=FALSE) {
-
+    ## d <- copy(d.all)
 
     dd <- d[keep == TRUE,.(id_observation,id_raw_observation ,id_inventaire,id_point,id_carre, num_point,
                            date,annee,classe,id_data,espece,code_sp,abondance,distance_contact,
@@ -363,6 +407,8 @@ raw2observation <- function(d,dateConstruction="",repOutInfo="", repOutData="",o
     dd[,s_habitat := gsub("NA","",s_habitat)][s_habitat == "", s_habitat := NA]
 
 
+
+
  the_col <- c("pk_observation","id_raw_observation","id_inventaire","id_point","id_carre","num_point","date","annee","classe","id_data","espece","code_sp","distance_contact","abondance","nuage","pluie","vent","visibilite","neige","p_habitat","p_milieu","p_type","p_cat1","p_cat2","p_sous_cat1","p_sous_cat2","s_habitat","s_milieu","s_type","s_cat1","s_cat2","s_sous_cat1","s_sous_cat2","db","date_export")
 
     dd<-dd[,the_col,with=FALSE]
@@ -376,26 +422,88 @@ raw2observation <- function(d,dateConstruction="",repOutInfo="", repOutData="",o
 }
 
 
+
+obs2seuil <- function(d.obs,d.inv,dateConstruction="",repOutInfo="", repOutData="",output=FALSE){
+    dseuil <- d.obs[,.(id_inventaire,id_carre,id_point,code_sp,distance_contact,abondance)]
+    dpass <- d.inv[,.(pk_inventaire,passage_stoc)]
+
+
+    setkey(dseuil,"id_inventaire")
+    setkey(dpass,"pk_inventaire")
+
+    dseuil <- dseuil[dpass]
+    dseuil <- dseuil[passage_stoc %in% c(1,2),]
+
+    dseuil_all <- dseuil[,.(seuil_all_tukey_outlier  = quantile(abondance, .75) + 1.5 * (quantile(abondance,0.75) - quantile(abondance,.25)),seuil_all_tukey_farout  = quantile(abondance, .75) + 30 * (quantile(abondance,0.75) - quantile(abondance,.25))),by = code_sp]
+    dseuil_inf <- dseuil[distance_contact %in% c("25-100m","100-200m","sup_200m","inf_25m","sup_100m","25-50m","50-100m")  ,.(seuil_inf_tukey_outlier  = quantile(abondance, .75) + 1.5 * (quantile(abondance,0.75) - quantile(abondance,.25)),seuil_inf_tukey_farout  = quantile(abondance, .75) + 30 * (quantile(abondance,0.75) - quantile(abondance,.25))),by = code_sp]
+    dseuil_200 <- dseuil[distance_contact %in% c("25-100m","100-200m","inf_25m","25-50m","50-100m") ,.(seuil_200_tukey_outlier  = quantile(abondance, .75) + 1.5 * (quantile(abondance,0.75) - quantile(abondance,.25)),seuil_200_tukey_farout  = quantile(abondance, .75) + 30 * (quantile(abondance,0.75) - quantile(abondance,.25))),by = code_sp]
+    dseuil_100 <- dseuil[distance_contact %in% c("25-100m","inf_25m","25-50m","50-100m"),.(seuil_100_tukey_outlier  = quantile(abondance, .75) + 1.5 * (quantile(abondance,0.75) - quantile(abondance,.25)),seuil_100_tukey_farout  = quantile(abondance, .75) + 30 * (quantile(abondance,0.75) - quantile(abondance,.25))),by = code_sp]
+
+    setkey(dseuil_all,"code_sp")
+    setkey(dseuil_inf,"code_sp")
+    setkey(dseuil_200,"code_sp")
+    setkey(dseuil_100,"code_sp")
+    dd <- dseuil_all[dseuil_inf[dseuil_200[dseuil_100]]]
+
+    filename <- paste0(repOutData,"seuil_",dateConstruction,".csv")
+    write.csv(dd,filename,row.names=FALSE,na="")
+    cat("  (->",filename,")\n")
+
+    if(output) return(dd)
+
+}
+
 raw2habitat <- function(d,dateConstruction="",repOutInfo="", repOutData="",output=FALSE) {
 
- ##d <- copy(d.all)
+## d <- copy(d.all)
 
-    d[,`:=`(p_habitat = NA,s_habitat = NA)]
+##    d[,`:=`(p_habitat = NA,s_habitat = NA)]
+
+       ## suppression des valeur d habitat abberante
+    milieuPossible <- LETTERS[1:7]
+    d[,`:=`(p_milieu = toupper(p_milieu),s_milieu = toupper(s_milieu))]
+    d[!(p_milieu %in% milieuPossible),p_milieu := NA ]
+    d[!(s_milieu %in% milieuPossible), s_milieu := NA ]
+
+
+    d[,`:=`(p_habitat = paste0(p_milieu,sprintf("%02d",p_type)),s_habitat = paste0(s_milieu,sprintf("%02d",s_type)))]
+    d[,p_habitat := gsub("NA","",p_habitat)][p_habitat == "", p_habitat := "_"]
+    d[,s_habitat := gsub("NA","",s_habitat)][s_habitat == "", s_habitat := "_"]
+
+    d[,habitat := paste0(p_habitat,"-",s_habitat)]
+    d[habitat == "_-_",habitat := "_"]
+
 
     dd <- unique(d[keep == TRUE,.(id_inventaire,id_point ,date , annee, db ,date_export)])
 
-    dd_hab <- d[keep == TRUE,.(nb_description = .N,
+    dd_hab <- d[keep == TRUE,.(habitat = get_mode(habitat),
+                               habitat_collapse = paste(unique(habitat),collapse = "|"),
                                p_habitat = get_mode(p_habitat),
+                               p_habitat_collapse = paste(unique(p_habitat),collapse = "|"),
                                p_milieu = get_mode(p_milieu),p_type = get_mode(p_type),
                                p_cat1 = get_mode(p_cat1),p_cat2 = get_mode(p_cat2),
                                p_sous_cat1 = get_mode(p_sous_cat1),p_sous_cat2 = get_mode(p_sous_cat2),
                                s_habitat = get_mode(s_habitat),
+                               s_habitat_collapse = paste(unique(s_habitat),collapse = "|"),
                                s_milieu = get_mode(s_milieu),s_type = get_mode(s_type),
                                s_cat1 = get_mode(s_cat1),s_cat2 = get_mode(s_cat2),
                                s_sous_cat1 = get_mode(s_sous_cat1),s_sous_cat2 = get_mode(s_sous_cat2)
                                ),by = id_inventaire]
 
-dd <- merge(dd,dd_hab,by = "id_inventaire")
+    dd_nb <- unique(d[keep == TRUE,.(id_inventaire,p_habitat ,
+                               p_milieu ,p_type ,
+                               p_cat1 ,p_cat2  ,
+                               p_sous_cat1 ,p_sous_cat2,
+                               s_habitat ,
+                               s_milieu ,s_type ,
+                               s_cat1 ,s_cat2 ,
+                               s_sous_cat1 ,s_sous_cat2 )])[,.(nb_description = .N),by=id_inventaire]
+    setkey(dd,id_inventaire)
+    setkey(dd_hab,id_inventaire)
+    setkey(dd_nb,id_inventaire)
+
+    dd <- dd[dd_hab[dd_nb]]
+
 
     setnames(dd, "id_inventaire","pk_habitat")
 
@@ -407,87 +515,91 @@ dd <- merge(dd,dd_hab,by = "id_inventaire")
  ##   aa_unique <- names(aa)[aa==1]
  ##   aa_doublon <- names(aa)[aa>1]
 
-   ## suppression des valeur d habitat abberante
-    milieuPossible <- LETTERS[1:7]
-    dd[,`:=`(p_milieu = toupper(p_milieu),s_milieu = toupper(s_milieu))]
-    dd[!(p_milieu %in% milieuPossible),p_milieu := NA ]
-    dd[!(s_milieu %in% milieuPossible), s_milieu := NA ]
 
-    dd[,`:=`(p_habitat = paste0(p_milieu,p_type),s_habitat = paste0(s_milieu,s_type))]
-    dd[,p_habitat := gsub("NA","",p_habitat)][p_habitat == "", p_habitat := NA]
-    dd[,s_habitat := gsub("NA","",s_habitat)][s_habitat == "", s_habitat := NA]
-
-    setorder(dd, date,id_point,p_habitat,s_habitat)
     ## construction de la suggestion de correction en fonction des habitats saisis pour les inventaire precedent et suivant
 
-    ## inventaire precedent
-    dd[,inc_point := 1:.N,by = id_point]
-    dd_pre <- dd[,.(id_point,inc_point, p_habitat,s_habitat,date)]
-    dd_pre[,inc_point := inc_point + 1]
-    setnames(dd_pre,c("p_habitat","s_habitat","date"),c("p_habitat_pre","s_habitat_pre","date_pre"))
 
-    ## inventaire suivant
-    dd_post <- dd[,.(id_point,inc_point, p_habitat,s_habitat,date)]
-    dd_post[,inc_point := inc_point - 1]
-    setnames(dd_post,c("p_habitat","s_habitat","date"),c("p_habitat_post","s_habitat_post","date_post"))
+    dd[,habitat_point_id := paste0(id_point,"_",habitat)]
+    dd[,inc_point := 1:.N, by = id_point]
 
-    dd <- merge(dd,dd_pre,by=c("id_point","inc_point"),all.x=TRUE)
-    dd <- merge(dd,dd_post,by=c("id_point","inc_point"),all.x=TRUE)
+    setorder(dd, id_point,inc_point,habitat)
 
-    ## suggestion
-    dd[,p_habitat_sug := ifelse(p_habitat_pre == p_habitat_post,p_habitat_pre,NA)]
-    dd[is.na(p_habitat_sug), p_habitat_sug := p_habitat]
-    dd[,p_habitat_consistent := p_habitat == p_habitat_sug ]
-    dd[,s_habitat_sug := ifelse(s_habitat_pre == s_habitat_post,s_habitat_pre,NA)]
-    dd[is.na(s_habitat_sug), s_habitat_sug := s_habitat]
-    dd[,s_habitat_consistent := s_habitat == s_habitat_sug]
+    ddprev <- dd[,.(habitat_point_id,id_point,inc_point)]
+    setnames(ddprev,"habitat_point_id","habitat_point_id_prev")
+    ddprev[,inc_point := inc_point + 1]
+    dd <- merge(dd, ddprev,by = c("id_point","inc_point"),all.x= TRUE)
 
-    dd[,habitat_point_id := paste0(id_point,p_habitat_sug,s_habitat_sug)]
-    setorder(dd, date,id_point,p_habitat,s_habitat)
-    dd[,inc_habitat_point := 1:.N,by = habitat_point_id]
+    dd[,habitat_point_inc := as.numeric(habitat_point_id_prev != habitat_point_id | is.na(habitat_point_id_prev)) ]
+    dd[,inc_habitat_point := cumsum(habitat_point_inc),by = id_point]
+    dd[,habitat_point_inc_id := paste0(id_point,"_",inc_habitat_point)]
+
+
     setorder(dd,id_point,inc_point,inc_habitat_point)
 
     ## construction de suggestion pour les p_habitat NA en fonction des saisie precedentes et suivante
 
     ## creation d'un indentifiant de serie temporel d'habitat constant
-    inc_decal <- c(0,dd[1:(nrow(dd)-1),inc_habitat_point])
-    dd[,habitat_point_inc_id := 1+ cumsum(as.numeric(inc_habitat_point <= inc_decal))]
 
     ## table des saisies précedentes
-    dd_habitat_inc_pre <-  dd[,.(id_point = get_mode(id_point),p_habitat_sug = get_mode(p_habitat_sug), s_habitat_sug = get_mode(s_habitat_sug),last_date=max(date)),by = habitat_point_inc_id]
+    dd_habitat_inc_pre <-  dd[,.(habitat = get_mode(habitat),last_date=max(date)),by = .(habitat_point_inc_id,id_point,inc_habitat_point)]
 
-    setnames(dd_habitat_inc_pre,c("p_habitat_sug","s_habitat_sug","last_date"),paste0(c("p_habitat_sug","s_habitat_sug","last_date"),"_pre"))
-    dd_habitat_inc_pre[, habitat_point_inc_id_pre :=  habitat_point_inc_id ]
-    dd_habitat_inc_pre[, habitat_point_inc_id :=  habitat_point_inc_id +1]
+    vcol <- colnames(dd_habitat_inc_pre)
+    setnames(dd_habitat_inc_pre,vcol,paste0(vcol,"_pre"))
+    dd_habitat_inc_pre[,habitat_point_inc_id :=  paste0(id_point_pre,"_",inc_habitat_point_pre + 1)]
 
-
-    dd <- merge(dd,dd_habitat_inc_pre,by=c("habitat_point_inc_id","id_point"),all.x=TRUE)
+    dd <- merge(dd,dd_habitat_inc_pre,by="habitat_point_inc_id",all.x=TRUE)
 
     ## table des saisies suivante
-    dd_habitat_inc_post <-  dd[,.(id_point = get_mode(id_point),p_habitat_sug = get_mode(p_habitat_sug), s_habitat_sug = get_mode(s_habitat_sug),first_date = min(date)),by = habitat_point_inc_id]
+    dd_habitat_inc_post <-  dd[,.(habitat = get_mode(habitat),first_date = min(date)),by = .(habitat_point_inc_id,id_point,inc_habitat_point)]
 
-    setnames(dd_habitat_inc_post,c("p_habitat_sug","s_habitat_sug","first_date"),paste0(c("p_habitat_sug","s_habitat_sug","first_date"),"_post"))
-    dd_habitat_inc_post[, habitat_point_inc_id_post :=  habitat_point_inc_id ]
-    dd_habitat_inc_post[, habitat_point_inc_id :=  habitat_point_inc_id -1]
+    vcol <- colnames(dd_habitat_inc_post)
+    setnames(dd_habitat_inc_post,vcol,paste0(vcol,"_post"))
 
-####ERROR !
+    dd_habitat_inc_post[,habitat_point_inc_id :=  paste0(id_point_post,"_",inc_habitat_point_post - 1)]
 
-    dd <- merge(dd,dd_habitat_inc_post,by=c("habitat_point_inc_id","id_point"),all.x=TRUE)
+    dd <- merge(dd,dd_habitat_inc_post,by="habitat_point_inc_id",all.x=TRUE)
+
+    dd[,time_declaration_sug_j_pre := as.numeric(difftime(as.Date(date),as.Date(last_date_pre),units="days"))]
+    dd[is.na(time_declaration_sug_j_pre),time_declaration_sug_j_pre := 99999]
+    dd[,time_declaration_sug_j_post := as.numeric(difftime(as.Date(date),as.Date(first_date_post),units="days"))]
+    dd[is.na(time_declaration_sug_j_post),time_declaration_sug_j_post := -99999]
+    dd[,closest_pre := time_declaration_sug_j_pre <= abs(time_declaration_sug_j_post)]
+
+
+    ## suggestion
+    dd[,habitat_sug := ifelse(habitat_pre == habitat_post,habitat_pre,NA)]
+    dd[is.na(habitat_sug) & habitat != "_" , habitat_sug := habitat]
+    dd[,habitat_consistent := (habitat == habitat_sug) | (habitat== "_" & !is.na(habitat_sug)) ]
+
+###############
+
+    dd[,time_declaration_sug_j := 99999]
+    dd[habitat_consistent==TRUE & habitat != "_",time_declaration_sug_j := 0]
+    dd[habitat_consistent==TRUE & habitat == "_" & closest_pre ==  TRUE ,time_declaration_sug_j :=  time_declaration_sug_j_pre]
+    dd[habitat_consistent==TRUE & habitat == "_" & closest_pre == FALSE ,time_declaration_sug_j :=  time_declaration_sug_j_post]
+
+
 
     ## suggestion si p_habitat_sug est NA
-    dd[,time_last_declaration_sug_j := ifelse(p_habitat_consistent==TRUE,0,ifelse(!is.na(p_habitat_sug),difftime(as.Date(date),as.Date(date_pre),units="days"),NA))]
-    dd[is.na(p_habitat_sug) & !(is.na( p_habitat_sug_pre)),time_last_declaration_sug_j :=difftime(as.Date(date),as.Date(last_date_pre),units="days") ]
-    dd[is.na(p_habitat_sug) & !(is.na( p_habitat_sug_pre)),p_habitat_sug := p_habitat_sug_pre ]
-    dd[is.na(p_habitat_sug) & !(is.na( p_habitat_sug_pre)),s_habitat_sug := s_habitat_sug_pre ]
-    dd[is.na(p_habitat_sug) & !(is.na( p_habitat_sug_pre)),p_habitat_consistent := FALSE ]
+
+
+    dd[is.na(habitat_sug) & habitat_pre != "_" ,`:=`(time_declaration_sug_j = time_declaration_sug_j_pre, habitat_sug = habitat_pre,habitat_consistent = FALSE )]
 
     ## suggestion si p_habitat_sug est encore NA
-    dd[is.na(p_habitat_sug) & !(is.na( p_habitat_sug_post)),time_last_declaration_sug_j :=difftime(as.Date(date),as.Date(first_date_post),units="days") ]
-    dd[is.na(p_habitat_sug) & !(is.na( p_habitat_sug_post)),p_habitat_sug := p_habitat_sug_post ]
-    dd[is.na(p_habitat_sug) & !(is.na( p_habitat_sug_post)),s_habitat_sug := s_habitat_sug_post ]
-    dd[is.na(p_habitat_sug) & !(is.na( p_habitat_sug_post)),p_habitat_consistent := FALSE ]
 
-    dd <- dd[,.(pk_habitat, id_point, date,annee,p_habitat_sug,p_habitat,p_habitat_consistent,p_milieu,p_type,p_cat1, p_cat2, p_sous_cat1,p_sous_cat2,s_habitat_sug,s_habitat,s_habitat_consistent, s_milieu, s_type, s_cat1, s_cat2 ,s_sous_cat1,s_sous_cat2,time_last_declaration_sug_j, db ,date_export)]
+    dd[is.na(habitat_sug) & habitat_post != "_" ,`:=`(time_declaration_sug_j = time_declaration_sug_j_post, habitat_sug = habitat_post,habitat_consistent = FALSE) ]
+
+    dd[habitat == "_", habitat := NA]
+    dd[abs(time_declaration_sug_j) == 99999,time_declaration_sug_j == NA]
+
+    dd[,`:=`(p_habitat_sug = substr(habitat_sug,1,3),s_habitat_sug = substr(habitat_sug,5,7))]
+    dd[p_habitat_sug %in% c("__","_"), p_habitat_sug := NA]
+    dd[s_habitat_sug %in% c("__","_"), s_habitat_sug := NA]
+    dd[p_habitat %in% c("__","_"), p_habitat := NA]
+    dd[s_habitat %in%c("__","_"), s_habitat := NA]
+    dd[,`:=`(p_milieu_sug := substr(p_habitat_sug,1,2),s_milieu_sug := substr(s_habitat_sug,1,2))]
+
+    dd <- dd[,.(pk_habitat, id_point, date,annee,nb_description,habitat_sug,habitat,habitat_collapse, habitat_consistent,time_declaration_sug_j,p_habitat_sug,p_habitat,p_habitat_collapse,p_milieu_sug,p_milieu,p_type,p_cat1, p_cat2, p_sous_cat1,p_sous_cat2,s_habitat_sug,s_habitat,s_habitat_collapse,s_milieu_sug,s_milieu, s_type, s_cat1, s_cat2 ,s_sous_cat1,s_sous_cat2, db ,date_export)]
 
     filename <- paste0(repOutData,"habitat_",dateConstruction,".csv")
     write.csv(dd,filename,row.names=FALSE,na="")
@@ -498,3 +610,116 @@ dd <- merge(dd,dd_hab,by = "id_inventaire")
 }
 
 
+hab2point_annee <- function(d.hab,d.inv,dateConstruction="",repOutInfo="", repOutData="",output=FALSE) {
+
+    setkey(d.hab,"pk_habitat")
+    setkey(d.inv,"pk_inventaire")
+
+    dd.hab <- d.hab[d.inv][passage_stoc %in% c(1,2),.(annee,id_point,id_carre,habitat_collapse,p_habitat_collapse,s_habitat_collapse,nombre_passage_stoc_annee,info_passage_an, nb_description, time_declaration_sug_j)]
+
+    dd.hab <- dd.hab[,.(
+        id_carre = get_mode(id_carre),
+        habitat_collapse = paste(unique(habitat_collapse),collapse= "|"),
+        p_habitat_collapse = paste(unique(p_habitat_collapse),collapse= "|"),
+        s_habitat_collapse = paste(unique(s_habitat_collapse),collapse= "|"),
+        nombre_passage_stoc_annee= get_mode(nombre_passage_stoc_annee),
+        info_passage_an = get_mode(info_passage_an),
+        nb_description = sum(nb_description),
+        time_declaration_sug_j = mean(time_declaration_sug_j)),by = .(id_point,annee)]
+dd.hab[,pk_point_annee := paste0(annee,id_point)]
+
+    dd.hab1 <- d.hab[d.inv][passage_stoc  == 1,.(annee,id_point, info_heure_debut,nb_description, habitat_collapse,habitat_sug, habitat_consistent,p_habitat_sug, p_habitat,  p_milieu_sug, s_habitat_sug, s_habitat, s_milieu,s_milieu_sug)]
+    colonnes <- colnames(dd.hab1)[3:ncol(dd.hab1)]
+setnames(dd.hab1,colonnes, paste0(colonnes,"_pass1"))
+    dd.hab2 <- d.hab[d.inv][passage_stoc  == 2,.(annee,id_point, info_heure_debut,nb_description, habitat_collapse,habitat_sug, habitat_consistent,p_habitat_sug, p_habitat,  p_milieu_sug, s_habitat_sug, s_habitat, s_milieu,s_milieu_sug)]
+    colonnes <- colnames(dd.hab2)[3:ncol(dd.hab2)]
+setnames(dd.hab2,colonnes, paste0(colonnes,"_pass2"))
+
+
+    dd.hab <- merge(dd.hab, merge(dd.hab1,dd.hab2, by = c("id_point","annee"),all=TRUE), by = c("id_point","annee"),all = TRUE)
+
+    dd.hab[,`:=`(qualite_inventaire_stoc_pass1 = ifelse(is.na(info_heure_debut_pass1),0,ifelse(info_heure_debut_pass1 == "OK", 1,0.75)),
+                 qualite_inventaire_stoc_pass2 = ifelse(is.na(info_heure_debut_pass2),0,ifelse(info_heure_debut_pass2 == "OK", 1,0.75)))]
+
+    dd.hab[,`:=`(qualite_inventaire_stoc = (qualite_inventaire_stoc_pass1 + qualite_inventaire_stoc_pass2 )/ 2,
+                 qualite_inventaire_stoc_pass1 = NULL,
+                 qualite_inventaire_stoc_pass2 = NULL )]
+
+    dd.hab[,`:=`(
+        foret_p = p_milieu_sug_pass1 %in% c("A","B") | p_milieu_sug_pass2 %in% c("A","B"),
+        foret_ps = p_milieu_sug_pass1 %in% c("A","B") | p_milieu_sug_pass2 %in% c("A","B") | s_milieu_sug_pass1 %in% c("A","B") | s_milieu_sug_pass2 %in% c("A","B"),
+          ouvert_p = p_milieu_sug_pass1 %in% c("C","G") | p_milieu_sug_pass2 %in% c("C","G"),
+        ouvert_ps = p_milieu_sug_pass1 %in% c("C","G") | p_milieu_sug_pass2 %in% c("C","G") | s_milieu_sug_pass1 %in% c("C","G") | s_milieu_sug_pass2 %in% c("C","G"),
+          agri_p = p_milieu_sug_pass1 %in% c("D") | p_milieu_sug_pass2 %in% c("D"),
+        agri_ps = p_milieu_sug_pass1 %in% c("D") | p_milieu_sug_pass2 %in% c("D") | s_milieu_sug_pass1 %in% c("D") | s_milieu_sug_pass2 %in% c("D"),
+
+        urbain_p = p_milieu_sug_pass1 %in% c("E") | p_milieu_sug_pass2 %in% c("E"),
+        urbain_ps = p_milieu_sug_pass1 %in% c("E") | p_milieu_sug_pass2 %in% c("E") | s_milieu_sug_pass1 %in% c("E") | s_milieu_sug_pass2 %in% c("E"))]
+
+
+
+
+    the_col <- c("pk_point_annee","id_point","id_carre","annee",  "qualite_inventaire_stoc","nombre_passage_stoc_annee","info_passage_an",
+                 "habitat_collapse","p_habitat_collapse","s_habitat_collapse","time_declaration_sug_j",
+                 "foret_p","foret_ps","ouvert_p","ouvert_ps","agri_p","agri_ps","urbain_p","urbain_ps",
+                 "info_heure_debut_pass1","nb_description_pass1","habitat_sug_pass1","habitat_collapse_pass1","habitat_consistent_pass1","p_habitat_sug_pass1","p_habitat_pass1","p_milieu_pass1","s_habitat_sug_pass1","s_habitat_pass1","s_milieu_pass1",
+                 "info_heure_debut_pass2","nb_description_pass2","habitat_sug_pass2","habitat_collapse_pass2","habitat_consistent_pass2","p_habitat_sug_pass2","p_habitat_pass2","p_milieu_pass2","s_habitat_sug_pass2","s_habitat_pass2","s_milieu_pass2")
+
+
+
+    dd.hab <-dd.hab[,the_col,with=FALSE]
+
+    filename <- paste0(repOutData,"point_annee_",dateConstruction,".csv")
+    write.csv(dd.hab,filename,row.names=FALSE,na="")
+    cat("  (->",filename,")\n")
+
+    if(output) return(dd.hab)
+
+}
+
+
+
+
+
+point_annee2carre_annee <- function(d.point_annnee,dateConstruction="",repOutInfo="", repOutData="",output=FALSE) {
+
+    dd.hab <- d.point_annee[,.(
+        qualite_inventaire_stoc  = sum(qualite_inventaire_stoc) / 10,
+        nombre_passage_stoc_annee = get_mode(nombre_passage_stoc_annee),
+        info_passage_an = get_mode(info_passage_an),
+        nbp_foret_p = sum(as.numeric(foret_p)),
+        nbp_foret_ps = sum(as.numeric(foret_ps)),
+        nbp_ouvert_p = sum(as.numeric(ouvert_p)),
+        nbp_ouvert_ps = sum(as.numeric(ouvert_ps)),
+        nbp_agri_p = sum(as.numeric(agri_p)),
+        nbp_agri_ps = sum(as.numeric(agri_ps)),
+        nbp_urbain_p = sum(as.numeric(urbain_p)),
+        nbp_urbain_ps = sum(as.numeric(urbain_ps)) ),by=.(id_carre,annee)]
+
+    dd.hab[,pk_carre_annee := paste0(annee,id_carre)]
+
+    dd.hab[,`:=`(
+        foret_p = nbp_foret_p >= 5,
+        foret_ps = nbp_foret_ps >= 5,
+        ouvert_p = nbp_ouvert_p >= 5,
+        ouvert_ps = nbp_ouvert_ps >= 5,
+        agri_p = nbp_agri_p >= 5,
+        agri_ps = nbp_agri_ps >= 5,
+        urbain_p = nbp_urbain_p >= 5,
+        urbain_ps = nbp_urbain_ps >= 5)]
+
+
+
+
+    the_col <- c("pk_carre_annee","id_carre","annee","qualite_inventaire_stoc","nombre_passage_stoc_annee","info_passage_an","nbp_foret_p","nbp_foret_ps","nbp_ouvert_p","nbp_ouvert_ps","nbp_agri_p","nbp_agri_ps","nbp_urbain_p","nbp_urbain_ps","foret_p","foret_ps","ouvert_p","ouvert_ps","agri_p","agri_ps","urbain_p","urbain_ps")
+
+
+    dd.hab <-dd.hab[,the_col,with=FALSE]
+
+    filename <- paste0(repOutData,"carre_annee_",dateConstruction,".csv")
+    write.csv(dd.hab,filename,row.names=FALSE,na="")
+    cat("  (->",filename,")\n")
+
+    if(output) return(dd.hab)
+
+}

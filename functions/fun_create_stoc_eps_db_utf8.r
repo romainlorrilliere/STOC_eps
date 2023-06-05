@@ -40,26 +40,27 @@ if("STOC_eps_database" %in% dir()) setwd("STOC_eps_database")
 source("functions/fun_generic.r")
 source("functions/fun_raw_data.r")
 source("functions/fun_raw2table.r")
-source("functions/fun_postgres_create.r"
+source("functions/fun_postgres_create.r")
 
 
-f_prepaData <- function(dateExportVP="2019-01-10",nomFileVP="export_stoc_10012019.txt",
-                        nomFileVP_ONF="export_stoc_ONF_10012019.txt",
-                        dateExportFNat="2017-01-04", importACCESS=FALSE,
+f_prepaData <- function(
+                        dateExportFaune=c("2023-03-23"),nomFileFaune=c("2023_03_23_data_stoc_eps_shoc.csv"),
+                        dateExportVP=c("2019-11-25","2019-12-03"),nomFileVP=c("export_stoc_25112019.txt","export_stoc_onf_03122019.txt"),
+                        dateExportFNat="2017-01-04",
+                        importACCESS=FALSE,
                         nomFileFNat="FNat_plat_2017-01-04.csv",nomDBFNat="Base FNat2000.MDB",
-                        importationDataBrut=TRUE,
-                        constructionPoint=TRUE,constructionCarre=TRUE,
-                        constructionInventaire=TRUE,
-                        constructionObservation = TRUE, constructionHabitat = TRUE,
-                        dateConstruction=NULL,postgresql_import=TRUE,nomDBpostgresql=NULL,
+                        importationDataBrut_FNat=TRUE,importationDataBrut_VP=TRUE,importationDataBrut_Faune=TRUE,
+                        constructionPoint=TRUE,constructionCarre=TRUE,constructionInventaire=TRUE,
+                        constructionObservation = TRUE, constructionSeuil = TRUE, constructionHabitat = TRUE,
+                        constructionPointAnnee = TRUE, constructionCarreAnnee,
+                        dateConstruction="2023-05-25",postgresql_import=TRUE,
+                        nomDBpostgresql="stoc_eps",
                         postgresql_createAll=TRUE,postgresUser="postgres",
-                        postgresPassword="postgres",
-                        postGIS_initiation=TRUE,import_shape=FALSE,repertoire=NULL,
-                        postgresql_abondanceSeuil=TRUE,seuilAbondance = .99,
-                        historiqueCarre=TRUE,
-                        pointCarreAnnee=TRUE,importPointCarreAnnee=TRUE,fileTemp=FALSE)
+                        postGIS_initiation=TRUE,import_shape=FALSE,repertoire=NULL,fileTemp=FALSEE)
 {
-   #multigsub
+
+
+
 
 
     cat("               ===========================================================================\n")
@@ -75,23 +76,24 @@ f_prepaData <- function(dateExportVP="2019-01-10",nomFileVP="export_stoc_1001201
     cat(" ----------------------------\n\n")
 
 
-dateExportFaune=c("2023-03-23");nomFileFaune=c("2023_03_23_data_stoc_eps_shoc.csv");
-
-    dateExportVP=c("2019-11-25","2019-12-03");nomFileVP=c("export_stoc_25112019.txt","export_stoc_onf_03122019.txt");
-    dateExportFNat="2017-01-04";
-    importACCESS=FALSE;
-    nomFileFNat="FNat_plat_2017-01-04.csv";nomDBFNat="Base FNat2000.MDB";
-    importationDataBrut_FNat=TRUE;importationDataBrut_VP=TRUE;importationDataBrut_Faune=TRUE;
-    constructionPoint=TRUE;constructionCarre=TRUE;constructionInventaire=TRUE;
-    constructionObservation = TRUE; constructionHabitat = TRUE;
-    dateConstruction="2023-05-25";postgresql_import=TRUE;nomDBpostgresql=NULL;seuilAbondance = .99
-    nomDBpostgresql="stoc_eps";
-    postgresql_createAll=TRUE;postgresUser="romain";
-    postGIS_initiation=TRUE;import_shape=FALSE;repertoire=NULL;postgresql_abondanceSeuil=TRUE;historiqueCarre=TRUE;
-    pointCarreAnnee=TRUE;importPointCarreAnnee=TRUE;fileTemp=FALSE
-    ##
-    postgresPassword = "postgres"
-
+##dateExportFaune=c("2023-03-23");nomFileFaune=c("2023_03_23_data_stoc_eps_shoc.csv");
+##
+##    dateExportVP=c("2019-11-25","2019-12-03");nomFileVP=c("export_stoc_25112019.txt","export_stoc_onf_03122019.txt");
+##    dateExportFNat="2017-01-04";
+##    importACCESS=FALSE;
+##    nomFileFNat="FNat_plat_2017-01-04.csv";nomDBFNat="Base FNat2000.MDB";
+##    importationDataBrut_FNat=TRUE;importationDataBrut_VP=TRUE;importationDataBrut_Faune=TRUE;
+##    constructionPoint=TRUE;constructionCarre=TRUE;constructionInventaire=TRUE;
+##    constructionObservation = TRUE; constructionSeuil = TRUE; constructionHabitat = TRUE;
+##    constructionPointAnnee = TRUE; constructionCarreAnnee;
+##    dateConstruction="2023-05-25";postgresql_import=TRUE;nomDBpostgresql=NULL;seuilAbondance = .99
+##    nomDBpostgresql="stoc_eps";
+##    postgresql_createAll=TRUE;postgresUser="postgres";
+##    postGIS_initiation=TRUE;import_shape=FALSE;repertoire=NULL;postgresql_abondanceSeuil=TRUE;historiqueCarre=TRUE;
+##    pointCarreAnnee=TRUE;importPointCarreAnnee=TRUE;fileTemp=FALSE
+##    ##
+##    postgresPassword = "postgres"
+##
 
     start <- Sys.time() ## heure de demarage est utiliser comme identifiant par defaut
     if(is.null(dateConstruction)) dateConstruction = format(start, "%Y-%m-%d")
@@ -215,7 +217,7 @@ dateExportFaune=c("2023-03-23");nomFileFaune=c("2023_03_23_data_stoc_eps_shoc.cs
     cat("\n\n II) Union des données brutes \n=================================\n")
 
 
-    d.all <- union_raw(dFaune,dVP,dFNat)
+    d.all <- union_raw(dFaune,dVP,dFNat,dHist = NULL,dateConstruction,repOutInfo=repOutInfo,repOutData = repOutData,output = TRUE)
 
     cat(" Table complète: ", nrow(d.all)," lignes et ",ncol(d.all)," colonnes dont ", nrow(d.all[keep == TRUE,])," conservées \n    DONE ! \n")
 
@@ -233,7 +235,7 @@ dateExportFaune=c("2023-03-23");nomFileFaune=c("2023_03_23_data_stoc_eps_shoc.cs
             cat(" construction -> ")
             d.point <- raw2point(d.all,dateConstruction,repOutInfo=repOutInfo,repOutData = repOutData,TRUE)
         } else {
-            filename <- paste0(repOutData,"point_VP_",dateConstruction,".csv")
+            filename <- paste0(repOutData,"point_",dateConstruction,".csv")
             cat(" importation \n",filename," -> ")
             d.point <- fread(filename)
         }
@@ -289,8 +291,25 @@ dateExportFaune=c("2023-03-23");nomFileFaune=c("2023_03_23_data_stoc_eps_shoc.cs
         cat(nrow(d.obs)," lignes \n")
 
 
-    ##  5) Table habitats
-    cat("\n\n 5) Table habitats\n----------------------\n")
+
+    ## 5) Table seuil
+    cat("\n\n 5) Table seuil\n----------------------\n")
+    flush.console()
+
+    if(constructionSeuil) {
+            cat(" construction -> ")
+            d.seuil <- obs2seuil(d.obs,d.inv,dateConstruction,repOutInfo=repOutInfo,repOutData = repOutData,TRUE)
+        } else {
+            filename <- paste0(repOutData,"seuil_",dateConstruction,".csv")
+            cat(" importation \n",filename," -> ")
+            d.seuil <- fread(filename)
+        }
+        cat(nrow(d.seuil)," lignes \n")
+
+
+
+    ##  6) Table habitats
+    cat("\n\n 6) Table habitats\n----------------------\n")
     flush.console()
 
     if(constructionHabitat) {
@@ -304,6 +323,38 @@ dateExportFaune=c("2023-03-23");nomFileFaune=c("2023_03_23_data_stoc_eps_shoc.cs
         }
         cat(nrow(d.hab)," lignes \n")
 
+
+    ##  7) Table point_annee
+    cat("\n\n 7) Table point_annee\n----------------------\n")
+    flush.console()
+
+    if(constructionPoint_annee) {
+            cat(" construction -> ")
+            d.point_annee <- hab2point_annee(d.hab,d.inv,dateConstruction,repOutInfo=repOutInfo,repOutData = repOutData,TRUE)
+        } else {
+
+            filename <- paste0(repOutData,"point_annee_",dateConstruction,".csv")
+            cat(" importation \n",filename," -> ")
+            d.point_annee <- fread(filename)
+        }
+        cat(nrow(d.point_annee)," lignes \n")
+
+
+
+    ##  8) Table carre_annee
+    cat("\n\n 8) Table point_annee\n----------------------\n")
+    flush.console()
+
+    if(constructionCarre_annee) {
+            cat(" construction -> ")
+            d.carre_annee <- point_annee2carre_annee(d.point_annee,dateConstruction,repOutInfo=repOutInfo,repOutData = repOutData,TRUE)
+        } else {
+
+            filename <- paste0(repOutData,"carre_annee_",dateConstruction,".csv")
+            cat(" importation \n",filename," -> ")
+            d.carre_annee <- fread(filename)
+        }
+        cat(nrow(d.carre_annee)," lignes \n")
 
 
 
@@ -319,23 +370,6 @@ dateExportFaune=c("2023-03-23");nomFileFaune=c("2023_03_23_data_stoc_eps_shoc.cs
         createDB_postgres(dateConstruction,nomDBpostgresql,postgresUser,postgresPassword,postgresql_createAll,postGIS_initiation,postgresql_abondanceSeuil,seuilAbondance,repertoire,repOut=repOutData,fileTemp)
         cat("\n    -> OK\n")
     } else { cat(" ---> SKIP\n") }
-
-    ## Point et Carrees Annee
-    cat("\n\n 2) Point et Carrees Annee\n----------------------\n")
-    flush.console()
-    if(pointCarreAnnee) {
-        point_carre_annee(dateConstruction=dateConstruction,version=version,con=NULL,importation=importPointCarreAnnee,repertoire=repertoire,nomDBpostgresql=nomDBpostgresql,postgresUser=postgresUser,postgresPassword=postgresPassword)
-    } else { cat(" ---> SKIP\n") }
-
-
-    ## Historic des Carrees
-    cat("\n\n 3) Historic des Carrees\n----------------------\n")
-    flush.console()
-    if(historiqueCarre & postgresql_import) {
-        historicCarre(nomDBpostgresql=nomDBpostgresql,postgresUser=postgresUser,postgresPassword=postgresPassword)
-    } else { cat(" ---> SKIP\n") }
-
-
 
 
 
@@ -358,259 +392,4 @@ dateExportFaune=c("2023-03-23");nomFileFaune=c("2023_03_23_data_stoc_eps_shoc.cs
 
 
 ###############################################################################################
-
-
-historicCarre  <- function(con=NULL,nomDBpostgresql="stoc_eps",postgresUser="romain",postgresPassword=NULL,anneeMax=NULL) {
-
-    ##  con=NULL;anneeMax=2017 ##
-
-    require(ggplot2)
-    require(reshape2)
-    require(maps)
-    require(maptools)
-    require(animation)
-
-    if(is.null(con))     con <- openDB.PSQL(user=postgresUser,pw=postgresPassword,DBname=nomDBpostgresql)
-
-
-
-    if(is.null(anneeMax)) anneeTxt <- NULL else anneeTxt <- anneeMax
-    if(is.null(anneeMax)) anneeMax = 9999
-
-    ##        query <-paste0("select  from carre_annee where annee <= ",anneeMax," and annee > 2000 and qualite_inventaire_stoc > 0 group by id_carre, annee order by id_carre, annee;")
-
-
-
-    query <-paste0("select  * from carre_annee where annee <= ",anneeMax," and annee > 2000 and qualite_inventaire_stoc > 0;")
-
-    cat("Query:\n",query,"\n")
-
-    d <- dbGetQuery(con, query)
-    d$PA <- 1
-
-    dan <- aggregate(PA ~ annee, d, sum)
-
-    dd <- cast(d,id_carre~annee,mean)
-    rnames <- dd$id_carre
-    cnames <- colnames(dd)[-1]
-    dd <- as.matrix(dd[,-1])
-    rownames(dd) <- rnames
-    colnames(dd) <- cnames
-    dd[is.nan(dd)] <- 0
-
-
-
-    nb_carre_diff <- nrow(dd)
-
-    colnames(dan)[2] <- "nbCarre"
-    dan$Nouveaux <- NA
-    dan$NonRealise <- NA
-    dan$Arrete <- NA
-    dan$Nouveaux[1] <- sum(dd[,1])
-    dan$NonRealise[1] <- 0
-    dan$Arrete[1] <- 0
-    dan$Arrete[ncol(dd)] <- NA
-
-    for(j in 2:ncol(dd)) {
-        if(j==2)
-            dan$Nouveaux[j] <- sum(dd[dd[,j]==1 & dd[,j-1]==0,j]) else dan$Nouveaux[j] <- sum(dd[dd[,j]==1 & rowSums(dd[,1:j-1])==0,j])
-    }
-                                        #-as.numeric(rowSums(dd[dd[,j]==1 & dd[,j-1]==0,1:j-1])>0)))
-
-
-    for(j in 2:ncol(dd))
-        if(j<ncol(dd))
-            dan$NonRealise[j] <- sum(dd[dd[,j]==0 & rowSums(dd[,j:ncol(dd)])>0 & dd[,j-1]==1,(j-1)])  else  dan$NonRealise[j] <- sum(dd[(dd[,j]==0 & dd[,j-1]==1),j-1])
-
-    for(j in 2:(ncol(dd)-1))
-        dan$Arrete[j] <- sum(dd[rowSums(dd[,j:ncol(dd)])==0 & dd[,j-1]==1,(j-1)])
-
-    fileCSV <- paste0(repOut,"carreSTOCactif_",anneeTxt,".csv")
-    cat( "\n  CSV --> ", fileCSV,"\n")
-    write.csv2(dan,fileCSV)
-
-    ggAnnee <- melt(dan,"annee")
-
-    gg <- ggplot(ggAnnee,aes(x=annee,y=value,colour=variable))+geom_line(size=1.1)+geom_point(size=1.3)
-    gg <- gg + scale_colour_manual(values=c("nbCarre" = "#0d259f","Nouveaux"="#0d9f1b","Arrete" = "#9f0d0d" ,"NonRealise" = "#ff9d00"),
-                                   labels=c("nbCarre" = "Carrés actif","Nouveaux"="Nouveaux carrés","Arrete" = "Carrés arrêtés","NonRealise" = "Carrés non réalisés"),name="" )
-    gg <- gg + labs(title="",x="",y="")
-
-    filePNG <- paste0(repOut,"carreSTOC_",anneeTxt,".png")
-    cat( "\n  PNG --> ", filePNG,"\n")
-    ggsave(filePNG,gg)
-
-
-
-    birth <- apply(dd,1,FUN = function(x) min(which(x==1)))
-    dage <- dd
-    for(i in 1:nrow(dd)) {
-        cc <- names(birth[i])
-        b <- birth[i]
-        dage[cc,b:ncol(dage)] <- 1:(ncol(dage)-b+1)
-    }
-
-    dage <- dage*dd
-    dage <- as.data.frame(as.matrix(dage))
-    dage2 <- data.frame(id_carre=row.names(dage),dage)
-
-    dage2 <- melt(dage2,"id_carre")
-    colnames(dage2) <- c("id_carre","annee","age")
-    dage2$annee <- as.numeric(substring(as.character(dage2$annee),2,5))
-
-    dage2 <- subset(dage2,age>0)
-    ggAge <- aggregate(id_carre~annee+age,dage2,length)
-
-
-    gg <- ggplot(ggAge,aes(age,id_carre))+ geom_col() + facet_wrap(~annee)
-    gg <- gg + labs(title="Pyramide des ages des stations STOC EPS",x="Age",y="Nombre de carré STOC actifs")
-
-    filePNG <- paste0(repOut,"carreSTOC_pyramideAge_",anneeTxt,".png")
-    cat( "\n  PNG --> ", filePNG,"\n")
-    ggsave(filePNG,gg)
-
-
-
-    fileCSV <- paste0(repOut,"carreSTOCage_",anneeTxt,".csv")
-    cat( "\n  CSV --> ", fileCSV,"\n")
-    write.csv2(dan,fileCSV)
-
-
-
-    query <-paste0("select id_carre, longitude_grid_wgs84, latitude_grid_wgs84
-from carre_annee as i, carre as c
-where i.id_carre = c.pk_carre and annee <= 9999 and annee > 2000 and qualite_inventaire_stoc > 0
-group by id_carre, longitude_grid_wgs84, latitude_grid_wgs84
-order by id_carre;")
-
-    cat("Query:\n",query,"\n")
-
-    dcoord <- dbGetQuery(con, query)
-
-    fileCSV <- paste0(repOut,"coord_carreSTOC_",anneeTxt,".csv")
-    cat( "\n  CSV --> ", fileCSV,"\n")
-    write.csv2(dcoord,fileCSV)
-
-
-
-    france <- map_data("france")
-
-    gg <- ggplot(dcoord,aes(longitude_grid_wgs84,latitude_grid_wgs84))+
-        geom_polygon( data=france, aes(x=long, y=lat, group = group),colour="gray", fill="white",size=0.3 )+
-        geom_point(size=.8,alpha=.8,colour="black")
-    gg <- gg + theme(axis.ticks = element_blank(), axis.text = element_blank()) + labs(title="Localisation des carré STOC-EPS suivis au moins 1 année depuis 2001",x="",y="")
-    gg <- gg + coord_fixed(ratio=1.2)
-
-    filePNG <- paste0(repOut,"carreSTOC_map_simple_",anneeTxt,".png")
-    cat( "\n  PNG --> ", filePNG,"\n")
-    ggsave(filePNG,gg)
-
-
-
-
-    dage2 <- merge(dage2,dcoord,by="id_carre")
-    dage2$creation <- dage2$annee-dage2$age + 1
-
-    ageMax <- max(dage2$age)
-                                        # dage2 <- subset(dage2,annee<=2016)
-
-    gg <- ggplot(dage2,aes(longitude_grid_wgs84,latitude_grid_wgs84,colour=creation))+
-        geom_polygon( data=france, aes(x=long, y=lat, group = group),colour="gray", fill="white",size=0.3 )+
-        geom_point(size=.8,alpha=.8,colour="black")+ geom_point(size=0.6,alpha=.8) + facet_wrap(~annee)
-    gg <- gg + scale_colour_gradientn(colours=c("#4d004b","#8c6bb1","#bfd3e6"),name="Date de\ncréation")
-    gg <- gg + theme(axis.ticks = element_blank(), axis.text = element_blank()) + labs(title="Localisation et age des suivis STOC-EPS",x="",y="")
-    gg <- gg + coord_fixed(ratio=1.2)
-
-    fileGIF <- paste0(repOut,"carreSTOC_mapGIF_",anneeTxt,".gif")
-    cat( "\n  GIF --> ", fileGIF,"\n")
-    ggsave(fileGIF,gg,height = 10.5,width = 13)
-
-
-
-
-    saveGIF({
-        for(a in sort(unique(dage2$annee))) {
-            dage2a <- subset(dage2,annee==a)
-            gg <- ggplot(dage2a,aes(longitude_grid_wgs84,latitude_grid_wgs84,colour=creation))+
-                geom_polygon( data=france, aes(x=long, y=lat, group = group),colour="gray", fill="white",size=0.3 )+
-                geom_point(size=1.5,alpha=.8,colour="black")+geom_point(size=1.3,alpha=.8) + facet_wrap(~annee)
-            gg <- gg + scale_colour_gradientn(colours=c("#4d004b","#8c6bb1","#bfd3e6"),name="Date de\ncréation",limits=c(min(dage2$annee),max(dage2$annee)))
-            gg <- gg + coord_fixed(ratio=1.2)
-            gg <- gg + theme(axis.ticks = element_blank(), axis.text = element_blank()) + labs(title="Localisation et age des suivis STOC-EPS",x="",y="")
-            print(gg)
-            ani.pause()
-        }
-    },
-    interval = 1.3,
-    movie.name = fileGIF,ani.width = 500, ani.height = 500)
-
-
-
-
-
-}
-
-
-
-
-import_shape <- function(vecShape=c("pra_93","L93_10x10_TerreMer"),vecNameTable=c("pra","maille_atlas"),vecEPSG = NULL,
-                         repertoire=NULL,nomDBpostgresql=NULL,postgresUser="romain",
-                         fileTemp=TRUE,savePostgres=TRUE) {
-
-
-                                        # require(ggplot2)
-    ## vecShape=c("pra_93","L93_10x10_TerreMer");vecNameTable=c("pra","maille_atlas");vecEPSG = NULL
-    ##    repertoire=NULL;savePostgres=TRUE;nomDBpostgresql=NULL;postgresUser="romain"; fileTemp=FALSE;
-
-
-    cat("\n  Importation des shapes files \n   ------------------------------------\n")
-    cat(vecShape)
-
-
-    if(is.null(repertoire)) repertoire <- paste0(getwd(),"/")
-    if(is.null(nomDBpostgresql)) nomDBpostgresql <- "stoc_eps"
-
-
-
-    for (i in length(vecShape)) {
-
-        sh <- vecShape[i]
-        epsg <- vecEPSG[i]
-        if(is.null(epsg)) epsg <- 2154 #Lambert 93
-
-        fsh <- fsql <- paste0("data_DB_import/tableGeneriques/",sh,"/",sh)
-        fsql <- paste0("data_DB_import/tableGeneriques/",sh,"/",sh,".sql")
-
-        cmd <- paste0("shp2pgsql -I -s ",epsg,"  ",fsh," >  ",fsql," \n")
-        cat(cmd,"\n")
-        myshell(cmd)
-
-        name_table <- tail(readLines(fsql, n=4),1)
-        name_table <- gsub("CREATE TABLE \"","",name_table)
-        name_table <- gsub("\" (gid serial,","",name_table,fixed=TRUE)
-
-
-        query <- paste0("DROP TABLE IF EXISTS ",name_table,";")
-        cat("drop query:", query,"\n")
-        dbSendQuery(con, query)
-
-### HERE !!!
-
-        cmd <- paste0("psql -U ",postgresUser," -d ",nomDBpostgresql," < ",fsql)
-        ## \copy species_list_indicator FROM c:/git/BirdLab/generic_data/espece_list_indicateur.csv with (format csv, header, delimiter ',')
-        myshell(cmd,invisible=TRUE)
-
-        name_table <-  vecNameTable[i]
-        if(!(is.na(name_table))) {
-
-        }
-    }
-
-    cat("\n\n --- Importation SQL ---\n\n")
-    cat("\n\n - file: ",fsql,"\n")
-
-    commande <- paste0("psql -U ",postgresUser," ",nomDBpostgresql," < ",repertoire,"library_sql/postgres_createTableGenerique.sql")
-    shell(commande)
-
-}
 

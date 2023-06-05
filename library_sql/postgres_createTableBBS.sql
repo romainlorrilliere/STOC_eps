@@ -17,6 +17,9 @@ CREATE TABLE point
          latitude_wgs84 double precision,
 	 longitude_wgs84_sd double precision,
          latitude_wgs84_sd double precision,
+	 nb_sp int,
+	 nb_sp_mean double precision,
+	 abondance_mean double precision,
          db varchar(15) NOT NULL,
 	 date_export varchar(10) NOT NULL);
 
@@ -25,7 +28,6 @@ DROP table if exists carre;
 CREATE TABLE carre
        (pk_carre varchar(100) primary key,
        nom_carre varchar(100),
-       nom_carre_fnat varchar(100),
        commune varchar(50),
        site varchar,
        etude varchar(25),
@@ -33,12 +35,20 @@ CREATE TABLE carre
        insee varchar(5),   
        departement varchar(3),
        altitude_median double precision,
-       aire int,
-       perimetre int,
+       nb_point int,
+       aire double precision,
+       perimetre double precision,
        latitude_median_wgs84 double precision,
        longitude_median_wgs84 double precision,
        latitude_grid_wgs84 double precision,
        longitude_grid_wgs84 double precision,
+       first_year int,
+       last_year int,
+       duration int,
+       nb_year int,
+       nb_sp int,
+       nb_sp_mean double precision,
+       abondance_point_mean double precision,
        db varchar(15) NOT NULL,
        date_export varchar(10) NOT NULL);
 
@@ -66,7 +76,7 @@ CREATE TABLE inventaire
        nombre_passage_anne int,
        nombre_passage_stoc_annee int,
        info_passage_an varchar(10),
-       info_pasage varchar(25),
+       info_passage varchar(25),
        nb_sem_entre_passage double precision,
        info_temps_entre_passage varchar(10),
        heure_debut varchar(5),
@@ -125,6 +135,18 @@ CREATE TABLE observation
  	db varchar(15) NOT NULL,
 	date_export varchar(10) NOT NULL);
 
+DROP table if exists seuil_obs;
+CREATE TABLE seuil_obs
+       (code_sp varchar(6) NOT NULL,
+       seuil_all_tukey_outlier double precision,
+       seuil_all_tukey_farout double precision,
+       seuil_inf_tukey_outlier double precision,
+       seuil_inf_tukey_farout double precision,
+       seuil_200_tukey_outlier double precision,
+       seuil_200_tukey_farout double precision,
+       seuil_100_tukey_outlier double precision,
+       seuil_100_tukey_farout double precision);
+
 
 DROP table if exists habitat;
 create TABLE habitat
@@ -132,9 +154,16 @@ create TABLE habitat
        id_point varchar(100)  NOT NULL,
        date varchar(10) NOT NULL,
        annee int NOT NULL,
+       nb_description int,
+       habitat_sug varchar(7),
+       habitat varchar(7),
+       habitat_collapse varchar(25),
+       habitat_consistent boolean,
+       time_last_declaration_sug_j int,
        p_habitat_sug varchar(3),
        p_habitat varchar(3),
-       p_habitat_consistent boolean,
+       p_habitat_collapse varchar(25),
+       p_milieu_sug varchar(1)
        p_milieu varchar(1),
        p_type int,
        p_cat1 int,
@@ -143,14 +172,90 @@ create TABLE habitat
        p_sous_cat2 int,
        s_habitat_sug varchar(3),
        s_habitat varchar(3),
-       s_habitat_consistent boolean,
+       s_habitat_collapse varchar(25),
+       s_milieu_sug varchar(1),
        s_milieu varchar(1),
        s_type int,
        s_cat1 int,
        s_cat2 int,
        s_sous_cat1 int,
        s_sous_cat2 int,
-       time_last_declaration_sug_j int,
        db varchar(15) NOT NULL,
        date_export varchar(10) NOT NULL);
+
+
+
+
+DROP table if exists point_annee;
+create TABLE point_annee
+       (pk_point_annee varchar(100) primary key,
+       id_point varchar(100) NOT NULL,
+       id_carre varchar(100) NOT NULL,
+       annee int NOT NULL,
+       qualite_inventaire_stoc double precision,
+       nombre_passage_stoc_annee int,
+       info_passage_an varchar(10),
+       habitat_collapse varchar(50),
+       p_habitat_collapse varchar(50),
+       s_habitat_collapse varchar(50),
+       time_declaration_sug_j int,
+       foret_p boolean,
+       foret_ps boolean,
+       ouvert_p boolean,
+       ouvert_ps boolean,
+       agri_p boolean,
+       agri_ps boolean,
+       urbain_p boolean,
+       urbain_ps boolean,
+       info_heure_debut_pass1 varchar(10),
+       nb_description_pass1 int,
+       habitat_sug_pass1 varchar(7),
+       habitat_collapse_pass1 varchar(25),
+       habitat_consistent_pass1 boolean,
+       p_habitat_sug_pass1 varchar(3),
+       p_habitat_pass1 varchar(3),
+       p_milieu_pass1 varchar(1),
+       s_habitat_sug_pass1 varchar(3),
+       s_habitat_pass1 varchar(3),
+       s_milieu_pass1 varchar(3),
+       info_heure_debut_pass2 varchar(10),
+       nb_description_pass2 int,
+       habitat_sug_pass2 varchar(7),
+       habitat_collapse_pass2 varchar(25),
+       habitat_consistent_pass2 boolean,
+       p_habitat_sug_pass2 varchar(3),
+       p_habitat_pass2 varchar(3),
+       p_milieu_pass2 varchar(1),
+       s_habitat_sug_pass2 varchar(3),
+       s_habitat_pass2 varchar(3),
+       s_milieu_pass2 varchar(3));
+
+
+
+
+
+DROP table if exists carre_annee;
+create TABLE carre_annee
+       (pk_carre_annee varchar(100) primary key,
+       id_carre varchar(100) NOT NULL,
+       annee int NOT NULL,
+       qualite_inventaire_stoc double precision,
+       nombre_passage_stoc_annee int,
+       info_passage_an varchar(10),
+       nbp_foret_p int,
+       nbp_foret_ps int,
+       nbp_ouvert_p int,
+       nbp_ouvert_ps int,
+       nbp_agri_p int,
+       nbp_agri_ps int,
+       nbp_urbain_p int,
+       nbp_urbain_ps int,
+       foret_p boolean,
+       foret_ps boolean,
+       ouvert_p boolean,
+       ouvert_ps boolean,
+       agri_p boolean,
+       agri_ps boolean,
+       urbain_p boolean,
+       urbain_ps boolean);
 

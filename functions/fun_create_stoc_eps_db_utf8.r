@@ -83,11 +83,12 @@ f_prepaData <- function(
 ##    dateExportFNat="2017-01-04";
 ##    importACCESS=FALSE;
 ##    nomFileFNat="FNat_plat_2017-01-04.csv";nomDBFNat="Base FNat2000.MDB";
+##    import_raw = TRUE
 ##    importationDataBrut_FNat=TRUE;importationDataBrut_VP=TRUE;importationDataBrut_Faune=TRUE;
 ##    constructionPoint=TRUE;constructionCarre=TRUE;constructionInventaire=TRUE;
 ##    constructionObservation = TRUE; constructionSeuil = TRUE; constructionHabitat = TRUE;
 ##    constructionPointAnnee = TRUE; constructionCarreAnnee;
-## dateConstruction=NULL;postgresql_import=TRUE;nomDBpostgresql=NULL;seuilAbondance = .99
+ dateConstruction="2023-07-10";postgresql_import=TRUE;nomDBpostgresql=NULL;seuilAbondance = .99
 ##    nomDBpostgresql="stoc_eps";
 ##    postgresql_createAll=TRUE;postgresUser="postgres";
 ##    postGIS_initiation=TRUE;import_shape=FALSE;repertoire=NULL;postgresql_abondanceSeuil=TRUE;historiqueCarre=TRUE;

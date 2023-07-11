@@ -33,11 +33,11 @@ raw2point <- function(d,dateConstruction,repOutInfo="", repOutData="",output=FAL
                   site = get_mode(site),
                   insee = get_mode(insee),
                   departement = get_mode(departement),
-                  altitude = median(altitude),
-                  latitude_wgs84 = median(latitude_wgs84),
-                  longitude_wgs84 = median(longitude_wgs84),
-                  latitude_wgs84_sd = sd(latitude_wgs84),
-                  longitude_wgs84_sd = sd(longitude_wgs84),
+                  altitude = median(altitude,na.rm=TRUE),
+                  latitude_wgs84 = median(latitude_wgs84,na.rm=TRUE),
+                  longitude_wgs84 = median(longitude_wgs84,na.rm=TRUE),
+                  latitude_wgs84_sd = sd(latitude_wgs84,na.rm=TRUE),
+                  longitude_wgs84_sd = sd(longitude_wgs84,na.rm=TRUE),
                   date_export = max(date_export)),
               by=.(id_point,db)]
 
@@ -111,9 +111,9 @@ raw2carre <- function(d,dateConstruction,repOutInfo="", repOutData="",output=FAL
                 etude_detail = get_mode(etude_detail),
                 nom_carre = get_mode(nom_carre),
                 departement = get_mode(departement),
-                altitude_median = as.integer(median(altitude)),
-                latitude_median_wgs84 = median(latitude_wgs84),
-                longitude_median_wgs84 = median(longitude_wgs84),
+                altitude_median = as.integer(median(altitude,na.rm=TRUE)),
+                latitude_median_wgs84 = median(latitude_wgs84,na.rm=TRUE),
+                longitude_median_wgs84 = median(longitude_wgs84,na.rm=TRUE),
                 date_export = max(date_export)),
             by=.(id_carre,db)]
 
@@ -174,7 +174,7 @@ raw2carre <- function(d,dateConstruction,repOutInfo="", repOutData="",output=FAL
 raw2inventaire <- function(d,version = "V.1",dateConstruction="",repOutInfo="", repOutData="",output=FALSE) {
 
     ## dateExport=dateExportVP
-    ## d=copy(d.all)
+    d=copy(d.all)
 
     require(maptools)
 
@@ -199,8 +199,8 @@ raw2inventaire <- function(d,version = "V.1",dateConstruction="",repOutInfo="", 
                            visibilite = visibilite,
                            neige = neige,
                            altitude = get_mode(altitude),
-                           latitude_wgs84 = median(latitude_wgs84),
-                           longitude_wgs84 = median(longitude_wgs84),
+                           latitude_wgs84 = median(latitude_wgs84,na.rm=TRUE),
+                           longitude_wgs84 = median(longitude_wgs84,na.rm=TRUE),
                            db = get_mode(db),
                            date_export=date_export,version=version), by = id_inventaire]
 
@@ -237,8 +237,8 @@ raw2inventaire <- function(d,version = "V.1",dateConstruction="",repOutInfo="", 
                visibilite = get_mode(visibilite),
                neige = get_mode(neige),
                altitude = get_mode(altitude),
-               latitude_wgs84 = median(latitude_wgs84),
-               longitude_wgs84 = median(longitude_wgs84),
+               latitude_wgs84 = median(latitude_wgs84,na.rm=TRUE),
+               longitude_wgs84 = median(longitude_wgs84,na.rm=TRUE),
                db = get_mode(db),
                date_export=get_mode(date_export),version=version), by = id_inventaire])
 
@@ -256,6 +256,7 @@ raw2inventaire <- function(d,version = "V.1",dateConstruction="",repOutInfo="", 
     dd[jour_julien < 61 ,periode_passage:= "winter_end"]
     dd[,passage_stoc := 999]
 
+    dd[is.na(altitude), altitude := -999]
     ## precoce
     dd[jour_julien > 60 & jour_julien <= 91 , passage_stoc :=  0] # 01/03 -> 31/03
 
@@ -268,6 +269,8 @@ raw2inventaire <- function(d,version = "V.1",dateConstruction="",repOutInfo="", 
     dd[jour_julien >= 135 & jour_julien <= 167 & altitude >= 800,passage_stoc :=  2] #15/05 -> 15/06
     ## tardif
     dd[jour_julien > 167 & jour_julien <= 197 , passage_stoc :=  3] # 16/06 -> 15/07
+
+  dd[altitude == -999, altitude := NA]
 
     dd[passage_stoc == 0 , periode_passage := "early"]
     dd[passage_stoc == 1 , periode_passage := "first"]
@@ -455,6 +458,7 @@ obs2seuil <- function(d.obs,d.inv,dateConstruction="",repOutInfo="", repOutData=
 
 raw2habitat <- function(d,dateConstruction="",repOutInfo="", repOutData="",output=FALSE) {
 
+
 ## d <- copy(d.all)
 
 ##    d[,`:=`(p_habitat = NA,s_habitat = NA)]
@@ -540,7 +544,7 @@ raw2habitat <- function(d,dateConstruction="",repOutInfo="", repOutData="",outpu
 
     ## creation d'un indentifiant de serie temporel d'habitat constant
 
-    ## table des saisies prÃ©cedentes
+    ## table des saisies précedentes
     dd_habitat_inc_pre <-  dd[,.(habitat = get_mode(habitat),last_date=max(date)),by = .(habitat_point_inc_id,id_point,inc_habitat_point)]
 
     vcol <- colnames(dd_habitat_inc_pre)
@@ -611,6 +615,8 @@ raw2habitat <- function(d,dateConstruction="",repOutInfo="", repOutData="",outpu
 }
 
 
+
+
 hab2point_annee <- function(d.hab,d.inv,dateConstruction="",repOutInfo="", repOutData="",output=FALSE) {
 
     setkey(d.hab,"pk_habitat")
@@ -677,6 +683,7 @@ setnames(dd.hab2,colonnes, paste0(colonnes,"_pass2"))
     if(output) return(dd.hab)
 
 }
+
 
 
 

@@ -88,7 +88,7 @@ f_prepaData <- function(
 ##    constructionPoint=TRUE;constructionCarre=TRUE;constructionInventaire=TRUE;
 ##    constructionObservation = TRUE; constructionSeuil = TRUE; constructionHabitat = TRUE;
 ##    constructionPointAnnee = TRUE; constructionCarreAnnee;
- dateConstruction="2023-07-10";postgresql_import=TRUE;nomDBpostgresql=NULL;seuilAbondance = .99
+##  dateConstruction="2023-07-10";postgresql_import=TRUE;nomDBpostgresql=NULL;seuilAbondance = .99
 ##    nomDBpostgresql="stoc_eps";
 ##    postgresql_createAll=TRUE;postgresUser="postgres";
 ##    postGIS_initiation=TRUE;import_shape=FALSE;repertoire=NULL;postgresql_abondanceSeuil=TRUE;historiqueCarre=TRUE;

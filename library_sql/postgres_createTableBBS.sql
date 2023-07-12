@@ -259,3 +259,69 @@ create TABLE carre_annee
        urbain_p boolean,
        urbain_ps boolean);
 
+
+
+
+
+
+
+
+DROP table if exists all_data;
+create TABLE all_data
+       (id_raw_observation varchar,
+       id_raw_inventaire varchar,
+       etude varchar(25),
+       site varchar,
+       insee varchar(5),
+       commune varchar(50),
+       id_carre varchar(100),
+       date varchar(10),
+       heure varchar(5),
+       heure_fin varchar(5),
+       observateur varchar(50),
+       num_point varchar(2),
+       altitude int,
+       espece varchar(9),
+       classe varchar(15),
+       abondance int,
+       distance_contact varchar(8),
+       longitude_wgs84 double precision,
+       latitude_wgs84 double precision,
+       nuage int,
+       pluie int,
+       vent int,
+       visibilite int,
+       neige int,
+       p_milieu varchar(1),
+       p_type int,
+       p_cat1 int,
+       p_cat2 int,
+       p_sous_cat1 int,
+       p_sous_cat2 int,
+       s_milieu varchar(1),
+       s_type int,
+       s_cat1 int,
+       s_cat2 int,
+       s_sous_cat1 int,
+       s_sous_cat2 int,
+       date_export varchar(10),
+       departement varchar(3),
+       etude_detail varchar(30),
+       nom_carre varchar(100),
+       point varchar,
+       id_point varchar(100),
+       jour_julien int,
+       annee int,
+       id_inventaire  varchar(100),
+       duree_minute int,
+       id_data varchar(100),
+       inventaire_inc int,
+       id_observation varchar(100),
+       db varchar(15),
+       info_passage varchar(25),
+       passage_stoc int,
+       passage_observateur int,
+       email varchar(100),
+       code_sp varchar(6),
+       keep boolean);
+

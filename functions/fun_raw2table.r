@@ -174,7 +174,7 @@ raw2carre <- function(d,dateConstruction,repOutInfo="", repOutData="",output=FAL
 raw2inventaire <- function(d,version = "V.1",dateConstruction="",repOutInfo="", repOutData="",output=FALSE) {
 
     ## dateExport=dateExportVP
-    d=copy(d.all)
+    ## d=copy(d.all)
 
     require(maptools)
 

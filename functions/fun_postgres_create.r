@@ -25,6 +25,7 @@ createDB_postgres <- function(dateConstruction,nomDBpostgresql=NULL,postgresUser
     cat("     6- habitat\n")
     cat("     7- point_annee\n")
     cat("     8- carre_annee\n")
+    cat("     9- all_data\n")
     commande <- paste0("psql -U ",postgresUser," ",nomDBpostgresql," < ",repertoire,"library_sql/postgres_createTableBBS.sql")
     myshell(commande)
 
@@ -51,6 +52,9 @@ createDB_postgres <- function(dateConstruction,nomDBpostgresql=NULL,postgresUser
         " with (format csv, header, delimiter ',')\n",sep="",
         file=paste0(repertoire,"library_sql/_sqlR_importationData.sql"),append=TRUE)
     cat(" \\copy carre_annee FROM ",repertoire,repOut,"carre_annee_",dateConstruction,".csv",
+        " with (format csv, header, delimiter ',')\n",sep="",
+        file=paste0(repertoire,"library_sql/_sqlR_importationData.sql"),append=TRUE)
+    cat(" \\copy all_data FROM ",repertoire,repOut,"alldata_",dateConstruction,".csv",
         " with (format csv, header, delimiter ',')\n",sep="",
         file=paste0(repertoire,"library_sql/_sqlR_importationData.sql"),append=TRUE)
 

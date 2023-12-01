@@ -1,13 +1,58 @@
 union_raw <- function(dFaune = NULL, dVP = NULL, dFNat = NULL, dHist = NULL,dateConstruction,repOutInfo="", repOutData="",output=FALSE) {
 
-    dFaune[,keep := TRUE]
-    dVP[,keep := !(id_inventaire %in% dFaune[,id_inventaire])]
-    dFNat[,keep := !(id_inventaire %in% c(dFaune[,id_inventaire],dVP[,id_inventaire]))]
+
+    if(!is.null(dFaune)) dFaune[,keep := TRUE]
+    if(!is.null(dVP)) dVP[,keep := TRUE]
+    if(!is.null(dFNat)) dFNat[,keep := TRUE]
+    if(!is.null(dHist)) dHist[,keep := TRUE]
+
+    vec_d <- c("dFaune","dVP","dFNat","dHist")
+
+    init_col <- TRUE
+    for(di in vec_d) {
+        if(!is.null(get(di))) {
+            if(init_col) {
+                lesColonnes <- colnames(get(di))
+                init_col <- FALSE
+            } else {
+                lesColonnes <- intersect(lesColonnes,colnames(get(di)))
+            }
+        }
+    }
+
+
+    init_d <- TRUE
+    for(di in vec_d) {
+        if(!is.null(get(di))) {
+            if(init_d) {
+                dd <- get(di)
+                d <- dd[,lesColonnes,with=FALSE]
+                vec_inventaire <- d[,id_inventaire]
+                init_d <- FALSE
+
+            } else {
+                dd <- get(di)
+                dd[,keep := !(id_inventaire %in% vec_inventaire)]
+                dd <- dd[,lesColonnes,with=FALSE]
+                d <- rbind(d,dd)
+                vec_inventaire <- unique(d[,id_inventaire])
+            }
+        }
+    }
+
+
+
+
+
+
+
+##    dVP[,keep := !(id_inventaire %in% dFaune[,id_inventaire])]
+##    dFNat[,keep := !(id_inventaire %in% c(dFaune[,id_inventaire],dVP[,id_inventaire]))]
 ##    dHist[,keep := !(id_inventaire %in% c(dFaune[,id_inventaire],dVP[,id_inventaire],dFNat[,id_inventaire]))]
 
-    lesColonnes <- intersect(intersect(colnames(dFaune),colnames(dVP)),colnames(dFNat))
+ ##   lesColonnes <- intersect(intersect(colnames(dFaune),colnames(dVP)),colnames(dFNat))
 
-    d <- rbind(rbind(dFaune[,lesColonnes,with=FALSE],dVP[,lesColonnes,with=FALSE]),dFNat[,lesColonnes,with=FALSE])
+ ##   d <- rbind(rbind(dFaune[,lesColonnes,with=FALSE],dVP[,lesColonnes,with=FALSE]),dFNat[,lesColonnes,with=FALSE])
 
     setorder(d,date,id_carre)
 
@@ -455,6 +500,7 @@ obs2seuil <- function(d.obs,d.inv,dateConstruction="",repOutInfo="", repOutData=
     if(output) return(dd)
 
 }
+
 
 raw2habitat <- function(d,dateConstruction="",repOutInfo="", repOutData="",output=FALSE) {
 

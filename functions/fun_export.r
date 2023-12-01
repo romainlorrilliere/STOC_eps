@@ -9,11 +9,11 @@ library(RPostgreSQL)
 library(reshape2)
 require(dplyr)
 
-source("functions/fun_generic.r")
+## source("functions/fun_generic.r")
 
 
-if("STOC_eps_database" %in% dir()) setwd("STOC_eps_database/")
-if(!("output_export" %in% dir())) dir.create("output_export")
+## if("STOC_eps_database" %in% dir()) setwd("STOC_eps_database/")
+## if(!("output_export" %in% dir())) dir.create("output_export")
 
 
 makeTableCarre <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,savePostgres=FALSE,output=TRUE,sp=NULL,
@@ -341,7 +341,7 @@ sep="")
 select oc.id_carre as carre, oc.annee, (oc.annee::varchar(4)||oc.id_carre::varchar(100))::varchar(100) as id_carre_annee, c.etude,
 qualite_inventaire_stoc,ca.nombre_passage_stoc_annee,ca.info_passage_an, commune,insee,departement,
 oc.code_sp, e.scientific_name, e.french_name, e.english_name, e.euring,e.taxref, '",distance_contact,"'::varchar(10) as distance_contact_max,
-abond_brut as abondance_brut, abond_tuckey_outlier  as abondance_filtre_tuckey,abond_tuckey_farout  as abondance_filtre_tuckey_farout, 
+abond_brut as abondance_brut, abond_tuckey_outlier  as abondance_filtre_tuckey,abond_tuckey_farout  as abondance_filtre_tuckey_farout,
 altitude_median, longitude_grid_wgs84,latitude_grid_wgs84, ",
 ifelse(champsHabitat," foret_p, ouvert_p, agri_p, urbain_p,
 foret_ps, ouvert_ps, agri_ps, urbain_ps,
@@ -424,7 +424,7 @@ makeTablePoint <- function(con=NULL,user=NULL,mp=NULL,nomDB=NULL,savePostgres=FA
     start <- Sys.time()
     dateExport <- format(start,"%Y-%m-%d")
 
- 
+
 
 
     if(is.null(con)) con <- openDB.PSQL(user,mp,nomDB)
@@ -597,7 +597,7 @@ makeQueryPoint <- function(sp=NULL, distance_contact="inf",champSp = "code_sp",n
 
   flag.query1 <- FALSE
   flag.query2 <- FALSE
-  
+
 
       if(is.null(distance_contact) | distance_contact == "" | distance_contact == "all") {
         distance_contact_txt <- "" ; distance_contact <- "all"

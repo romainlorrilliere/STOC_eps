@@ -33,6 +33,7 @@ library(rgdal)
 library(sf)
 library(dplyr)
 library(qdap)
+library(maptools)
 
 
 if("STOC_eps_database" %in% dir()) setwd("STOC_eps_database")
@@ -156,11 +157,14 @@ f_prepaData <- function(
 
 ### I) Importation et preparation des données récente vigie-plume
     cat("\n\n I) Importation des données brutes \n=================================\n")
+    dFaune <- NULL
+    dVP <- NULL
+    dFNat <- NULL
 
 if(import_raw & construction_tables) {
 
     cat("\n\n 1) Données au format faune-france \n----------------------\n")
-    if(importationDataBrut_Faune) {
+    if(importationDataBrut_Faune & !is.null(nomFileFaune)) {
 
         cat("\n - Faune-France \n <-- Fichier a plat:",nomFileFaune,"\n")
         flush.console()
@@ -174,7 +178,7 @@ if(import_raw & construction_tables) {
 
 
   cat("\n\n 2) Données au format Vigie-Plume \n----------------------\n")
-    if(importationDataBrut_VP) {
+    if(importationDataBrut_VP & !is.null(nomFileVP)) {
 
         cat("\n - VigiePlume\n <-- Fichier a plat:",nomFileVP,"\n")
         flush.console()

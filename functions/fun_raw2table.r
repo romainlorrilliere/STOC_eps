@@ -74,6 +74,7 @@ raw2point <- function(d,dateConstruction,repOutInfo="", repOutData="",output=FAL
 
     ## d=d.all;dateConstruction=dateConstruction;repOuData=repOutData;output=TRUE
 
+
     dagg <- d[keep == TRUE, .(commune = get_mode(commune),
                   site = get_mode(site),
                   insee = get_mode(insee),

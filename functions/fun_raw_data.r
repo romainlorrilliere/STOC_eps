@@ -187,7 +187,7 @@ faune_importation <- function(nomFileFaune,dateExportFaune,repImport="data_faune
 vp_importation <- function(nomFileVP,dateExportVP,repImport="data_raw/",repOutInfo, repOutData) {
     require(data.table)
 
-    d_nom1 <- data.table(old=c("Code.inventaire","Etude","Site","Pays","Département","INSEE","Commune","N..Carré.EPS","Date","Heure","Heure.fin","N..Passage","Observateur","Email","EXPORT_STOC_TEXT_EPS_POINT","Altitude","Classe","Espèce","Nombre","Distance.de.contact","Longitude","Latitude","Type.de.coordonnées","Type.de.coordonnées.lambert","EPS.Nuage","EPS.Pluie","EPS.Vent","EPS.Visibilité","EPS.Neige","EPS.Transport","EPS.P.Milieu","EPS.P.Type","EPS.P.Cat1","EPS.P.Cat2","EPS.P.Sous.Cat1","EPS.P.Sous.Cat2","EPS.S.Milieu","EPS.S.Type","EPS.S.Cat1","EPS.S.Cat2","EPS.S.Sous.Cat1","EPS.S.Sous.Cat2"),new=c("Code.inventaire","etude","site","pays","departement","insee","commune","id_carre","date","heure","heure_fin","passage_observateur","observateur","email","nom_point","altitude","classe","espece","abondance","distance_contact","longitude_wgs84","latitude_wgs84","type_coord","type_coord_lambert","nuage","pluie","vent","visibilite","neige","transport","p_milieu","p_type","p_cat1","p_cat2","p_sous_cat1","p_sous_cat2","s_milieu","s_type","s_cat1","s_cat2","s_sous_cat1","s_sous_cat2"))
+    d_nom1 <- data.table(old=c("Code.inventaire","Etude","Site","Pays","Département","INSEE","Commune","N..Carré.EPS","Date","Heure","Heure.fin","N..Passage","Observateur","Email","N..Point.EPS","Altitude","Classe","Espèce","Nombre","Distance.de.contact","Longitude","Latitude","Type.de.coordonnées","Type.de.coordonnées.lambert","EPS.Nuage","EPS.Pluie","EPS.Vent","EPS.Visibilité","EPS.Neige","EPS.Transport","EPS.P.Milieu","EPS.P.Type","EPS.P.Cat1","EPS.P.Cat2","EPS.P.Sous.Cat1","EPS.P.Sous.Cat2","EPS.S.Milieu","EPS.S.Type","EPS.S.Cat1","EPS.S.Cat2","EPS.S.Sous.Cat1","EPS.S.Sous.Cat2"),new=c("Code.inventaire","etude","site","pays","departement","insee","commune","id_carre","date","heure","heure_fin","passage_observateur","observateur","email","nom_point","altitude","classe","espece","abondance","distance_contact","longitude_wgs84","latitude_wgs84","type_coord","type_coord_lambert","nuage","pluie","vent","visibilite","neige","transport","p_milieu","p_type","p_cat1","p_cat2","p_sous_cat1","p_sous_cat2","s_milieu","s_type","s_cat1","s_cat2","s_sous_cat1","s_sous_cat2"))
 
 
     d_nom2 <- data.table(old=c("Code_inventaire","Etude","site","Pays","Departement","INSEE","Commune","Carre","Date","Heure","Heure_fin","Passage","Observateur","mail","Point","Altitude","Classe","Espece","Nombre","Distance_Contact","Longitude","Latitude","Type_coordonnees","Type_coordonnees_lambert","EPS_Nuage","EPS_Pluie","EPS_Vent","EPS_Visibilite","EPS_Neige","EPS_Transport","P_Milieu","P_Type","P_Cat1","P_Cat2","P_Sous_Cat1","P_Sous_Cat2","S_Milieu","S_Type","S_Cat1","S_Cat2","S_Sous_Cat1","S_Sous_Cat2"),new=c("Code.inventaire","etude","site","pays","departement","insee","commune","id_carre","date","heure","heure_fin","passage_observateur","observateur","email","nom_point","altitude","classe","espece","abondance","distance_contact","longitude_wgs84","latitude_wgs84","type_coord","type_coord_lambert","nuage","pluie","vent","visibilite","neige","transport","p_milieu","p_type","p_cat1","p_cat2","p_sous_cat1","p_sous_cat2","s_milieu","s_type","s_cat1","s_cat2","s_sous_cat1","s_sous_cat2"))
@@ -240,23 +240,24 @@ vp_importation <- function(nomFileVP,dateExportVP,repImport="data_raw/",repOutIn
             setnames(di,old=d_nom[,old],new=d_nom[,new])
             cat("  DONE ! \n")
 
+            if("X" %in% colnames(di)) di[,X:=NULL]
+
             di[,date_export:= dateExportVP[i]]
+
             d <- rbind(d,di)
         }
     }
     ## renome les colonnes
 
-
+# browser()
     d[,etude_detail := etude]
     d[nom_point == "" & etude %in% c("STOC_EPS","SHOC"), etude := NA]
 
 
     d <- d[!is.na(abondance) & !is.na(espece) & espece != "",]
 
-## browser()
-
     d[,insee := sprintf("%05d", as.numeric(as.character(insee)))]
-#    d[,departement := sprintf("%02d", departement)]
+    d[, `:=`(departement = ifelse(nchar(departement) == 1, paste0(0,departement),departement))]
     d[,date := as.Date(date,format="%d.%m.%Y")]
     d[,id_carre := substring(id_carre,9,nchar(id_carre))]
     d[,nom_carre := paste("Carre",id_carre,site)]
@@ -367,7 +368,10 @@ FNat_importation <- function(nomFileFNat,dateExportFNat,repImport="data_raw/",re
 
     d <- d[!is.na(abondance) & !is.na(espece) & espece != "",]
 
-    d[,insee := sprintf("%05d", insee)]
+    d[,insee := sprintf("%05d",  as.numeric(as.character(insee)))]
+
+    d[, `:=`(departement = ifelse(nchar(departement) == 1, paste0(0,departement),departement))]
+
     d[,date := as.character(date)]
     d[,date := as.Date(date,format="%Y%m%d")]
     d[,heure := as.POSIXct(sprintf("%04d", heure),format="%H%M")]
